@@ -21,7 +21,7 @@
 | 🍴 **Fork 上游跟踪** | 检测 Fork 项目是否有上游更新 |
 | ⏰ **定时自动执行** | GitHub Actions 每周自动运行 |
 | 📊 **可视化报告** | 暗色主题交互式 HTML，支持筛选和生态视图 |
-| 🧪 **测试覆盖** | 91 个单元测试覆盖核心逻辑 |
+| 🧪 **测试覆盖** | 97 个测试（91 单元 + 6 集成）覆盖核心逻辑 |
 
 ---
 
@@ -83,13 +83,19 @@
 | `QQ_API_URL` | ❌ | go-cqhttp API 地址 |
 | `QQ_GROUP_ID` | ❌ | QQ 群号（通知用） |
 
-> 💡 **GH_TOKEN 获取**: [GitHub Settings → Tokens](https://github.com/settings/tokens) → Generate new token (classic) → 无需勾选任何 scope
+> 💡 **GH_TOKEN 获取**: [GitHub Settings → Tokens](https://github.com/settings/tokens) → Generate new token (classic) → 无需勾选任何 scope，建议选 **No expiration**（无限期）
 
 ### 3. 启用 GitHub Pages
 
-仓库 → **Settings → Pages** → Source 选择 **GitHub Actions**
+仓库 → **Settings → Pages** → 在 **Build and deployment** 区块中，Source 下拉菜单选择 **GitHub Actions**
 
-### 4. 首次运行
+### 4. 配置 Actions 写入权限
+
+仓库 → **Settings → Actions → General** → 页面最下方 **Workflow permissions** → 选择 **✅ Read and write permissions** → 点击 **Save**
+
+> ⚠️ 这一步是必须的，否则 Actions 无法提交数据库更新到仓库。
+
+### 5. 首次运行
 
 进入 **Actions → Auto Classify GitHub Stars → Run workflow**
 
@@ -354,12 +360,37 @@ QQ_CONFIG = {
 
 ### 运行测试
 
-项目包含 91 个单元测试，覆盖所有核心模块：
+项目包含 97 个测试（91 个单元测试 + 6 个集成测试）：
 
 ```bash
 # 运行全部测试
 python -m unittest discover -s tests -v
 ```
+
+### 已知限制与测试范围
+
+**已覆盖（有测试）**：
+- 规则分类器（平台 / 类型 / 生态关键词匹配）
+- 增量更新引擎（新/旧/保护/强制刷新/LLM 增强状态机）
+- 数据库 JSON 持久化（原子写入、损坏重建、加载/保存）
+- GitHub API 封装（分页、错误处理、Markdown 清洗）
+- HTTP 客户端（requests / urllib 双后端、POST JSON）
+- 导入工具（CSV / JSON、首次运行检测）
+- GitHub Lists 管理（检测、迁移、清理）
+- StarItem 数据模型（roundtrip dict、字段过滤）
+- 通知系统（邮件 / Telegram / 企业微信 / QQ，含 CQ 代码转义）
+- Notion 导出（属性映射、清空归档、错误处理）
+- Pipeline 编排（阶段顺序、dry-run、LLM 开关、通知组装）
+- Release / Fork 跟踪器（检测逻辑、报告格式化）
+- **集成测试**：真实 `StarsDB` + `StarItem` → HTML/CSV/JSON 报告生成、`ReleaseTracker` dict 赋值
+
+**未覆盖 / 已知限制**：
+- LLM 分类器的实际 API 调用（测试使用 mock 响应，未测试真实 OpenAI/Moonshot/DeepSeek 接口）
+- 大规模仓库性能（>1000 个 Stars 时的内存和 API 速率管理）
+- Notion 大规模同步（>1000 条记录时的逐条创建性能）
+- 报告 HTML 模板在极端数据下的渲染（如全为空描述、特殊字符仓库名）
+- Windows GBK 编码回退的实际终端测试（代码中有 fallback 逻辑，但未在 GBK 终端验证）
+- GitHub Lists 的 TTY 交互式提示（仅在非 CI 环境可用，依赖 `sys.stdin.isatty()`）
 
 ### 架构概览
 
@@ -414,6 +445,15 @@ A: 在数据库中将项目的 `subscribe_releases` 设为 `true`，下次运行
 
 **Q: Fork 上游跟踪会做什么？**
 A: 自动检测所有 `is_fork = true` 的项目，比较上游仓库的最后推送时间。如果有更新，会在通知中提醒。
+
+**Q: Actions 运行时报 "Process completed with exit code 1" 怎么办？**
+A: 常见原因：
+1. **Workflow permissions 未开启** → 去 Settings → Actions → General 开启 Read and write permissions
+2. **GH_TOKEN 无效** → 检查 Secret 是否已添加，Token 是否被撤销
+3. **GitHub API 速率限制** → 免费账户每小时 5000 次请求，Star 项目过多时可能触发，等一小时再试
+
+**Q: 为什么 Pages 报告页面没有 Source 选项？**
+A: GitHub 更新了界面。路径是：Settings → Pages → Build and deployment → Source 下拉菜单选择 GitHub Actions。
 
 ---
 
