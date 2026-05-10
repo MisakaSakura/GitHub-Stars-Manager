@@ -89,6 +89,20 @@ class IncrementalEngine:
 
         return self.stats
 
+    @staticmethod
+    def _apply_llm_override(target, llm_result: dict | None, existing_eco: str | None) -> None:
+        """将 LLM 结果应用到目标对象的分类字段（消除重复逻辑）"""
+        if not llm_result or llm_result.get("confidence", 0) <= 0.7:
+            return
+        ecology_locked = existing_eco and _is_ecology_locked(existing_eco)
+        target.platform = llm_result.get("platform", target.platform)
+        target.type = llm_result.get("type", target.type)
+        if not ecology_locked:
+            if llm_result.get("ecology"):
+                target.ecology = llm_result["ecology"]
+            if llm_result.get("ecology_role"):
+                target.ecology_role = llm_result["ecology_role"]
+
     def _process_single(self, item: dict, incremental: bool, force_refresh: bool, use_llm: bool, llm_result: dict | None = None, subscribe_all_releases: bool = False) -> None:
         key = f"{item['owner']['login']}/{item['name']}"
         existing = self.db.get(key)
@@ -115,16 +129,7 @@ class IncrementalEngine:
                 existing.topics = item.get("topics", [])
                 existing.last_updated = datetime.now(timezone.utc).isoformat()
                 # 增量模式下规则分类跳过，但 LLM 覆盖仍然应用（修正已有项目分类）
-                if llm_result and llm_result.get("confidence", 0) > 0.7:
-                    existing_eco = existing.get("ecology")
-                    ecology_locked = existing_eco and _is_ecology_locked(existing_eco)
-                    existing.platform = llm_result.get("platform", existing.platform)
-                    existing.type = llm_result.get("type", existing.type)
-                    if not ecology_locked:
-                        if llm_result.get("ecology"):
-                            existing.ecology = llm_result["ecology"]
-                        if llm_result.get("ecology_role"):
-                            existing.ecology_role = llm_result["ecology_role"]
+                self._apply_llm_override(existing, llm_result, existing.get("ecology"))
                 self.stats["skipped"] += 1
                 return
 
@@ -147,22 +152,12 @@ class IncrementalEngine:
 
         existing = self.db.get(f"{item['owner']['login']}/{item['name']}")
         existing_eco = existing.get("ecology") if existing else None
-        ecology_locked = existing_eco and _is_ecology_locked(existing_eco)
 
-        # LLM 可以覆盖规则分类结果（分类决策本身是即时的，不依赖 AI DB）
-        if use_llm and self.llm and llm_result:
-            if llm_result.get("confidence", 0) > 0.7:
-                platform = llm_result.get("platform", platform)
-                ptype = llm_result.get("type", ptype)
-                if not ecology_locked:
-                    if llm_result.get("ecology"):
-                        eco = llm_result["ecology"]
-                    if llm_result.get("ecology_role"):
-                        role = llm_result["ecology_role"]
-                else:
-                    eco = existing_eco
+        # 生态锁定：强制保留已有生态值
+        if existing_eco and _is_ecology_locked(existing_eco):
+            eco = existing_eco
 
-        return StarItem(
+        result = StarItem(
             full_name=f"{item['owner']['login']}/{item['name']}",
             name=item["name"],
             owner=item["owner"]["login"],
@@ -183,3 +178,9 @@ class IncrementalEngine:
             last_release_tag=existing.get("last_release_tag") if existing else None,
             is_fork=item.get("fork", False),
         )
+
+        # LLM 可以覆盖规则分类结果（分类决策本身是即时的，不依赖 AI DB）
+        if use_llm and self.llm and llm_result:
+            self._apply_llm_override(result, llm_result, existing_eco)
+
+        return result

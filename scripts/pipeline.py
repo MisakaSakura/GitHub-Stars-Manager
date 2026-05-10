@@ -250,7 +250,7 @@ class Pipeline:
         """从 AI 数据库回填 AI 字段到主数据库中的项目"""
         if not self.ai_db:
             return
-        for key, item in self.db.data.items():
+        for key, item in self.db.items():
             ai = self.ai_db.get(key)
             if ai:
                 item.llm_status = ai.llm_status

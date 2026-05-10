@@ -80,6 +80,9 @@ class StarsDB:
     def values(self):
         return self.data.values()
 
+    def items(self):
+        return self.data.items()
+
     def __len__(self) -> int:
         return len(self.data)
 
