@@ -71,7 +71,14 @@ on:
         options: ['ignore', 'migrate', 'replace']
 
       check_releases:
-        description: '检查已订阅仓库的新 Release'
+        description: '检查已订阅仓库的新 Release（传统方式）'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+      check_all_releases:
+        description: '检查所有仓库的新 Release（生成周报）'
         required: false
         default: 'false'
         type: choice
@@ -199,7 +206,10 @@ jobs:
           ARGS+=("--lists-strategy" "${{ github.event.inputs.lists_strategy }}")
 
           # Release / Fork 追踪
-          if [ "${{ github.event.inputs.check_releases }}" = "true" ]; then
+          # 每周一自动运行默认全量检查 Release（生成周报）
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event.inputs.check_all_releases }}" = "true" ]; then
+            ARGS+=("--check-all-releases")
+          elif [ "${{ github.event.inputs.check_releases }}" = "true" ]; then
             ARGS+=("--check-releases")
           fi
           if [ "${{ github.event.inputs.check_forks }}" = "true" ]; then

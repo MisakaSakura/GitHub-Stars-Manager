@@ -34,8 +34,10 @@ class FakeArgs:
             "notion_db": None,
             "notion_clear": False,
             "check_releases": False,
+            "check_all_releases": False,
             "check_forks": False,
             "subscribe_releases": False,
+            "llm_release_digest": False,
             "notify": False,
             "notify_channels": "email",
             "no_report": False,
@@ -159,7 +161,7 @@ class TestPipelineNotify(unittest.TestCase):
         pipeline = Pipeline(args)
         pipeline._setup()
         pipeline.stats = {"new": 2, "updated": 1, "skipped": 0, "protected": 0, "llm_enhanced": 0, "error": 0}
-        pipeline.release_updates = [{"owner": "a", "name": "b", "old_tag": "v1", "new_tag": "v2"}]
+        pipeline.release_updates = [{"full_name": "a/b", "old_tag": "v1", "new_tag": "v2"}]
         pipeline.release_tracker = MagicMock()
         pipeline.release_tracker.format_report.return_value = "RELEASE_REPORT"
 

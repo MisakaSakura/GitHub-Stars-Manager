@@ -30,6 +30,16 @@ h1{color:#58a6ff;margin-bottom:8px;font-size:28px}
 .br{background:#e3b34122;color:#e3b341;border:1px solid #e3b34144}
 .btg{display:inline-block;padding:1px 5px;border-radius:8px;background:#23863622;color:#3fb950;border:1px solid #23863644;font-size:10px;margin-right:3px;margin-bottom:2px}
 .bpl{display:inline-block;padding:1px 5px;border-radius:8px;background:#1f6feb22;color:#58a6ff;border:1px solid #1f6feb44;font-size:10px;margin-right:3px;margin-bottom:2px}
+.weekly-digest{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;margin-bottom:20px}
+.weekly-digest h2{color:#e3b341;font-size:16px;margin-bottom:12px}
+.wd-section{margin-bottom:14px}
+.wd-section h3{color:#58a6ff;font-size:13px;margin-bottom:8px}
+.wd-list{display:flex;flex-direction:column;gap:6px}
+.wd-item{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#0d1117;border-radius:6px;font-size:12px}
+.wd-item a{color:#58a6ff;text-decoration:none}
+.wd-item a:hover{text-decoration:underline}
+.wd-eco{color:#a371f7;font-size:11px;background:#8957e522;padding:1px 6px;border-radius:8px}
+.wd-tag{color:#3fb950;font-size:11px;background:#23863622;padding:1px 6px;border-radius:8px}
 .tg{margin-top:3px}
 .tw{background:#161b22;border:1px solid #30363d;border-radius:12px;overflow:hidden}
 .fb{display:flex;gap:10px;padding:14px 18px;border-bottom:1px solid #30363d;flex-wrap:wrap}
@@ -70,6 +80,7 @@ tr:hover td{background:#1c2128}
 <body>
 <h1>⭐ GitHub Stars 自动分类报告</h1>
 <p class="sub">生成时间：{{TIMESTAMP}} · 共 {{TOTAL}} 个项目 · 🔒=手动保护 🤖=LLM增强</p>
+{{WEEKLY_DIGEST}}
 <div class="tabs">
   <button class="tab active" onclick="st('list')">📋 列表视图</button>
   <button class="tab" onclick="st('eco')">🌿 生态视图</button>

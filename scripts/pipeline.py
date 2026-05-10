@@ -229,7 +229,16 @@ class Pipeline:
                 log("试运行模式：报告未生成", "WARN")
             return
         report = ReportGenerator(self.db)
-        report.generate_html(self.args.output)
+        # Build weekly digest data for HTML report
+        from datetime import datetime, timezone, timedelta
+        now = datetime.now(timezone.utc)
+        week_ago = (now - timedelta(days=7)).isoformat()
+        new_items = [r for r in self.db.values() if r.get("first_seen", "") >= week_ago]
+        weekly_data = {
+            "new_items": new_items,
+            "release_updates": self.release_updates,
+        } if (new_items or self.release_updates) else None
+        report.generate_html(self.args.output, weekly_data=weekly_data)
         report.generate_csv(self.args.output)
         report.generate_json(self.args.output)
 
@@ -240,10 +249,18 @@ class Pipeline:
         notion.sync(list(self.db.values()), clear_existing=self.args.notion_clear)
 
     def _track_releases(self) -> None:
-        if not self.args.check_releases or self.args.dry_run:
+        if self.args.dry_run:
+            return
+        if not self.args.check_releases and not self.args.check_all_releases:
             return
         self.release_tracker = ReleaseTracker(self.gh)
-        self.release_updates = self.release_tracker.check(list(self.db.values()))
+        items = list(self.db.values())
+        if self.args.check_all_releases:
+            self.release_updates = self.release_tracker.check_all(items)
+        else:
+            self.release_updates = self.release_tracker.check(items)
+        if self.args.llm_release_digest and self.llm and self.release_updates:
+            self.release_updates = self.release_tracker.digest_with_llm(self.release_updates, self.llm)
         if self.release_updates:
             self.db.save()
 
@@ -261,6 +278,9 @@ class Pipeline:
         NOTIFY_CONFIG["channels"] = self.args.notify_channels.split(",")
         notifier = Notifier(NOTIFY_CONFIG)
         summary = self._build_summary()
+        weekly_digest = self._build_weekly_digest_text()
+        if weekly_digest:
+            summary += "\n\n" + weekly_digest
         if self.release_updates and self.release_tracker:
             summary += "\n\n" + self.release_tracker.format_report(self.release_updates)
         if self.fork_updates and self.fork_tracker:
@@ -280,6 +300,34 @@ class Pipeline:
             _safe_print("   4. 如需重新分类所有项目，使用 --force-refresh")
 
     # ---------- 工具方法 ----------
+
+    def _build_weekly_digest_text(self) -> str:
+        """构建周报纯文本摘要，用于通知"""
+        lines = []
+        from datetime import datetime, timezone, timedelta
+        now = datetime.now(timezone.utc)
+        week_ago = (now - timedelta(days=7)).isoformat()
+
+        new_items = [r for r in self.db.values() if r.get("first_seen", "") >= week_ago]
+        if new_items:
+            lines.append(f"📦 本周新增项目: {len(new_items)} 个")
+            for r in new_items[:5]:
+                lines.append(f"  • {r['full_name']} | {r['ecology']} | {r['platform']} / {r['type']}")
+            if len(new_items) > 5:
+                lines.append(f"  ... 还有 {len(new_items) - 5} 个")
+
+        if self.release_updates:
+            lines.append(f"\n🚀 本周新 Release: {len(self.release_updates)} 个")
+            for u in self.release_updates[:5]:
+                digest = u.get("ai_digest", "")
+                line = f"  • {u['full_name']}: {u['new_tag']}"
+                if digest:
+                    line += f" | {digest}"
+                lines.append(line)
+            if len(self.release_updates) > 5:
+                lines.append(f"  ... 还有 {len(self.release_updates) - 5} 个")
+
+        return "\n".join(lines) if lines else ""
 
     def _build_summary(self) -> str:
         lines = [

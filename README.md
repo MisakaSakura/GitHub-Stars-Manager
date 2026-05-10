@@ -1,6 +1,8 @@
 # GitHub Stars 自动分类工具 v4
 
-自动为你的 GitHub Stars 按 **平台、类型、语言、生态归属** 四维分类，支持 LLM 智能增强、增量更新、手动修正保护、Notion 导出、多通道通知、Release 跟踪、Fork 上游跟踪。
+自动为你的 GitHub Stars 按 **平台、类型、语言、生态归属** 四维分类，生成可搜索的 HTML 报告和周报摘要，支持 LLM 智能增强、增量更新、手动修正保护、Notion 导出、多通道通知、Release 跟踪、Fork 上游跟踪。
+
+> 📌 **设计目标说明**：本工具是**本地分类报告生成器**，不是 GitHub Lists 的同步客户端。分类结果存储在仓库的 `data/stars_db.json` 中，并通过 GitHub Pages 部署为 HTML 报告。由于 GitHub 目前未公开 Lists 的写入 API，工具**不会自动修改你账号中的 GitHub Lists**（Lists 仅作为可选的初始导入源）。
 
 🔗 **在线报告**: 部署后访问 `https://你的用户名.github.io/你的仓库名/`
 
@@ -16,8 +18,8 @@
 | 🔒 **手动修正保护** | `manual_override` 标记的项目永久不被覆盖 |
 | 📝 **Notion 导出** | 一键同步到 Notion 数据库 |
 | 📧 **多通道通知** | 邮件 / Telegram / 企业微信 / QQ（go-cqhttp） |
-| 📋 **GitHub Lists 集成** | 自动检测、迁移或替换 GitHub 原生 Lists |
-| 🔔 **Release 跟踪** | 监控订阅仓库的新版本发布 |
+| 📋 **GitHub Lists 导入** | 首次运行时可从 GitHub Lists 迁移已有分类（单向导入，不反向同步） |
+| 🔔 **Release 周报** | 全量监控已 Star 仓库的新版本发布，按生态/平台聚合周报 |
 | 🍴 **Fork 上游跟踪** | 检测 Fork 项目是否有上游更新 |
 | ⏰ **定时自动执行** | GitHub Actions 每周自动运行 |
 | 📊 **可视化报告** | 暗色主题交互式 HTML，支持筛选和生态视图 |
@@ -98,6 +100,12 @@
 ### 5. 首次运行
 
 进入 **Actions → Auto Classify GitHub Stars → Run workflow**
+
+> 💡 **报告范围说明**：
+> - 首次运行：全量分类你所有的 Stars，生成**完整报告**（显示所有项目）
+> - 后续增量运行：只处理新 Star 的项目，但报告仍然是**全量重新生成**的
+> - 每周变化（新增项目 + 新 Release）会在报告的"本周摘要"区块中高亮显示
+> - 如需查看纯增量变化，可查看通知消息或 Git commit diff
 
 ---
 
@@ -454,6 +462,16 @@ A: 常见原因：
 
 **Q: 为什么 Pages 报告页面没有 Source 选项？**
 A: GitHub 更新了界面。路径是：Settings → Pages → Build and deployment → Source 下拉菜单选择 GitHub Actions。
+
+**Q: 为什么我的 GitHub Lists 没有自动更新分类？**
+A: 本工具**不会修改你的 GitHub Lists**。原因：GitHub 目前没有公开稳定的 Lists 写入 REST API（无法通过 API 创建 List 或添加项目）。工具的核心价值是生成本地 HTML 报告。如果你想在 GitHub 上使用分类，可以手动参考报告中的分类结果创建 Lists。
+
+**Q: 调整分类规则后，如何让已有项目重新分类？**
+A: 运行一次 `--force-refresh`：
+```bash
+python scripts/classifier.py --token ghp_xxx --user yourname --force-refresh
+```
+这会重新分类所有**未保护**（`manual_override=false`）的项目。已保护的项目不受影响。
 
 ---
 

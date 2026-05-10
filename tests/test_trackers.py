@@ -62,6 +62,55 @@ class TestReleaseTracker(unittest.TestCase):
         self.assertIn("v1", text)
         self.assertIn("v2", text)
 
+    # --- check_all tests ---
+
+    def test_check_all_ignores_subscription_flag(self):
+        gh = MagicMock()
+        gh.get_latest_release.return_value = {
+            "tag_name": "v2.0",
+            "published_at": "2024-01-01T00:00:00Z",
+            "html_url": "https://github.com/a/b/releases/v2.0",
+        }
+        tracker = ReleaseTracker(gh)
+        items = [{
+            "full_name": "a/b",
+            "name": "b",
+            "subscribe_releases": False,
+            "last_release_tag": "v1.0",
+        }]
+        result = tracker.check_all(items)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["new_tag"], "v2.0")
+
+    def test_check_all_baseline_first_discovery(self):
+        gh = MagicMock()
+        gh.get_latest_release.return_value = {
+            "tag_name": "v1.0",
+            "published_at": "2024-01-01T00:00:00Z",
+            "html_url": "https://github.com/a/b/releases/v1.0",
+        }
+        tracker = ReleaseTracker(gh)
+        items = [{
+            "full_name": "a/b",
+            "name": "b",
+            "subscribe_releases": False,
+        }]
+        result = tracker.check_all(items)
+        self.assertEqual(result, [])
+        self.assertEqual(items[0]["last_release_tag"], "v1.0")
+
+    def test_check_all_no_change(self):
+        gh = MagicMock()
+        gh.get_latest_release.return_value = {"tag_name": "v1.0"}
+        tracker = ReleaseTracker(gh)
+        items = [{
+            "full_name": "a/b",
+            "name": "b",
+            "last_release_tag": "v1.0",
+        }]
+        result = tracker.check_all(items)
+        self.assertEqual(result, [])
+
 
 class TestForkTracker(unittest.TestCase):
     def test_get_user_forks(self):

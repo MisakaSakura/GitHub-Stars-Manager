@@ -9,14 +9,22 @@ from utils import log
 
 
 class ReleaseTracker(BaseTracker):
-    """检查订阅了 Release 的仓库是否有新版本"""
+    """检查仓库新 Release，支持订阅制和全量检查两种模式"""
 
     def check(self, db_items: list[dict]) -> list[dict]:
+        """订阅制检查：只检查 subscribe_releases=true 的项目（向后兼容）"""
+        candidates = [item for item in db_items if item.get("subscribe_releases")]
+        return self._check_candidates(candidates, baseline_mode=False)
+
+    def check_all(self, db_items: list[dict]) -> list[dict]:
+        """全量检查：对所有项目检查 Release，新项目设为 baseline 不通知"""
+        return self._check_candidates(db_items, baseline_mode=True)
+
+    def _check_candidates(self, db_items: list[dict], baseline_mode: bool) -> list[dict]:
         updates: list[dict] = []
-        log("检查 Release 更新...", "STEP")
+        mode_label = "全量" if baseline_mode else "订阅"
+        log(f"检查 Release 更新 ({mode_label})...", "STEP")
         for item in db_items:
-            if not item.get("subscribe_releases"):
-                continue
             try:
                 owner, repo = item["full_name"].split("/")
                 latest = self.gh.get_latest_release(owner, repo)
@@ -24,6 +32,12 @@ class ReleaseTracker(BaseTracker):
                     continue
                 latest_tag = latest.get("tag_name")
                 current_tag = item.get("last_release_tag")
+                now = datetime.now(timezone.utc).isoformat()
+                if baseline_mode and not current_tag:
+                    # 首次发现：设为 baseline，不产生通知
+                    item["last_release_tag"] = latest_tag
+                    item["last_release_checked"] = now
+                    continue
                 if latest_tag and latest_tag != current_tag:
                     updates.append({
                         "full_name": item["full_name"],
@@ -33,13 +47,34 @@ class ReleaseTracker(BaseTracker):
                         "new_tag": latest_tag,
                         "published_at": latest.get("published_at", ""),
                         "html_url": latest.get("html_url", ""),
+                        "body": latest.get("body", "")[:2000],
                     })
                     item["last_release_tag"] = latest_tag
-                    item["last_release_checked"] = datetime.now(timezone.utc).isoformat()
-                    item["last_updated"] = datetime.now(timezone.utc).isoformat()
+                    item["last_release_checked"] = now
+                    item["last_updated"] = now
             except Exception as e:
-                log(f"检查 {item['full_name']} Release 失败: {e}", "WARN")
+                log(f"检查 {item.get('full_name', '?')} Release 失败: {e}", "WARN")
         log(f"Release 检查完成: {len(updates)} 个仓库有新版本", "OK")
+        return updates
+
+    def digest_with_llm(self, updates: list[dict], llm) -> list[dict]:
+        """对 Release Notes 生成 AI 摘要"""
+        if not llm or not updates:
+            return updates
+        log(f"LLM 分析 {len(updates)} 个 Release Notes...", "STEP")
+        system_prompt = "你是一个技术文档摘要专家。请用 20-30 字概括软件版本的更新要点。只输出概括内容，不要任何其他文字。"
+        for u in updates:
+            body = u.get("body", "")
+            if not body:
+                continue
+            prompt = f"请根据以下 Release Notes，用 20-30 字概括这个版本的主要更新：\n\n{body[:1200]}"
+            try:
+                summary = llm.summarize(prompt, system_prompt=system_prompt, max_tokens=64)
+                u["ai_digest"] = summary or ""
+            except Exception as e:
+                log(f"LLM 摘要 {u['full_name']} 失败: {e}", "WARN")
+                u["ai_digest"] = ""
+        log("Release Notes LLM 摘要完成", "OK")
         return updates
 
     def format_report(self, updates: list[dict]) -> str:

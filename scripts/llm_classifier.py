@@ -171,7 +171,14 @@ Topics: {topics or '无'}
   ...
 ]"""
 
-    def _call_api(self, prompt, max_tokens=None):
+    def summarize(self, text: str, system_prompt: str | None = None, max_tokens: int = 128) -> str | None:
+        """通用文本摘要，返回摘要字符串"""
+        from config import LLM_CONFIG, LLM_SYSTEM_PROMPT
+        sp = system_prompt or LLM_SYSTEM_PROMPT
+        result = self._call_api(text, max_tokens=max_tokens, system_prompt=sp)
+        return result.strip() if result else None
+
+    def _call_api(self, prompt, max_tokens=None, system_prompt=None):
         from config import LLM_CONFIG, LLM_SYSTEM_PROMPT
 
         url = f"{self.api_base}/chat/completions"
@@ -186,7 +193,7 @@ Topics: {topics or '无'}
         payload = {
             "model": self.model,
             "messages": [
-                {"role": "system", "content": LLM_SYSTEM_PROMPT},
+                {"role": "system", "content": system_prompt or LLM_SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
             ],
             "max_tokens": max_tokens or LLM_CONFIG.get("max_tokens", 256),

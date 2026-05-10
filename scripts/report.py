@@ -19,7 +19,7 @@ class ReportGenerator:
             os.path.dirname(__file__), "report_template.html"
         )
 
-    def generate_html(self, output_dir: str) -> str:
+    def generate_html(self, output_dir: str, weekly_data: dict | None = None) -> str:
         items = list(self.db.values())
         total = len(items)
         timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
@@ -31,7 +31,7 @@ class ReportGenerator:
             "ecology": Counter([r["ecology"] for r in items]),
         }
 
-        html = self._build_html(items, total, timestamp, stats)
+        html = self._build_html(items, total, timestamp, stats, weekly_data)
         os.makedirs(output_dir, exist_ok=True)
         path = os.path.join(output_dir, "index.html")
         with open(path, "w", encoding="utf-8") as f:
@@ -82,7 +82,7 @@ class ReportGenerator:
         log(f"JSON 导出: {path}", "OK")
         return path
 
-    def _build_html(self, items: list, total: int, timestamp: str, stats: dict) -> str:
+    def _build_html(self, items: list, total: int, timestamp: str, stats: dict, weekly_data: dict | None = None) -> str:
         def bar(name, count, total, cs="#58a6ff", ce="#a371f7"):
             pct = (count / total * 100) if total else 0
             return f'<div class="si"><span>{escape(str(name))}</span><span style="font-weight:600">{count}</span></div><div class="sbg"><div class="sf" style="width:{pct:.1f}%;background:linear-gradient(90deg,{cs},{ce})"></div></div>'
@@ -164,6 +164,27 @@ class ReportGenerator:
         else:
             fork_groups = '<div class="sn">暂无 Fork 仓库数据，使用 --check-forks 可检测上游更新。</div>'
 
+        # Weekly Digest Block
+        wd_parts: list[str] = []
+        if weekly_data:
+            new_items = weekly_data.get("new_items", [])
+            release_updates = weekly_data.get("release_updates", [])
+            if new_items or release_updates:
+                wd_parts.append('<div class="weekly-digest">')
+                wd_parts.append('<h2>📅 本周摘要</h2>')
+                if new_items:
+                    wd_parts.append(f'<div class="wd-section"><h3>🆕 新收录 ({len(new_items)})</h3><div class="wd-list">')
+                    for it in new_items:
+                        wd_parts.append(f'<div class="wd-item"><a href="{it["html_url"]}" target="_blank">{it["full_name"]}</a><span class="wd-eco">{it["ecology"]}</span></div>')
+                    wd_parts.append('</div></div>')
+                if release_updates:
+                    wd_parts.append(f'<div class="wd-section"><h3>🚀 新 Release ({len(release_updates)})</h3><div class="wd-list">')
+                    for ru in release_updates:
+                        wd_parts.append(f'<div class="wd-item"><a href="{ru["html_url"]}" target="_blank">{ru["full_name"]}</a><span class="wd-tag">{ru["old_tag"]} → {ru["new_tag"]}</span></div>')
+                    wd_parts.append('</div></div>')
+                wd_parts.append('</div>')
+        weekly_digest = "".join(wd_parts) if wd_parts else ""
+
         with open(self.template_path, "r", encoding="utf-8") as f:
             template = f.read()
 
@@ -179,6 +200,7 @@ class ReportGenerator:
             "{{ROWS}}": rows,
             "{{ECOLOGY_GROUPS}}": eco_groups,
             "{{FORK_GROUPS}}": fork_groups,
+            "{{WEEKLY_DIGEST}}": weekly_digest,
             "{{PLATFORM_BARS}}": pb,
             "{{TYPE_BARS}}": tb,
             "{{LANGUAGE_BARS}}": lb,
