@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 虚拟环境
+venv/
+.env
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 项目生成文件
+data/
+docs/
+fake_docs/
+fake_db.json
+
+# LLM 缓存
+.llm_cache.json
+
+# 测试产物
+.pytest_cache/
+.coverage
+htmlcov/

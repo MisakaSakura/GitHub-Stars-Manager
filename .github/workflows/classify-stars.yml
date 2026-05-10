@@ -1,0 +1,241 @@
+name: Auto Classify GitHub Stars
+
+# 触发条件:
+# 1. 每周一凌晨 2:00 UTC 自动运行（增量更新）
+# 2. 手动触发（支持多种参数组合）
+#
+# 首次运行建议:
+# - 如果你有已有分类想保留，先在本地用 --import-json 导入后再推送到仓库
+# - 或者首次手动触发时不选增量模式，让系统全新分类，之后检查并手动保护满意的项目
+# - 首次运行后，后续会自动走增量模式，不会重复覆盖
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'   # 每周一凌晨 2:00 UTC（北京时间周一 10:00）
+
+  workflow_dispatch:
+    inputs:
+      force_refresh:
+        description: '强制全量刷新（重新分类所有未保护项目）'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+      use_llm:
+        description: '启用 LLM 智能分类（需要设置 LLM_KEY Secret）'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+      llm_provider:
+        description: 'LLM 提供商（use_llm=true 时生效）'
+        required: false
+        default: 'openai'
+        type: choice
+        options: ['openai', 'moonshot', 'deepseek', 'openrouter']
+
+      llm_model:
+        description: 'LLM 模型（可选，留空使用默认）'
+        required: false
+        default: ''
+        type: string
+
+      sync_notion:
+        description: '同步到 Notion（需要设置 NOTION_KEY 和 NOTION_DB）'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+      notion_clear:
+        description: '导出前清空 Notion（危险！会归档所有旧页面）'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+      send_notify:
+        description: '发送通知（需要配置对应通知渠道的 Secrets）'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+      lists_strategy:
+        description: 'GitHub Lists 处理策略（首次运行时生效）'
+        required: false
+        default: 'ignore'
+        type: choice
+        options: ['ignore', 'migrate', 'replace']
+
+      check_releases:
+        description: '检查已订阅仓库的新 Release'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+      check_forks:
+        description: '检查 Fork 仓库的上游更新'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+      subscribe_releases:
+        description: '首次运行时标记所有仓库订阅 Release'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+      retry_failed:
+        description: '重试之前 AI 分析失败的项目'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+      notify_channels:
+        description: '通知通道（send_notify=true 时生效）'
+        required: false
+        default: 'email'
+        type: string
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  classify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-classifier-${{ hashFiles('requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          pip install requests || true
+          # 确保 requirements.txt 存在（用于缓存 key）
+          echo "requests>=2.31.0" > requirements.txt
+
+      - name: Run classifier
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_USER: ${{ github.actor }}
+          LLM_KEY: ${{ secrets.LLM_KEY }}
+          NOTION_KEY: ${{ secrets.NOTION_KEY }}
+          NOTION_DB: ${{ secrets.NOTION_DB }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+          WECOM_WEBHOOK: ${{ secrets.WECOM_WEBHOOK }}
+          QQ_API_URL: ${{ secrets.QQ_API_URL }}
+          QQ_GROUP_ID: ${{ secrets.QQ_GROUP_ID }}
+        run: |
+          mkdir -p docs data
+
+          # P1: 构建参数列表，避免 eval 带来的命令注入风险
+          ARGS=(
+            "--token" "$GH_TOKEN"
+            "--user" "$GH_USER"
+            "--db" "./data/stars_db.json"
+            "--output" "./docs"
+            "--incremental"
+          )
+
+          # 强制刷新
+          if [ "${{ github.event.inputs.force_refresh }}" = "true" ]; then
+            ARGS+=("--force-refresh")
+          fi
+
+          # LLM 智能增强
+          if [ "${{ github.event.inputs.use_llm }}" = "true" ] && [ -n "$LLM_KEY" ]; then
+            ARGS+=("--llm-key" "$LLM_KEY" "--llm-provider" "${{ github.event.inputs.llm_provider }}")
+            if [ -n "${{ github.event.inputs.llm_model }}" ]; then
+              ARGS+=("--llm-model" "${{ github.event.inputs.llm_model }}")
+            fi
+          fi
+
+          # Notion 同步
+          if [ "${{ github.event.inputs.sync_notion }}" = "true" ] && [ -n "$NOTION_KEY" ] && [ -n "$NOTION_DB" ]; then
+            ARGS+=("--notion-key" "$NOTION_KEY" "--notion-db" "$NOTION_DB")
+            if [ "${{ github.event.inputs.notion_clear }}" = "true" ]; then
+              ARGS+=("--notion-clear")
+            fi
+          fi
+
+          # 通知
+          if [ "${{ github.event.inputs.send_notify }}" = "true" ]; then
+            ARGS+=("--notify" "--notify-channels" "email")
+          fi
+
+          # GitHub Lists 策略
+          ARGS+=("--lists-strategy" "${{ github.event.inputs.lists_strategy }}")
+
+          # Release / Fork 追踪
+          if [ "${{ github.event.inputs.check_releases }}" = "true" ]; then
+            ARGS+=("--check-releases")
+          fi
+          if [ "${{ github.event.inputs.check_forks }}" = "true" ]; then
+            ARGS+=("--check-forks")
+          fi
+          if [ "${{ github.event.inputs.subscribe_releases }}" = "true" ]; then
+            ARGS+=("--subscribe-releases")
+          fi
+          if [ "${{ github.event.inputs.retry_failed }}" = "true" ]; then
+            ARGS+=("--retry-failed")
+          fi
+
+          # 通知通道
+          if [ "${{ github.event.inputs.send_notify }}" = "true" ]; then
+            ARGS+=("--notify-channels" "${{ github.event.inputs.notify_channels }}")
+          fi
+
+          echo "执行命令: python scripts/classifier.py ${ARGS[@]}"
+          python scripts/classifier.py "${ARGS[@]}"
+
+      - name: Commit database updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/stars_db.json requirements.txt
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: auto-update stars database [$(date -u +%Y-%m-%d)]"
+            git push
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './docs'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

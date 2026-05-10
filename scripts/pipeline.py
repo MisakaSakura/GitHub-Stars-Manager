@@ -1,0 +1,315 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Pipeline / Orchestrator：将 classifier.py 的协调逻辑抽取为可测试的阶段"""
+
+import sys
+from collections import Counter
+
+from utils import log
+from github_api import GitHubAPI, GitHubAuthError, GitHubRateLimitError
+from rule_classifier import RuleClassifier
+from llm_classifier import LLMClassifier
+from database import StarsDB
+from engine import IncrementalEngine
+from import_helper import FirstRunHelper
+from report import ReportGenerator
+from notion import NotionExporter
+from notify import Notifier
+from lists_manager import ListsManager
+from release_tracker import ReleaseTracker
+from fork_tracker import ForkTracker
+
+from config import NOTIFY_CONFIG
+
+
+def _safe_print(msg: str) -> None:
+    """安全打印，在编码不支持时回退 ASCII"""
+    try:
+        print(msg)
+    except UnicodeEncodeError:
+        ascii_msg = msg.encode("ascii", "replace").decode("ascii")
+        print(ascii_msg)
+
+
+class Pipeline:
+    """分类工作流流水线，将 CLI 入口的协调逻辑封装为显式阶段"""
+
+    def __init__(self, args: "argparse.Namespace"):
+        self.args = args
+        self.db: StarsDB | None = None
+        self.gh: GitHubAPI | None = None
+        self.rule: RuleClassifier | None = None
+        self.llm: LLMClassifier | None = None
+        self.engine: IncrementalEngine | None = None
+        self.stats: dict | None = None
+        self.items: list[dict] = []
+        self.is_first_run = False
+        self.release_updates: list[dict] = []
+        self.fork_updates: list[dict] = []
+        self.release_tracker: ReleaseTracker | None = None
+        self.fork_tracker: ForkTracker | None = None
+
+    # ---------- 公开入口 ----------
+
+    def run(self) -> None:
+        self._setup()
+        if self._import_and_early_exit():
+            return
+        self._auth()
+        self._handle_lists()
+        self._setup_llm()
+        self._fetch()
+        self._enrich()
+        self._classify()
+        self._save()
+        self._generate_reports()
+        self._sync_notion()
+        self._track_releases()
+        self._track_forks()
+        self._notify()
+        self._print_summary()
+
+    # ---------- 各阶段 ----------
+
+    def _setup(self) -> None:
+        self.is_first_run = FirstRunHelper.detect_first_run(self.args.db)
+        _safe_print("=" * 60)
+        _safe_print("⭐ GitHub Stars 自动分类工具 v4")
+        _safe_print("=" * 60)
+
+        if self.is_first_run:
+            _safe_print("\n🆕 检测到首次运行（数据库不存在）")
+            _safe_print("   将创建新数据库并对所有项目执行全新分类。")
+            if self.args.import_json or self.args.import_csv:
+                _safe_print("   检测到导入参数，将先导入已有分类（自动保护），再处理剩余项目。\n")
+            else:
+                _safe_print("   提示: 如果你有已有分类想保留，使用 --import-json 或 --import-csv 导入")
+                _safe_print("   导入的项目会被自动标记保护，不会被覆盖。\n")
+        else:
+            _safe_print(f"\n📂 加载已有数据库: {self.args.db}\n")
+
+        self.db = StarsDB(self.args.db)
+
+    def _import_and_early_exit(self) -> bool:
+        """首次运行导入已有分类；若 --no-auto-classify 则提前退出。"""
+        if not self.is_first_run:
+            return False
+        if self.args.import_json or self.args.import_csv:
+            if self.args.import_json:
+                FirstRunHelper.import_from_json(self.db, self.args.import_json)
+            if self.args.import_csv:
+                FirstRunHelper.import_from_csv(self.db, self.args.import_csv)
+            self.db.save()
+            log("导入完成，数据库已保存", "OK")
+
+            if self.args.no_auto_classify:
+                log("--no-auto-classify 已设置，跳过自动分类", "OK")
+                _safe_print("\n" + "=" * 60)
+                _safe_print(f"✅ 导入完成！共 {len(self.db)} 个项目（全部手动保护）")
+                _safe_print("=" * 60)
+                return True
+        return False
+
+    def _auth(self) -> None:
+        try:
+            self.gh = GitHubAPI(self.args.token)
+        except GitHubAuthError as e:
+            log(f"GitHub 认证失败: {e}", "ERROR")
+            sys.exit(1)
+        except GitHubRateLimitError as e:
+            log(f"GitHub API 限制: {e}", "ERROR")
+            sys.exit(1)
+        self.rule = RuleClassifier()
+
+    def _handle_lists(self) -> None:
+        if not self.is_first_run:
+            return
+        lists_manager = ListsManager(self.gh)
+        lists = lists_manager.detect_lists(self.args.user)
+        if not lists:
+            return
+
+        summary = lists_manager.get_lists_summary(lists)
+        _safe_print(f"\n📝 检测到你有 {len(summary)} 个 GitHub Lists：")
+        _safe_print("   " + "-" * 42)
+        _safe_print(f"   {'名称':<24} {'项目数':>10}")
+        _safe_print("   " + "-" * 42)
+        for s in summary:
+            _safe_print(f"   {s['name']:<24} {s['count']:>10}")
+        _safe_print("   " + "-" * 42)
+
+        strategy = self.args.lists_strategy
+        if strategy == "auto":
+            strategy = "prompt" if sys.stdin.isatty() else "ignore"
+
+        if strategy == "prompt":
+            _safe_print("\n请选择处理方式：")
+            _safe_print("  [1] 迁移：将已有 Lists 作为受保护的初始分类导入（推荐）")
+            _safe_print("  [2] 重构：删除所有旧 Lists，用本工具的全新分类替代")
+            _safe_print("  [3] 忽略：保留旧 Lists，本工具独立运行")
+            while True:
+                try:
+                    choice = input("\n你的选择 [1/2/3]: ").strip()
+                    if choice == "1":
+                        lists_manager.migrate_lists_to_db(self.db, self.args.user)
+                        self.db.save()
+                        break
+                    elif choice == "2":
+                        lists_manager.clear_all_lists(self.args.user)
+                        break
+                    elif choice == "3":
+                        log("已忽略 GitHub Lists", "INFO")
+                        break
+                    else:
+                        print("请输入 1、2 或 3")
+                except (EOFError, KeyboardInterrupt):
+                    print("\n未收到输入，默认忽略 Lists")
+                    break
+        elif strategy == "migrate":
+            lists_manager.migrate_lists_to_db(self.db, self.args.user)
+            self.db.save()
+        elif strategy == "replace":
+            lists_manager.clear_all_lists(self.args.user)
+        else:
+            log("已忽略 GitHub Lists（--lists-strategy=ignore/auto 非 TTY）", "INFO")
+
+    def _setup_llm(self) -> None:
+        if not self.args.llm_key:
+            return
+        from config import LLM_CONFIG
+        model = self.args.llm_model or LLM_CONFIG.get("model", "gpt-4o-mini")
+        self.llm = LLMClassifier(
+            api_key=self.args.llm_key,
+            provider=self.args.llm_provider,
+            api_base=self.args.llm_base,
+            model=model
+        )
+        log(f"LLM 已启用: {self.args.llm_provider} / {model}")
+
+    def _fetch(self) -> None:
+        self.items = self.gh.fetch_all(self.args.user)
+
+    def _enrich(self) -> None:
+        if not self.llm:
+            return
+        log("获取 README 摘要用于 AI 分析...", "STEP")
+        for item in self.items[:50]:
+            try:
+                readme = self.gh.get_readme(item["owner"]["login"], item["name"], max_length=1500)
+                if readme:
+                    item["readme_excerpt"] = readme
+            except Exception:
+                pass
+        log("README 摘要获取完成", "OK")
+
+    def _classify(self) -> None:
+        if self.is_first_run and self.args.subscribe_releases:
+            log("已标记所有仓库订阅 Release", "OK")
+
+        self.engine = IncrementalEngine(self.db, self.rule, self.llm)
+        self.stats = self.engine.process(
+            self.items,
+            incremental=self.args.incremental,
+            force_refresh=self.args.force_refresh,
+            use_llm=bool(self.llm),
+            retry_failed=self.args.retry_failed,
+            subscribe_all_releases=self.args.subscribe_releases
+        )
+
+    def _save(self) -> None:
+        if self.args.dry_run:
+            log("试运行模式：数据库未保存", "WARN")
+            return
+        self.db.save()
+        log("数据库已保存", "OK")
+
+    def _generate_reports(self) -> None:
+        if self.args.no_report or self.args.dry_run:
+            if self.args.dry_run:
+                log("试运行模式：报告未生成", "WARN")
+            return
+        report = ReportGenerator(self.db)
+        report.generate_html(self.args.output)
+        report.generate_csv(self.args.output)
+        report.generate_json(self.args.output)
+
+    def _sync_notion(self) -> None:
+        if not (self.args.notion_key and self.args.notion_db) or self.args.dry_run:
+            return
+        notion = NotionExporter(self.args.notion_key, self.args.notion_db)
+        notion.sync(list(self.db.values()), clear_existing=self.args.notion_clear)
+
+    def _track_releases(self) -> None:
+        if not self.args.check_releases or self.args.dry_run:
+            return
+        self.release_tracker = ReleaseTracker(self.gh)
+        self.release_updates = self.release_tracker.check(list(self.db.values()))
+        if self.release_updates:
+            self.db.save()
+
+    def _track_forks(self) -> None:
+        if not self.args.check_forks or self.args.dry_run:
+            return
+        self.fork_tracker = ForkTracker(self.gh)
+        forks = self.fork_tracker.get_user_forks(self.args.user)
+        self.fork_updates = self.fork_tracker.check(forks)
+
+    def _notify(self) -> None:
+        if not self.args.notify or self.args.dry_run:
+            return
+        NOTIFY_CONFIG["enabled"] = True
+        NOTIFY_CONFIG["channels"] = self.args.notify_channels.split(",")
+        notifier = Notifier(NOTIFY_CONFIG)
+        summary = self._build_summary()
+        if self.release_updates and self.release_tracker:
+            summary += "\n\n" + self.release_tracker.format_report(self.release_updates)
+        if self.fork_updates and self.fork_tracker:
+            summary += "\n\n" + self.fork_tracker.format_report(self.fork_updates)
+        notifier.send("GitHub Stars 分类完成", summary, is_error=False)
+
+    def _print_summary(self) -> None:
+        _safe_print("\n" + "=" * 60)
+        _safe_print(self._build_summary())
+        _safe_print("=" * 60)
+
+        if self.is_first_run and not self.args.import_json and not self.args.import_csv:
+            _safe_print("\n💡 首次运行提示:")
+            _safe_print('   1. 检查生成的报告，对不满意的项目修改 data/stars_db.json')
+            _safe_print('   2. 给满意的项目添加 "manual_override": true 避免被覆盖')
+            _safe_print("   3. 下次运行使用 --incremental 只处理新项目")
+            _safe_print("   4. 如需重新分类所有项目，使用 --force-refresh")
+
+    # ---------- 工具方法 ----------
+
+    def _build_summary(self) -> str:
+        lines = [
+            "GitHub Stars 分类完成",
+            "=" * 40,
+        ]
+        if self.is_first_run:
+            lines.append("🆕 首次运行模式")
+            lines.append("")
+        lines.extend([
+            f"数据库总计: {len(self.db)} 个项目",
+            f"新增项目: {self.stats['new']}",
+            f"重新分类: {self.stats['updated']}",
+            f"元数据更新: {self.stats['skipped']}",
+            f"手动保护: {self.stats['protected']}",
+            f"LLM 分析: {self.stats['llm_enhanced']}",
+            f"错误: {self.stats['error']}",
+            "",
+            "生态分布 Top 5:",
+        ])
+        eco_stats = Counter([r.get("ecology") for r in self.db.values()])
+        for eco, count in eco_stats.most_common(5):
+            lines.append(f"  {eco}: {count}")
+
+        protected = sum(1 for r in self.db.values() if r.get("manual_override"))
+        imported = sum(1 for r in self.db.values() if r.get("imported"))
+        if protected:
+            lines.append(f"\n🔒 手动保护项目: {protected} 个")
+        if imported:
+            lines.append(f"📥 导入项目: {imported} 个（已自动保护）")
+
+        lines.append("\n报告已生成，请查看 GitHub Pages")
+        return "\n".join(lines)

@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+GitHub Stars 自动分类工具 v4 — CLI 入口
+======================================
+支持：规则分类、LLM 智能增强、增量更新、手动修正保护、
+      Notion 导出、多通道通知、HTML 报告、Release/Fork 追踪
+
+用法：
+  首次全量：python classifier.py --token ghp_xxx --user yourname
+  增量更新：python classifier.py --token ghp_xxx --user yourname --incremental
+  强制刷新：python classifier.py --token ghp_xxx --user yourname --force-refresh
+  启用 LLM：python classifier.py --token ghp_xxx --user yourname --llm-key sk-xxx
+  启用通知：python classifier.py --token ghp_xxx --user yourname --notify
+"""
+
+import argparse
+import sys
+
+from pipeline import Pipeline
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="GitHub Stars 自动分类工具 v4",
+        epilog="""
+首次运行说明:
+  1. 首次运行（数据库不存在）会自动创建新数据库，对所有项目执行全新分类
+  2. 如果你有已有分类想保留，使用 --import-json 或 --import-csv 导入
+  3. 导入的项目会自动标记 manual_override，不会被后续自动分类覆盖
+  4. 首次运行后，建议检查分类结果，对不满意的项目手动修正并标记保护
+
+示例:
+  # 首次运行（全新分类）
+  python classifier.py --token ghp_xxx --user yourname
+
+  # 首次运行 + 导入已有分类（保留旧标签）
+  python classifier.py --token ghp_xxx --user yourname --import-json ./old_tags.json
+
+  # 首次运行 + LLM 增强
+  python classifier.py --token ghp_xxx --user yourname --llm-key sk-xxx
+        """,
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+
+    # 基础参数
+    parser.add_argument("--token", required=True, help="GitHub Personal Access Token")
+    parser.add_argument("--user", required=True, help="GitHub 用户名")
+    parser.add_argument("--db", default="./data/stars_db.json", help="数据库路径")
+    parser.add_argument("--output", default="./docs", help="输出目录")
+
+    # 运行模式
+    parser.add_argument("--incremental", action="store_true",
+                        help="增量模式：只处理新 star 的项目，已有项目保留分类")
+    parser.add_argument("--force-refresh", action="store_true",
+                        help="强制刷新：重新分类所有项目，但 manual_override 项目仍被保护")
+
+    # 首次运行/导入
+    parser.add_argument("--import-json", metavar="PATH", help="从 JSON 文件导入已有分类")
+    parser.add_argument("--import-csv", metavar="PATH", help="从 CSV 文件导入已有分类")
+    parser.add_argument("--no-auto-classify", action="store_true",
+                        help="导入已有分类后，不对新项目自动分类")
+
+    # GitHub Lists 处理策略
+    parser.add_argument("--lists-strategy", default="auto",
+                        choices=["auto", "prompt", "migrate", "replace", "ignore"],
+                        help="GitHub Lists 处理策略")
+
+    # LLM
+    parser.add_argument("--llm-key", help="LLM API Key（启用智能分类增强）")
+    parser.add_argument("--llm-provider", default="openai",
+                        help="LLM 提供商: openai/moonshot/deepseek/openrouter")
+    parser.add_argument("--llm-model", help="LLM 模型名称（留空使用默认）")
+    parser.add_argument("--llm-base", help="LLM API Base URL（自定义端点）")
+
+    # Notion
+    parser.add_argument("--notion-key", help="Notion API Key")
+    parser.add_argument("--notion-db", help="Notion Database ID")
+    parser.add_argument("--notion-clear", action="store_true",
+                        help="导出前清空 Notion 数据库")
+
+    # Release / Fork 追踪
+    parser.add_argument("--check-releases", action="store_true",
+                        help="检查已订阅仓库是否有新 Release")
+    parser.add_argument("--check-forks", action="store_true",
+                        help="检查 Fork 仓库的上游是否有更新")
+    parser.add_argument("--subscribe-releases", action="store_true",
+                        help="将所有仓库标记为订阅 Release（首次运行时有效）")
+
+    # 通知
+    parser.add_argument("--notify", action="store_true", help="启用通知")
+    parser.add_argument("--notify-channels", default="email",
+                        help="通知通道，逗号分隔: email,telegram,wecom,qq")
+
+    # 其他
+    parser.add_argument("--no-report", action="store_true", help="不生成 HTML 报告")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="试运行：显示将要执行的操作但不保存数据库和报告")
+    parser.add_argument("--retry-failed", action="store_true",
+                        help="重新对之前 AI 分析失败的项目进行分类")
+
+    return parser.parse_args(argv)
+
+
+def main() -> None:
+    args = parse_args()
+    pipeline = Pipeline(args)
+    try:
+        pipeline.run()
+    except KeyboardInterrupt:
+        print("\n操作已取消")
+        sys.exit(130)
+    except Exception as e:
+        print(f"\n❌ 运行失败: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

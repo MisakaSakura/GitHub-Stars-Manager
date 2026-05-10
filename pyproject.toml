@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "github-stars-classifier"
+version = "4.0.0"
+description = "自动为你的 GitHub Stars 按平台、类型、语言、生态归属四维分类"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [
+    {name = "GitHub Stars Classifier Contributors"},
+]
+keywords = ["github", "stars", "classification", "automation", "llm"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+]
+
+dependencies = [
+    "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "coverage",
+]
+
+[project.scripts]
+github-stars-classifier = "scripts.classifier:main"
+
+[project.urls]
+Homepage = "https://github.com/yourname/github-stars-classifier"
+Repository = "https://github.com/yourname/github-stars-classifier"
+Issues = "https://github.com/yourname/github-stars-classifier/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["scripts*"]
+
+[tool.setuptools.package-data]
+scripts = ["report_template.html"]

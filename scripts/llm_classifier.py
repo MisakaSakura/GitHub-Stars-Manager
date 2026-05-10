@@ -1,0 +1,268 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""基于 LLM 的智能分类器"""
+
+import json
+import os
+import time
+
+from http_client import HTTPClient
+from utils import log
+
+
+class LLMClassifier:
+    """基于 LLM 的智能分类器，支持真正的批量分类以减少 API 调用"""
+
+    def __init__(self, api_key, provider="openai", api_base=None, model="gpt-4o-mini"):
+        self.api_key = api_key
+        self.provider = provider.lower()
+        self.model = model
+        self.cache = {}
+        self.cache_file = ".llm_cache.json"
+        self._load_cache()
+        self.client = HTTPClient()
+
+        from config import LLM_CONFIG
+        self.batch_size = LLM_CONFIG.get("batch_size", 1)
+
+        if self.provider == "openai":
+            self.api_base = api_base or "https://api.openai.com/v1"
+        elif self.provider == "moonshot":
+            self.api_base = api_base or "https://api.moonshot.cn/v1"
+        elif self.provider == "deepseek":
+            self.api_base = api_base or "https://api.deepseek.com/v1"
+        elif self.provider == "openrouter":
+            self.api_base = api_base or "https://openrouter.ai/api/v1"
+        else:
+            self.api_base = api_base or "https://api.openai.com/v1"
+
+    def _load_cache(self):
+        if os.path.exists(self.cache_file):
+            try:
+                with open(self.cache_file, "r", encoding="utf-8") as f:
+                    self.cache = json.load(f)
+            except Exception:
+                self.cache = {}
+
+    def _save_cache(self):
+        with open(self.cache_file, "w", encoding="utf-8") as f:
+            json.dump(self.cache, f, ensure_ascii=False, indent=2)
+
+    def _make_cache_key(self, item):
+        owner = item.get("owner", {})
+        login = owner.get("login") if isinstance(owner, dict) else str(owner)
+        name = item.get("name", "")
+        desc = item.get("description", "") or ""
+        return f"{login}/{name}:{desc[:50]}"
+
+    def classify(self, item):
+        """单条分类（带缓存）"""
+        cache_key = self._make_cache_key(item)
+        if cache_key in self.cache:
+            return self.cache[cache_key]
+
+        prompt = self._build_prompt(item)
+        content = self._call_api(prompt)
+
+        if content:
+            try:
+                result = self._parse_single_response(content)
+                self.cache[cache_key] = result
+                self._save_cache()
+                return result
+            except Exception as e:
+                log(f"LLM 单条解析失败: {e}", "WARN")
+
+        return None
+
+    def classify_batch(self, items):
+        """批量分类，按 batch_size 分组，真正减少 API 调用次数"""
+        if not items:
+            return {}
+
+        results = {}
+        uncached_items = []
+        for item in items:
+            cache_key = self._make_cache_key(item)
+            key = f"{item['owner']['login']}/{item['name']}"
+            if cache_key in self.cache:
+                results[key] = self.cache[cache_key]
+            else:
+                uncached_items.append(item)
+
+        if not uncached_items:
+            return results
+
+        for i in range(0, len(uncached_items), self.batch_size):
+            batch = uncached_items[i:i + self.batch_size]
+            batch_results = self._classify_batch(batch)
+            results.update(batch_results)
+            if i + self.batch_size < len(uncached_items):
+                time.sleep(0.5)
+
+        return results
+
+    def _classify_batch(self, items):
+        """对一批项目执行单次 LLM 调用"""
+        prompt = self._build_batch_prompt(items)
+        max_tokens = max(256, 128 * len(items))
+        content = self._call_api(prompt, max_tokens=max_tokens)
+
+        if not content:
+            log("LLM batch 调用失败，回退到单条处理", "WARN")
+            return self._fallback_single(items)
+
+        try:
+            parsed = self._parse_batch_response(content, items)
+            for item in parsed:
+                cache_key = self._make_cache_key({
+                    "owner": {"login": item.split("/")[0]},
+                    "name": item.split("/")[1]
+                })
+                self.cache[cache_key] = parsed[item]
+            self._save_cache()
+            return parsed
+        except Exception as e:
+            log(f"LLM batch 解析失败，回退到单条处理: {e}", "WARN")
+            return self._fallback_single(items)
+
+    def _fallback_single(self, items):
+        """batch 失败时回退到逐个单条处理"""
+        results = {}
+        for item in items:
+            key = f"{item['owner']['login']}/{item['name']}"
+            result = self.classify(item)
+            if result:
+                results[key] = result
+        return results
+
+    def _build_prompt(self, item):
+        topics = ", ".join(item.get("topics", []))
+        readme = item.get("readme_excerpt", "")
+        readme_section = f"\nREADME摘要: {readme[:800]}" if readme else ""
+        return f"""项目名称: {item['name']}
+作者: {item['owner']['login']}
+描述: {item.get('description') or '无'}
+Topics: {topics or '无'}
+语言: {item.get('language') or '未指定'}{readme_section}
+
+请分类。"""
+
+    def _build_batch_prompt(self, items):
+        lines = []
+        for idx, item in enumerate(items, 1):
+            topics = ", ".join(item.get("topics", []))
+            readme = item.get("readme_excerpt", "")
+            readme_part = f" | README: {readme[:300]}" if readme else ""
+            lines.append(
+                f"{idx}. {item['owner']['login']}/{item['name']}: "
+                f"{item.get('description') or '无'} "
+                f"(Topics: {topics or '无'}, 语言: {item.get('language') or '未指定'}){readme_part}"
+            )
+
+        projects_text = "\n".join(lines)
+        return f"""请为以下 {len(items)} 个项目分类，返回 JSON 数组，数组中第 N 个元素对应上面第 N 个项目：
+
+{projects_text}
+
+请严格按以下格式输出 JSON 数组，不要包含任何其他内容（如 markdown 代码块标记）：
+[
+  {{"platform": "最匹配的平台", "type": "最匹配的类型", "ecology": "最匹配的生态（没有则填 null）", "ecology_role": "生态内角色（没有则填 null）", "confidence": 0.85, "reason": "简要说明分类理由", "ai_summary": "50字概括", "ai_tags": ["标签1"], "ai_platforms": ["linux", "web"]}},
+  ...
+]"""
+
+    def _call_api(self, prompt, max_tokens=None):
+        from config import LLM_CONFIG, LLM_SYSTEM_PROMPT
+
+        url = f"{self.api_base}/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+        if self.provider == "openrouter":
+            headers["HTTP-Referer"] = "https://github.com"
+            headers["X-Title"] = "GitHub Stars Classifier"
+
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": LLM_SYSTEM_PROMPT},
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": max_tokens or LLM_CONFIG.get("max_tokens", 256),
+            "temperature": LLM_CONFIG.get("temperature", 0.1),
+        }
+
+        try:
+            code, body = self.client.post_json(url, payload, headers=headers, timeout=LLM_CONFIG.get("timeout", 15))
+            if code != 200:
+                log(f"LLM API 错误 {code}: {body[:200]}", "WARN")
+                return None
+            data = json.loads(body)
+            if not isinstance(data, dict):
+                log(f"LLM 响应格式错误: 期望 dict，实际为 {type(data).__name__}", "WARN")
+                return None
+            choices = data.get("choices")
+            if not isinstance(choices, list) or len(choices) == 0:
+                log("LLM 响应格式错误: choices 为空或缺失", "WARN")
+                return None
+            message = choices[0].get("message") if isinstance(choices[0], dict) else None
+            if not isinstance(message, dict):
+                log("LLM 响应格式错误: message 缺失或格式不对", "WARN")
+                return None
+            content = message.get("content")
+            if not isinstance(content, str):
+                log("LLM 响应格式错误: content 缺失或不是字符串", "WARN")
+                return None
+            return content
+        except Exception as e:
+            log(f"LLM 调用失败: {e}", "WARN")
+            return None
+
+    @staticmethod
+    def _clean_json_content(content):
+        content = content.strip()
+        if content.startswith("```json"):
+            content = content[7:]
+        if content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+        return content.strip()
+
+    def _parse_single_response(self, content):
+        content = self._clean_json_content(content)
+        result = json.loads(content)
+        if not isinstance(result, dict):
+            raise ValueError(f"返回结果不是对象，而是 {type(result).__name__}")
+        return self._extract_fields(result)
+
+    def _parse_batch_response(self, content, items):
+        content = self._clean_json_content(content)
+        arr = json.loads(content)
+        if not isinstance(arr, list):
+            raise ValueError(f"返回结果不是数组，而是 {type(arr).__name__}")
+        if len(arr) != len(items):
+            raise ValueError(f"返回结果数量不匹配: 期望 {len(items)}, 实际 {len(arr)}")
+
+        results = {}
+        for item, result in zip(items, arr):
+            if not isinstance(result, dict):
+                raise ValueError(f"Batch 中某元素不是对象，而是 {type(result).__name__}")
+            key = f"{item['owner']['login']}/{item['name']}"
+            results[key] = self._extract_fields(result)
+        return results
+
+    @staticmethod
+    def _extract_fields(result):
+        return {
+            "platform": result.get("platform", "其他 / 未分类"),
+            "type": result.get("type", "其他 / 未分类"),
+            "ecology": result.get("ecology"),
+            "ecology_role": result.get("ecology_role"),
+            "confidence": result.get("confidence", 0.5),
+            "reason": result.get("reason", ""),
+            "ai_summary": result.get("ai_summary", ""),
+            "ai_tags": result.get("ai_tags", []) if isinstance(result.get("ai_tags"), list) else [],
+            "ai_platforms": result.get("ai_platforms", []) if isinstance(result.get("ai_platforms"), list) else [],
+        }
