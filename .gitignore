@@ -18,10 +18,13 @@ env/
 *.swo
 
 # 项目生成文件
-data/
 docs/
 fake_docs/
 fake_db.json
+
+# 数据库目录本身需要被跟踪，但忽略其中的临时文件
+data/*
+!data/stars_db.json
 
 # LLM 缓存
 .llm_cache.json
