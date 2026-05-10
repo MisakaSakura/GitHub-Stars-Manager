@@ -145,7 +145,8 @@ class TestIncrementalEngine(unittest.TestCase):
         self.assertEqual(stats["new"], 1)
         self.assertEqual(stats["llm_enhanced"], 1)
         self.assertEqual(self.db.data["user/repo"]["platform"], "AI / 人工智能")
-        self.assertEqual(self.db.data["user/repo"]["llm_status"], "success")
+        # AI 字段已迁移到独立 AI 数据库，不再写入 StarItem
+        self.assertIn("user/repo", engine.llm_results)
 
     def test_llm_failed(self):
         llm = MagicMock()
@@ -154,7 +155,8 @@ class TestIncrementalEngine(unittest.TestCase):
         items = [_fake_item(name="repo")]
         stats = engine.process(items, use_llm=True)
         self.assertEqual(stats["new"], 1)
-        self.assertEqual(self.db.data["user/repo"]["llm_status"], "failed")
+        # AI 字段已迁移到独立 AI 数据库，不再写入 StarItem
+        self.assertEqual(engine.llm_results, {})
 
     def test_ecology_locked(self):
         import config

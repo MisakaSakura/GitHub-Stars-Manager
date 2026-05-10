@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Pipeline / Orchestrator：将 classifier.py 的协调逻辑抽取为可测试的阶段"""
 
+import os
 import sys
 from collections import Counter
 
@@ -10,6 +11,7 @@ from github_api import GitHubAPI, GitHubAuthError, GitHubRateLimitError
 from rule_classifier import RuleClassifier
 from llm_classifier import LLMClassifier
 from database import StarsDB
+from ai_database import AIDatabase
 from engine import IncrementalEngine
 from import_helper import FirstRunHelper
 from report import ReportGenerator
@@ -48,6 +50,7 @@ class Pipeline:
         self.fork_updates: list[dict] = []
         self.release_tracker: ReleaseTracker | None = None
         self.fork_tracker: ForkTracker | None = None
+        self.ai_db: AIDatabase | None = None
 
     # ---------- 公开入口 ----------
 
@@ -89,6 +92,12 @@ class Pipeline:
             _safe_print(f"\n📂 加载已有数据库: {self.args.db}\n")
 
         self.db = StarsDB(self.args.db)
+
+        # 初始化 AI 数据库（与主数据库解耦）
+        ai_db_path = os.path.splitext(self.args.db)[0] + "_ai.json"
+        self.ai_db = AIDatabase(ai_db_path)
+        # 向后兼容：从旧版主数据库迁移 AI 字段
+        self.ai_db.migrate_from_stars_db(list(self.db.values()))
 
     def _import_and_early_exit(self) -> bool:
         """首次运行导入已有分类；若 --no-auto-classify 则提前退出。"""
@@ -227,11 +236,36 @@ class Pipeline:
             subscribe_all_releases=self.args.subscribe_releases
         )
 
+        # 将 LLM 结果同步到独立 AI 数据库
+        if self.llm and self.ai_db:
+            for key, result in self.engine.llm_results.items():
+                if result:
+                    self.ai_db.update_from_llm_result(key, result, status="success")
+
+        # 从 AI 数据库回填 AI 字段到主数据库（供报告渲染使用）
+        self._backfill_ai_fields()
+
+    def _backfill_ai_fields(self) -> None:
+        """从 AI 数据库回填 AI 字段到主数据库中的项目"""
+        if not self.ai_db:
+            return
+        for key, item in self.db.data.items():
+            ai = self.ai_db.get(key)
+            if ai:
+                item.llm_status = ai.llm_status
+                item.llm_confidence = ai.llm_confidence
+                item.llm_reason = ai.llm_reason
+                item.ai_summary = ai.ai_summary
+                item.ai_tags = ai.ai_tags
+                item.ai_platforms = ai.ai_platforms
+
     def _save(self) -> None:
         if self.args.dry_run:
             log("试运行模式：数据库未保存", "WARN")
             return
         self.db.save()
+        if self.ai_db:
+            self.ai_db.save()
         if self.llm:
             from datetime import datetime, timezone
             self.db.meta["last_llm_classify_at"] = datetime.now(timezone.utc).isoformat()
@@ -243,7 +277,7 @@ class Pipeline:
             if self.args.dry_run:
                 log("试运行模式：报告未生成", "WARN")
             return
-        report = ReportGenerator(self.db)
+        report = ReportGenerator(self.db, ai_db=self.ai_db)
         # Build weekly digest data for HTML report
         from datetime import datetime, timezone, timedelta
         now = datetime.now(timezone.utc)

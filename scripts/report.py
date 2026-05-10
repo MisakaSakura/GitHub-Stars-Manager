@@ -13,14 +13,33 @@ from utils import log
 
 
 class ReportGenerator:
-    def __init__(self, db, template_path: str | None = None):
+    def __init__(self, db, template_path: str | None = None, ai_db=None):
         self.db = db
+        self.ai_db = ai_db
         self.template_path = template_path or os.path.join(
             os.path.dirname(__file__), "report_template.html"
         )
 
+    def _inject_ai_fields(self, items: list) -> list[dict]:
+        """将 AI 数据库中的字段注入到项目 dict 中供渲染使用"""
+        if not self.ai_db:
+            return [r.to_dict() if hasattr(r, "to_dict") else dict(r) for r in items]
+        result = []
+        for item in items:
+            d = item.to_dict() if hasattr(item, "to_dict") else dict(item)
+            ai = self.ai_db.get(d.get("full_name"))
+            if ai:
+                d["llm_status"] = ai.llm_status
+                d["llm_confidence"] = ai.llm_confidence
+                d["llm_reason"] = ai.llm_reason
+                d["ai_summary"] = ai.ai_summary
+                d["ai_tags"] = ai.ai_tags
+                d["ai_platforms"] = ai.ai_platforms
+            result.append(d)
+        return result
+
     def generate_html(self, output_dir: str, weekly_data: dict | None = None) -> str:
-        items = list(self.db.values())
+        items = self._inject_ai_fields(list(self.db.values()))
         total = len(items)
         timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
@@ -40,7 +59,7 @@ class ReportGenerator:
         return path
 
     def generate_csv(self, output_dir: str) -> str:
-        items = list(self.db.values())
+        items = self._inject_ai_fields(list(self.db.values()))
         os.makedirs(output_dir, exist_ok=True)
         path = os.path.join(output_dir, "stars_data.csv")
         fieldnames = [
@@ -59,7 +78,7 @@ class ReportGenerator:
         return path
 
     def generate_json(self, output_dir: str) -> str:
-        items = list(self.db.values())
+        items = self._inject_ai_fields(list(self.db.values()))
         os.makedirs(output_dir, exist_ok=True)
         path = os.path.join(output_dir, "stars_data.json")
         with open(path, "w", encoding="utf-8") as f:

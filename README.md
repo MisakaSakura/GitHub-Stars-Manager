@@ -41,6 +41,7 @@
 │   ├── pipeline.py            ← 16 阶段执行编排
 │   ├── engine.py              ← 增量更新引擎
 │   ├── models.py              ← StarItem 数据模型
+│   ├── ai_database.py         ← AI 分析结果独立数据库
 │   ├── database.py            ← JSON 持久化（原子写入）
 │   ├── github_api.py          ← GitHub REST API 封装
 │   ├── http_client.py         ← HTTP 客户端（requests / urllib 双后端）
@@ -62,7 +63,8 @@
 │   ├── utils.py               ← 工具函数
 │   └── requirements.txt       ← 依赖
 ├── data/
-│   └── stars_db.json          ← 持久化数据库（首次运行后生成）
+│   ├── stars_db.json          ← 持久化数据库（首次运行后生成）
+│   └── stars_ai.json          ← AI 分析结果数据库（与主库解耦）
 └── docs/
     └── index.html             ← 报告（首次运行后生成）
 ```
@@ -374,9 +376,29 @@ QQ_CONFIG = {
 | `manual_override` | 手动保护标记 |
 | `override_fields` | 被保护的字段 |
 | `imported` | 是否从外部导入 |
+| `subscribe_releases` | 是否订阅 Release 通知 |
+| `last_release_tag` | 最后记录的 Release 标签 |
+| `is_fork` | 是否为 Fork 仓库 |
+| `parent_full_name` | 上游仓库名称 |
+| `parent_pushed_at` | 上游最后推送时间 |
+| `github_list_source` | 来源 GitHub List 名称 |
+
+### AI 数据库结构
+
+`data/stars_ai.json` 是独立的 AI 分析结果存储，与主数据库完全解耦：
+
+| 字段 | 说明 |
+|------|------|
 | `llm_status` | LLM 分析状态（`not_analyzed` / `success` / `failed` / `skipped`） |
 | `llm_confidence` / `llm_reason` | LLM 置信度和理由 |
 | `ai_summary` / `ai_tags` / `ai_platforms` | LLM 生成的摘要和标签 |
+| `ai_platform` / `ai_type` / `ai_ecology` | AI 建议的分类（可与规则不同） |
+| `analyzed_at` | 本次 AI 分析时间戳 |
+
+**为什么分离？**
+- 规则分类每次运行都更新，AI 分类按间隔控制，两者生命周期不同
+- 分离后规则更新不会覆盖之前的 AI 分析结果
+- 向后兼容：首次运行自动从旧版主数据库迁移 AI 字段
 | `subscribe_releases` | 是否订阅 Release 通知 |
 | `last_release_tag` | 最后记录的 Release 标签 |
 | `is_fork` | 是否为 Fork 仓库 |

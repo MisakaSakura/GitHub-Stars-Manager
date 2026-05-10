@@ -26,6 +26,8 @@ class StarItem:
     last_updated: str = ""
     manual_override: bool = False
     override_fields: List[str] = field(default_factory=list)
+    # 注意：AI 相关字段已迁移到独立的 AI 数据库 (stars_ai.json)
+    # 保留以下字段仅用于向后兼容加载旧数据，新代码不再写入
     llm_status: str = "not_analyzed"
     llm_confidence: Optional[float] = None
     llm_reason: Optional[str] = None

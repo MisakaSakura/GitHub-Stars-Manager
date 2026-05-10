@@ -35,7 +35,7 @@ class IncrementalEngine:
     def process(self, items: list[dict], incremental: bool = False, force_refresh: bool = False, use_llm: bool = False, retry_failed: bool = False, subscribe_all_releases: bool = False) -> dict:
         log(f"处理模式: {'强制刷新' if force_refresh else '增量更新' if incremental else '标准更新'}", "STEP")
 
-        llm_results = {}
+        self.llm_results: dict[str, dict] = {}
         if use_llm and self.llm:
             llm_candidates = []
             for item in items:
@@ -58,13 +58,13 @@ class IncrementalEngine:
 
             if llm_candidates:
                 log(f"LLM 批量分类: {len(llm_candidates)} 个项目...", "STEP")
-                llm_results = self.llm.classify_batch(llm_candidates)
-                self.stats["llm_enhanced"] += len([r for r in llm_results.values() if r])
+                self.llm_results = self.llm.classify_batch(llm_candidates)
+                self.stats["llm_enhanced"] += len([r for r in self.llm_results.values() if r])
 
         for item in items:
             try:
                 key = f"{item['owner']['login']}/{item['name']}"
-                llm_result = llm_results.get(key)
+                llm_result = self.llm_results.get(key)
                 self._process_single(item, incremental, force_refresh, use_llm, llm_result, subscribe_all_releases)
             except Exception as e:
                 log(f"处理 {item.get('full_name', item.get('name'))} 失败: {e}", "ERROR")
@@ -111,7 +111,7 @@ class IncrementalEngine:
         self.stats["new"] += 1
 
     def _classify_item(self, item: dict, use_llm: bool, llm_result: dict | None = None, subscribe_all_releases: bool = False) -> StarItem:
-        """对单个项目执行分类并返回 StarItem"""
+        """对单个项目执行分类并返回 StarItem（AI 元数据不再写入 StarItem）"""
         platform = self.rule.classify_platform(item)
         ptype = self.rule.classify_type(item)
         eco, role = self.rule.classify_ecology(item)
@@ -121,6 +121,7 @@ class IncrementalEngine:
         existing_eco = existing.get("ecology") if existing else None
         ecology_locked = existing_eco and _is_ecology_locked(existing_eco)
 
+        # LLM 可以覆盖规则分类结果（分类决策本身是即时的，不依赖 AI DB）
         if use_llm and self.llm and llm_result:
             if llm_result.get("confidence", 0) > 0.7:
                 platform = llm_result.get("platform", platform)
@@ -132,16 +133,6 @@ class IncrementalEngine:
                         role = llm_result["ecology_role"]
                 else:
                     eco = existing_eco
-
-        if llm_result:
-            llm_status = "success"
-        elif use_llm and self.llm and not llm_result:
-            llm_status = "failed"
-        else:
-            llm_status = "not_analyzed"
-
-        if existing and existing.get("manual_override") and llm_result:
-            llm_status = "skipped"
 
         return StarItem(
             full_name=f"{item['owner']['login']}/{item['name']}",
@@ -160,12 +151,6 @@ class IncrementalEngine:
             last_updated=datetime.now(timezone.utc).isoformat(),
             manual_override=False,
             override_fields=[],
-            llm_status=llm_status,
-            llm_confidence=llm_result.get("confidence") if llm_result else None,
-            llm_reason=llm_result.get("reason") if llm_result else None,
-            ai_summary=llm_result.get("ai_summary") if llm_result else None,
-            ai_tags=llm_result.get("ai_tags") if llm_result else None,
-            ai_platforms=llm_result.get("ai_platforms") if llm_result else None,
             subscribe_releases=(existing.get("subscribe_releases") if existing else False) or subscribe_all_releases,
             last_release_tag=existing.get("last_release_tag") if existing else None,
             is_fork=item.get("fork", False),
