@@ -186,6 +186,53 @@ class TestIncrementalEngine(unittest.TestCase):
         finally:
             config.LOCKED_ECOLOGIES[:] = original
 
+    def test_llm_skips_existing_within_interval(self):
+        """增量模式下，已有项目如果在 AI 间隔内，LLM 应跳过"""
+        from ai_database import AIDatabase, AIResult
+        import tempfile
+        tmpdir = tempfile.mkdtemp()
+        ai_db = AIDatabase(os.path.join(tmpdir, "ai.json"))
+        ai_db.set("user/repo", AIResult(
+            full_name="user/repo",
+            analyzed_at="2099-01-01T00:00:00+00:00",  # 未来时间，一定在间隔内
+            llm_status="success",
+        ))
+        llm = MagicMock()
+        engine = IncrementalEngine(self.db, self.rule, llm, ai_db)
+        self.db.set("user/repo", {
+            "full_name": "user/repo", "name": "repo", "owner": "user",
+            "platform": "保留", "first_seen": "2024-01-01",
+        })
+        items = [_fake_item(name="repo")]
+        stats = engine.process(items, incremental=True, use_llm=True, llm_interval_days=30)
+        self.assertEqual(stats["skipped"], 1)
+        llm.classify_batch.assert_not_called()
+
+    def test_llm_reanalyzes_existing_outside_interval(self):
+        """增量模式下，已有项目如果超过 AI 间隔，LLM 应重新分析"""
+        from ai_database import AIDatabase, AIResult
+        import tempfile
+        tmpdir = tempfile.mkdtemp()
+        ai_db = AIDatabase(os.path.join(tmpdir, "ai.json"))
+        ai_db.set("user/repo", AIResult(
+            full_name="user/repo",
+            analyzed_at="2020-01-01T00:00:00+00:00",  # 很久以前，一定超过间隔
+            llm_status="success",
+        ))
+        llm = MagicMock()
+        llm.classify_batch.return_value = {"user/repo": {"confidence": 0.9, "platform": "AI"}}
+        engine = IncrementalEngine(self.db, self.rule, llm, ai_db)
+        self.db.set("user/repo", {
+            "full_name": "user/repo", "name": "repo", "owner": "user",
+            "platform": "旧分类", "first_seen": "2024-01-01",
+        })
+        items = [_fake_item(name="repo")]
+        stats = engine.process(items, incremental=True, use_llm=True, llm_interval_days=30)
+        # 增量模式下规则分类跳过，但 LLM 覆盖仍应用
+        self.assertEqual(stats["skipped"], 1)
+        self.assertEqual(self.db.data["user/repo"]["platform"], "AI")
+        llm.classify_batch.assert_called_once()
+
     def test_error_handling(self):
         items = [{
             "name": "repo",

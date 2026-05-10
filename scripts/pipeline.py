@@ -226,14 +226,15 @@ class Pipeline:
         if self.is_first_run and self.args.subscribe_releases:
             log("已标记所有仓库订阅 Release", "OK")
 
-        self.engine = IncrementalEngine(self.db, self.rule, self.llm)
+        self.engine = IncrementalEngine(self.db, self.rule, self.llm, self.ai_db)
         self.stats = self.engine.process(
             self.items,
             incremental=self.args.incremental,
             force_refresh=self.args.force_refresh,
             use_llm=bool(self.llm),
             retry_failed=self.args.retry_failed,
-            subscribe_all_releases=self.args.subscribe_releases
+            subscribe_all_releases=self.args.subscribe_releases,
+            llm_interval_days=self.args.llm_interval_days
         )
 
         # 将 LLM 结果同步到独立 AI 数据库

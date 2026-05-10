@@ -23,16 +23,45 @@ def _safe_int(value, default: int = 0) -> int:
 
 
 class IncrementalEngine:
-    def __init__(self, db, rule_classifier, llm_classifier=None):
+    def __init__(self, db, rule_classifier, llm_classifier=None, ai_db=None):
         self.db = db
         self.rule = rule_classifier
         self.llm = llm_classifier
+        self.ai_db = ai_db
         self.stats = {
             "new": 0, "updated": 0, "skipped": 0,
             "protected": 0, "llm_enhanced": 0, "error": 0
         }
 
-    def process(self, items: list[dict], incremental: bool = False, force_refresh: bool = False, use_llm: bool = False, retry_failed: bool = False, subscribe_all_releases: bool = False) -> dict:
+    def _needs_llm(self, key: str, existing, force_refresh: bool, retry_failed: bool, llm_interval_days: int) -> bool:
+        """判断项目是否需要 LLM 分析：独立增量策略，不受规则增量模式影响"""
+        if not existing:
+            return True  # 新项目必须分析
+        if existing.get("manual_override"):
+            return False  # 手动保护跳过
+        if force_refresh:
+            return True  # 强制刷新全部重分析
+
+        # 从 AI 数据库查询上次分析状态
+        ai_record = self.ai_db.get(key) if self.ai_db else None
+        if retry_failed and ai_record and ai_record.llm_status == "failed":
+            return True  # 重试之前失败的项目
+
+        if not ai_record or not ai_record.analyzed_at:
+            return True  # 从未分析过
+
+        # 检查是否超过间隔天数
+        from datetime import datetime, timezone, timedelta
+        try:
+            last_dt = datetime.fromisoformat(ai_record.analyzed_at)
+            if datetime.now(timezone.utc) - last_dt >= timedelta(days=llm_interval_days):
+                return True  # 间隔已到，需要重新分析
+        except Exception:
+            return True  # 时间戳异常，重新分析
+
+        return False  # 已有成功分析且在间隔内，跳过
+
+    def process(self, items: list[dict], incremental: bool = False, force_refresh: bool = False, use_llm: bool = False, retry_failed: bool = False, subscribe_all_releases: bool = False, llm_interval_days: int = 30) -> dict:
         log(f"处理模式: {'强制刷新' if force_refresh else '增量更新' if incremental else '标准更新'}", "STEP")
 
         self.llm_results: dict[str, dict] = {}
@@ -41,19 +70,7 @@ class IncrementalEngine:
             for item in items:
                 key = f"{item['owner']['login']}/{item['name']}"
                 existing = self.db.get(key)
-                needs_llm = False
-                if not existing:
-                    needs_llm = True
-                elif existing.get("manual_override"):
-                    needs_llm = False
-                elif force_refresh:
-                    needs_llm = True
-                elif retry_failed and existing.get("llm_status") == "failed":
-                    needs_llm = True
-                elif not incremental:
-                    needs_llm = True
-
-                if needs_llm:
+                if self._needs_llm(key, existing, force_refresh, retry_failed, llm_interval_days):
                     llm_candidates.append(item)
 
             if llm_candidates:
@@ -97,6 +114,17 @@ class IncrementalEngine:
                 existing.description = item.get("description") or ""
                 existing.topics = item.get("topics", [])
                 existing.last_updated = datetime.now(timezone.utc).isoformat()
+                # 增量模式下规则分类跳过，但 LLM 覆盖仍然应用（修正已有项目分类）
+                if llm_result and llm_result.get("confidence", 0) > 0.7:
+                    existing_eco = existing.get("ecology")
+                    ecology_locked = existing_eco and _is_ecology_locked(existing_eco)
+                    existing.platform = llm_result.get("platform", existing.platform)
+                    existing.type = llm_result.get("type", existing.type)
+                    if not ecology_locked:
+                        if llm_result.get("ecology"):
+                            existing.ecology = llm_result["ecology"]
+                        if llm_result.get("ecology_role"):
+                            existing.ecology_role = llm_result["ecology_role"]
                 self.stats["skipped"] += 1
                 return
 

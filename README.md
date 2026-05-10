@@ -302,10 +302,17 @@ LLM_CONFIG = {
 | `--llm-interval-days` | `30` | 两次 LLM 全量分析的最小间隔天数 |
 | `--force-llm` | 否 | 无视间隔，强制启用 LLM 分析 |
 
-**工作原理**：系统在 `data/stars_db.meta.json` 中记录上次 LLM 分析时间 `last_llm_classify_at`。若距离上次不足间隔天数，本次将跳过 LLM，仅使用规则分类。适合配合 GitHub Actions 每周自动运行——大约每月才真正调用一次 LLM。
+**工作原理**：系统有两层控制：
+
+1. **全局开关**（`stars_db.meta.json`）：记录上次 LLM 运行时间。若不足间隔天数，完全不调用 LLM API。
+2. **项目级追踪**（`stars_ai.json`）：每个项目独立记录 `analyzed_at`。即使全局启用 LLM，间隔内已成功分析的项目也会跳过，只分析**新项目**和**间隔到期的老项目**。
+
+这意味着：
+- **规则分类**遵循 `--incremental`：已有项目只更新 Stars/描述等元数据
+- **LLM 分析**走独立策略：**全局介入**，既处理新项目，也按间隔重新分析已有项目并修正其分类
 
 ```bash
-# 每月一次 LLM 分析（默认 30 天）
+# 每月一次 LLM 全局分析（默认 30 天）
 python scripts/classifier.py --token <TOKEN> --user <USER> --llm-key <KEY>
 
 # 每季度一次
