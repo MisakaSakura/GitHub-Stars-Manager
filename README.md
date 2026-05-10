@@ -405,13 +405,8 @@ QQ_CONFIG = {
 **为什么分离？**
 - 规则分类每次运行都更新，AI 分类按间隔控制，两者生命周期不同
 - 分离后规则更新不会覆盖之前的 AI 分析结果
-- 向后兼容：首次运行自动从旧版主数据库迁移 AI 字段
-| `subscribe_releases` | 是否订阅 Release 通知 |
-| `last_release_tag` | 最后记录的 Release 标签 |
-| `is_fork` | 是否为 Fork 仓库 |
-| `parent_full_name` | 上游仓库名称 |
-| `parent_pushed_at` | 上游最后推送时间 |
-| `github_list_source` | 来源 GitHub List 名称 |
+- 向后兼容：首次运行自动从旧版主数据库迁移 AI 字段到 `stars_ai.json`
+- 主数据库不再保存 AI 字段（保存时自动过滤），确保双库独立持久化
 
 ---
 

@@ -86,6 +86,12 @@ class StarsDB:
     def __len__(self) -> int:
         return len(self.data)
 
+    # AI 字段已迁移到独立 AI 数据库 (stars_ai.json)，主数据库不再保存
+    _AI_FIELDS = ("llm_status", "llm_confidence", "llm_reason", "ai_summary", "ai_tags", "ai_platforms")
+
     @staticmethod
     def _serialize(item: StarItem | dict) -> dict:
-        return item.to_dict() if isinstance(item, StarItem) else item
+        d = item.to_dict() if isinstance(item, StarItem) else dict(item)
+        for field in StarsDB._AI_FIELDS:
+            d.pop(field, None)
+        return d

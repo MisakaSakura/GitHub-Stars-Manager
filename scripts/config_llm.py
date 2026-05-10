@@ -3,7 +3,7 @@
 """LLM 配置：API 参数与系统提示词"""
 
 LLM_CONFIG = {
-    "enabled": False,  # 默认关闭，需要设置 API key 后开启
+    # 注意：LLM 启用由 --llm-key 参数控制，不再使用此 enabled 字段
     "provider": "openai",  # 支持: openai, moonshot, deepseek, openrouter
     "api_key": None,
     "api_base": None,  # 自定义 base url，如 "https://api.moonshot.cn/v1"
