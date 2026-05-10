@@ -72,6 +72,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="LLM 提供商: openai/moonshot/deepseek/openrouter")
     parser.add_argument("--llm-model", help="LLM 模型名称（留空使用默认）")
     parser.add_argument("--llm-base", help="LLM API Base URL（自定义端点）")
+    parser.add_argument("--llm-interval-days", type=int, default=30,
+                        help="LLM 分类最小间隔天数（默认 30，节省 Token）")
+    parser.add_argument("--force-llm", action="store_true",
+                        help="无视间隔强制启用 LLM 分类")
 
     # Notion
     parser.add_argument("--notion-key", help="Notion API Key")

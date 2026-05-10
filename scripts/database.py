@@ -13,7 +13,27 @@ class StarsDB:
     def __init__(self, db_path: str):
         self.db_path = db_path
         self.data = {}
+        self.meta = {}
         self.load()
+        self.load_meta()
+
+    @property
+    def meta_path(self) -> str:
+        base, _ = os.path.splitext(self.db_path)
+        return base + ".meta.json"
+
+    def load_meta(self) -> None:
+        if os.path.exists(self.meta_path):
+            try:
+                with open(self.meta_path, "r", encoding="utf-8") as f:
+                    self.meta = json.load(f)
+            except Exception:
+                self.meta = {}
+
+    def save_meta(self) -> None:
+        os.makedirs(os.path.dirname(self.meta_path) or ".", exist_ok=True)
+        with open(self.meta_path, "w", encoding="utf-8") as f:
+            json.dump(self.meta, f, ensure_ascii=False, indent=2)
 
     def load(self) -> None:
         if os.path.exists(self.db_path):

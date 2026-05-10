@@ -291,6 +291,28 @@ LLM_CONFIG = {
 }
 ```
 
+### LLM 间隔控制（节省 Token）
+
+默认情况下，即使配置了 `--llm-key`，系统也会控制 LLM 分析的频率，避免每次运行都消耗 Token：
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `--llm-interval-days` | `30` | 两次 LLM 全量分析的最小间隔天数 |
+| `--force-llm` | 否 | 无视间隔，强制启用 LLM 分析 |
+
+**工作原理**：系统在 `data/stars_db.meta.json` 中记录上次 LLM 分析时间 `last_llm_classify_at`。若距离上次不足间隔天数，本次将跳过 LLM，仅使用规则分类。适合配合 GitHub Actions 每周自动运行——大约每月才真正调用一次 LLM。
+
+```bash
+# 每月一次 LLM 分析（默认 30 天）
+python scripts/classifier.py --token <TOKEN> --user <USER> --llm-key <KEY>
+
+# 每季度一次
+python scripts/classifier.py --llm-key <KEY> --llm-interval-days 90
+
+# 临时强制启用（手动修正分类时）
+python scripts/classifier.py --llm-key <KEY> --force-llm
+```
+
 LLM 分类结果有 4 种状态：
 
 | 状态 | 含义 |

@@ -30,6 +30,8 @@ class FakeArgs:
             "llm_provider": "openai",
             "llm_model": None,
             "llm_base": None,
+            "llm_interval_days": 30,
+            "force_llm": False,
             "notion_key": None,
             "notion_db": None,
             "notion_clear": False,
@@ -133,6 +135,7 @@ class TestPipelineLLMSetup(unittest.TestCase):
         args = FakeArgs(llm_key="sk-test", llm_model="gpt-4")
         pipeline = Pipeline(args)
         pipeline._setup()
+        pipeline.db.meta = {}
         pipeline._setup_llm()
         self.assertIsNotNone(pipeline.llm)
         mock_llm_cls.assert_called_once()

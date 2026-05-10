@@ -18,7 +18,8 @@ class TestStarsDB(unittest.TestCase):
         self.db_path = os.path.join(self.tmpdir, "test_db.json")
 
     def tearDown(self):
-        for f in [self.db_path, self.db_path + ".tmp"]:
+        meta_path = os.path.splitext(self.db_path)[0] + ".meta.json"
+        for f in [self.db_path, self.db_path + ".tmp", meta_path]:
             if os.path.exists(f):
                 os.remove(f)
         if os.path.exists(self.tmpdir):
@@ -60,3 +61,11 @@ class TestStarsDB(unittest.TestCase):
 
         db2 = StarsDB(self.db_path)
         self.assertEqual(db2.get("x/y")["stars"], 20)
+
+    def test_meta_save_and_load(self):
+        db = StarsDB(self.db_path)
+        db.meta["last_llm_classify_at"] = "2024-01-01T00:00:00+00:00"
+        db.save_meta()
+
+        db2 = StarsDB(self.db_path)
+        self.assertEqual(db2.meta.get("last_llm_classify_at"), "2024-01-01T00:00:00+00:00")

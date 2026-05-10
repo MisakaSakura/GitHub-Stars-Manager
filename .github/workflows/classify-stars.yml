@@ -29,6 +29,13 @@ on:
         type: choice
         options: ['false', 'true']
 
+      force_llm:
+        description: '无视间隔强制启用 LLM（use_llm=true 时生效）'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
       llm_provider:
         description: 'LLM 提供商（use_llm=true 时生效）'
         required: false
@@ -186,6 +193,9 @@ jobs:
             ARGS+=("--llm-key" "$LLM_KEY" "--llm-provider" "${{ github.event.inputs.llm_provider }}")
             if [ -n "${{ github.event.inputs.llm_model }}" ]; then
               ARGS+=("--llm-model" "${{ github.event.inputs.llm_model }}")
+            fi
+            if [ "${{ github.event.inputs.force_llm }}" = "true" ]; then
+              ARGS+=("--force-llm")
             fi
           fi
 

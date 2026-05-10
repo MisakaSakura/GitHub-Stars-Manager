@@ -176,6 +176,17 @@ class Pipeline:
     def _setup_llm(self) -> None:
         if not self.args.llm_key:
             return
+        if not self.args.force_llm:
+            last = self.db.meta.get("last_llm_classify_at", "")
+            if last:
+                from datetime import datetime, timezone, timedelta
+                last_dt = datetime.fromisoformat(last)
+                interval = timedelta(days=self.args.llm_interval_days)
+                now = datetime.now(timezone.utc)
+                if now - last_dt < interval:
+                    days_left = (last_dt + interval - now).days
+                    log(f"LLM 间隔保护：距上次分析还有 {days_left} 天，本次跳过（--force-llm 可强制启用）", "INFO")
+                    return
         from config import LLM_CONFIG
         model = self.args.llm_model or LLM_CONFIG.get("model", "gpt-4o-mini")
         self.llm = LLMClassifier(
@@ -221,6 +232,10 @@ class Pipeline:
             log("试运行模式：数据库未保存", "WARN")
             return
         self.db.save()
+        if self.llm:
+            from datetime import datetime, timezone
+            self.db.meta["last_llm_classify_at"] = datetime.now(timezone.utc).isoformat()
+            self.db.save_meta()
         log("数据库已保存", "OK")
 
     def _generate_reports(self) -> None:
