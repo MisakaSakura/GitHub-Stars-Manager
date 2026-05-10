@@ -227,7 +227,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
-          git add data/stars_db.json
+          git add -f data/stars_db.json
           # 只有当 requirements.txt 内容真正有变化时才添加（避免时间戳修改导致空提交）
           if ! git diff --cached --quiet -- requirements.txt 2>/dev/null; then
             git add requirements.txt
