@@ -49,6 +49,12 @@ on:
         default: ''
         type: string
 
+      llm_base:
+        description: 'LLM API Base URL（兼容 OpenAI 格式的第三方服务，如 mimo）'
+        required: false
+        default: ''
+        type: string
+
       sync_notion:
         description: '同步到 Notion（需要设置 NOTION_KEY 和 NOTION_DB）'
         required: false
@@ -193,6 +199,9 @@ jobs:
             ARGS+=("--llm-key" "$LLM_KEY" "--llm-provider" "${{ github.event.inputs.llm_provider }}")
             if [ -n "${{ github.event.inputs.llm_model }}" ]; then
               ARGS+=("--llm-model" "${{ github.event.inputs.llm_model }}")
+            fi
+            if [ -n "${{ github.event.inputs.llm_base }}" ]; then
+              ARGS+=("--llm-base" "${{ github.event.inputs.llm_base }}")
             fi
             if [ "${{ github.event.inputs.force_llm }}" = "true" ]; then
               ARGS+=("--force-llm")

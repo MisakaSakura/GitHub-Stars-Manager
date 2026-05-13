@@ -140,6 +140,7 @@
 | **DeepSeek** | `deepseek-chat` | 价格低，推理能力强 | 💰 性价比首选 |
 | **OpenAI** | `gpt-4o-mini` | 速度快，分类准确 | 🌐 有海外访问条件 |
 | **OpenRouter** | `anthropic/claude-3.5-sonnet` 等 | 聚合平台，可自由切换模型 | 🔧 需要灵活切换 |
+| **兼容 OpenAI 的服务** | 视服务商而定 | 复用 OpenAI SDK，只需改 Base URL | 🔌 已有 API 代理或私有化部署 |
 
 #### 2. 获取 API Key
 
@@ -169,6 +170,7 @@
 | `use_llm` | ✅ `true` | 启用 LLM 智能分类 |
 | `llm_provider` | 你的提供商 | `moonshot` / `deepseek` / `openai` / `openrouter` |
 | `llm_model` | 留空 或 填模型名 | 留空使用 provider 默认模型；可指定如 `deepseek-chat` |
+| `llm_base` | 兼容服务的 Base URL | 如 `https://api.mimo.run/v1`，选 `openai` provider 时填写 |
 | `force_llm` | ✅ `true`（仅首次） | 无视 30 天间隔，确保所有项目都被分析 |
 | `force_refresh` | 可选 `true` | 重新分类所有未保护项目（已有规则分类的项目也会被 LLM 增强） |
 
