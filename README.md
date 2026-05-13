@@ -178,9 +178,16 @@
 
 > ⚠️ **安全提示**：Secret 一旦保存不可查看，只能删除后重新添加。建议先在本地文本编辑器确认 Key 正确再粘贴。
 
-#### 3.5 配置自定义 API Base URL（可选）
+#### 3.5 配置 LLM 端点与模型（可选）
 
-如果你使用**兼容 OpenAI 格式的第三方服务**（如 mimo、Azure OpenAI、私有化部署），需要配置 Base URL。有两种方式：
+如果你使用**兼容 OpenAI 格式的第三方服务**（如 mimo、Azure OpenAI、私有化部署），或想固定使用某个模型，需要配置 Base URL 和 Model。两者一一对应，建议一起配置：
+
+| 场景 | LLM_BASE | LLM_MODEL |
+|------|----------|-----------|
+| mimo | `https://api.mimo.run/v1` | `mimo-v2.5` |
+| OpenAI 官方 | 留空 | `gpt-4o-mini` |
+| Moonshot | 留空 | `moonshot-v1-8k` |
+| DeepSeek | 留空 | `deepseek-chat` |
 
 **方式 A：Repository Variables（推荐，自动生效）**
 
@@ -188,10 +195,10 @@
 
 | Variable | 值 | 说明 |
 |----------|-----|------|
-| `LLM_BASE` | `https://api.mimo.run/v1` | 你的兼容服务 Base URL，**必须**以 `/v1` 结尾 |
-| `LLM_MODEL` | `mimo-v2.5` | 默认使用的 LLM 模型（手动选择 `default` 时生效） |
+| `LLM_BASE` | `https://api.mimo.run/v1` | 兼容服务 Base URL，**必须**以 `/v1` 结尾；官方 API 留空 |
+| `LLM_MODEL` | `mimo-v2.5` | 默认模型；官方 provider 留空即可 |
 
-配置了 Variable 后，无论是手动触发还是未来自动启用 LLM，都会自动使用这个 Base URL 和模型，无需每次填写。
+配置了 Variable 后，无论是手动触发还是未来自动启用 LLM，都会自动使用这对 Base URL + Model，无需每次填写。`LLM_BASE` 和 `LLM_MODEL` 建议同时设置或同时留空。
 
 **优先级**：手动选择具体模型 > `LLM_MODEL` Variable > provider 默认模型。
 
