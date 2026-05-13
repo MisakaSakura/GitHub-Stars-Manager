@@ -113,12 +113,12 @@
 
 工具提供 **4 种运行模式**，通过 `mode` 参数一键切换。你不再需要手动组合 `--incremental`、`--force-refresh`、`--check-all-releases` 等细碎开关。
 
-| 模式 | 作用 | 自动启用的功能 | 建议频率 | 耗时 |
-|------|------|---------------|---------|------|
-| **`incremental`** ⭐ | 日常增量更新 | 增量拉取 + Release 检查 | 每周（自动运行） | 3-5 min |
-| **`deep`** | 深度整理 | 增量拉取 + **强制刷新规则** + Release + Fork | 每月/每季度 | 15-25 min |
-| **`full`** | 全量刷新 | **全量拉取** + 强制刷新 + Release + Fork + 订阅标记 | 首次/年度/大幅调整规则后 | 20-35 min |
-| **`custom`** | 自定义 | 完全由其他开关控制 | 按需 | 不定 |
+| 模式 | 作用 | 自动启用的功能 | LLM 行为 | 建议频率 | 耗时 |
+|------|------|---------------|---------|---------|------|
+| **`incremental`** ⭐ | 日常增量更新 | 增量拉取 + Release 检查 | 按间隔控制（需手动启用） | 每周（自动运行） | 3-5 min |
+| **`deep`** | 深度整理 | 增量拉取 + **强制刷新规则** + Release + Fork | 按间隔控制（需手动启用） | 每月/每季度 | 15-25 min |
+| **`full`** | 全量刷新 | **全量拉取** + 强制刷新 + Release + Fork + 订阅标记 | **配置了 key 则自动 force_llm** | 首次/年度/大幅调整规则后 | 20-35 min |
+| **`custom`** | 自定义 | 完全由其他开关控制 | 完全手动控制 | 按需 | 不定 |
 
 **模式详解**：
 
@@ -218,11 +218,12 @@ LLM_CONFIG = {
 | 参数 | 推荐设置 | 说明 |
 |------|----------|------|
 | `mode` | **`full`** | 首次运行建议全量模式，确保所有项目都被覆盖 |
-| `use_llm` | ✅ `true` | 启用 LLM 智能分类 |
+| `mode` | **`full`** | 首次运行建议全量模式，自动启用所有必要检查 |
+| `use_llm` | ✅ `true` | 启用 LLM 智能分类（full 模式且配置了 LLM_KEY 时自动启用） |
 | `llm_provider` | 你的提供商 | `moonshot` / `deepseek` / `openai` / `openrouter` |
 | `llm_model` | 留空 或 填模型名 | 留空使用 provider 默认模型；可指定如 `deepseek-chat` |
 | `llm_base` | 兼容服务的 Base URL | 如 `https://api.mimo.run/v1`，选 `openai` provider 时填写 |
-| `force_llm` | ✅ `true`（仅首次） | 无视 30 天间隔，确保所有项目都被分析 |
+| `force_llm` | ✅ `true`（仅首次） | 无视 30 天间隔，确保所有项目都被分析。勾选后自动联动 `use_llm` |
 | `lists_strategy` | `migrate`（如有 Lists） | 从 GitHub Lists 迁移已有分类 |
 
 点击 **Run workflow** 后等待 5-10 分钟（取决于项目数量）。运行成功后：
@@ -237,7 +238,10 @@ LLM_CONFIG = {
 | **自动周报** | `incremental`（自动） | ❌ | 每周 | 3-5 min |
 | **LLM 维护** | `incremental` | `use_llm=true` | 每月 1 次 | 8-15 min |
 | **深度整理** | `deep` | `use_llm=true` + `force_llm=true` | 每季度或调整规则后 | 15-25 min |
-| **年度大扫除** | `full` | `use_llm=true` + `force_llm=true` | 每年 | 20-35 min |
+| **首次/年度大扫除** | `full` | **自动启用**（配置了 LLM_KEY 时） | 首次/每年 | 20-35 min |
+
+> 💡 **AI 选项联动**：勾选了 `force_llm` 会自动启用 `use_llm`，无需重复勾选。
+> 💡 **全量模式自动 AI**：`full` 模式下如果配置了 `LLM_KEY`，即使没勾 `use_llm` 也会自动启用 LLM（反正没配置 key 会优雅跳过）。
 
 > 💡 **为什么自动运行默认不启用 LLM？** LLM 调用消耗 Token，而大部分用户的 Stars 变化量很小（每周几个新项目），自动启用会造成不必要的费用。建议每月手动触发一次 LLM 维护即可。
 

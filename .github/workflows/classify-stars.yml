@@ -22,35 +22,36 @@ on:
         type: choice
         options: ['incremental', 'deep', 'full', 'custom']
 
+      # ===== 🤖 AI / LLM 选项 =====
       use_llm:
-        description: '启用 LLM 智能分类（需要设置 LLM_KEY Secret）'
+        description: '🤖 启用 LLM 智能分类（需配置 LLM_KEY Secret）'
         required: false
         default: 'false'
         type: choice
         options: ['false', 'true']
 
       force_llm:
-        description: '无视间隔强制启用 LLM（use_llm=true 时生效）'
+        description: '🤖 无视间隔强制 LLM（勾选后自动启用 use_llm）'
         required: false
         default: 'false'
         type: choice
         options: ['false', 'true']
 
       llm_provider:
-        description: 'LLM 提供商（use_llm=true 时生效）'
+        description: '🤖 LLM 提供商'
         required: false
         default: 'openai'
         type: choice
         options: ['openai', 'moonshot', 'deepseek', 'openrouter']
 
       llm_model:
-        description: 'LLM 模型（可选，留空使用默认）'
+        description: '🤖 LLM 模型（留空使用 provider 默认）'
         required: false
         default: ''
         type: string
 
       llm_base:
-        description: 'LLM API Base URL（兼容 OpenAI 格式的第三方服务，如 mimo）'
+        description: '🤖 LLM Base URL（兼容 OpenAI 的第三方服务，如 mimo）'
         required: false
         default: ''
         type: string
@@ -198,7 +199,18 @@ jobs:
           )
 
           # LLM 智能增强
-          if [ "${{ github.event.inputs.use_llm }}" = "true" ] && [ -n "$LLM_KEY" ]; then
+          # 联动逻辑：force_llm=true 自动视为 use_llm=true
+          USE_LLM="${{ github.event.inputs.use_llm }}"
+          FORCE_LLM="${{ github.event.inputs.force_llm }}"
+          if [ "$FORCE_LLM" = "true" ]; then
+            USE_LLM="true"
+          fi
+          # full 模式默认启用 LLM（如果配置了 LLM_KEY）
+          if [ "$MODE" = "full" ] && [ -n "$LLM_KEY" ] && [ "$USE_LLM" != "false" ]; then
+            USE_LLM="true"
+          fi
+
+          if [ "$USE_LLM" = "true" ] && [ -n "$LLM_KEY" ]; then
             ARGS+=("--llm-key" "$LLM_KEY" "--llm-provider" "${{ github.event.inputs.llm_provider }}")
             if [ -n "${{ github.event.inputs.llm_model }}" ]; then
               ARGS+=("--llm-model" "${{ github.event.inputs.llm_model }}")
@@ -207,7 +219,7 @@ jobs:
             if [ -n "$LLM_BASE" ]; then
               ARGS+=("--llm-base" "$LLM_BASE")
             fi
-            if [ "${{ github.event.inputs.force_llm }}" = "true" ]; then
+            if [ "$FORCE_LLM" = "true" ]; then
               ARGS+=("--force-llm")
             fi
           fi

@@ -147,6 +147,11 @@ def _apply_mode(args: argparse.Namespace) -> argparse.Namespace:
     for key, value in config.items():
         setattr(args, key, value)
 
+    # 全量模式：如果配置了 llm_key，自动 force_llm（彻底梳理）
+    if args.mode == "full" and args.llm_key and not args.force_llm:
+        args.force_llm = True
+        print("[自动启用] --force-llm（全量模式默认全库 LLM 分析）")
+
     # 日志输出模式说明
     mode_desc = {
         "incremental": "增量更新（日常）",
@@ -157,8 +162,6 @@ def _apply_mode(args: argparse.Namespace) -> argparse.Namespace:
     enabled = [k for k, v in config.items() if v]
     if enabled:
         print(f"[自动启用] {', '.join(enabled)}")
-    if args.llm_key and args.mode in ("deep", "full") and not args.force_llm:
-        print("[提示] 当前为深度/全量模式，建议加 --force-llm 进行全量 LLM 分析")
 
     return args
 
