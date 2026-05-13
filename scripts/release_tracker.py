@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Release 追踪：检测仓库新 Release"""
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
 from base_tracker import BaseTracker
@@ -21,18 +22,17 @@ class ReleaseTracker(BaseTracker):
         return self._check_candidates(db_items, baseline_mode=True)
 
     def _check_candidates(self, db_items: list[dict], baseline_mode: bool) -> list[dict]:
-        updates: list[dict] = []
         mode_label = "全量" if baseline_mode else "订阅"
-        log(f"检查 Release 更新 ({mode_label})...", "STEP")
+        log(f"检查 Release 更新 ({mode_label}): {len(db_items)} 个仓库...", "STEP")
         from datetime import datetime, timezone, timedelta
         week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
 
-        for item in db_items:
+        def check_one(item: dict) -> dict | None:
             try:
                 owner, repo = item["full_name"].split("/")
                 releases = self.gh.list_releases(owner, repo, per_page=30)
                 if not releases:
-                    continue
+                    return None
 
                 current_tag = item.get("last_release_tag")
                 now = datetime.now(timezone.utc).isoformat()
@@ -41,7 +41,7 @@ class ReleaseTracker(BaseTracker):
                     # 首次发现：设为最新 baseline，不产生通知
                     item["last_release_tag"] = releases[0].get("tag_name")
                     item["last_release_checked"] = now
-                    continue
+                    return None
 
                 # 定位 current_tag 在列表中的位置（list_releases 默认倒序：最新在前）
                 current_idx = None
@@ -53,7 +53,6 @@ class ReleaseTracker(BaseTracker):
                 if current_idx is not None:
                     candidate_releases = releases[:current_idx]
                 else:
-                    # current_tag 不在最近 30 条内，取全部列表再过滤
                     candidate_releases = releases
 
                 # 只保留一周内的 release
@@ -63,9 +62,12 @@ class ReleaseTracker(BaseTracker):
                 ]
 
                 if new_releases:
-                    latest = new_releases[0]  # 最新的一条
+                    latest = new_releases[0]
                     intermediate = [r.get("tag_name") for r in new_releases[1:]]
-                    updates.append({
+                    item["last_release_tag"] = latest.get("tag_name")
+                    item["last_release_checked"] = now
+                    item["last_updated"] = now
+                    return {
                         "full_name": item["full_name"],
                         "name": item["name"],
                         "owner": owner,
@@ -75,12 +77,21 @@ class ReleaseTracker(BaseTracker):
                         "published_at": latest.get("published_at", ""),
                         "html_url": latest.get("html_url", ""),
                         "body": latest.get("body", "")[:2000],
-                    })
-                    item["last_release_tag"] = latest.get("tag_name")
-                    item["last_release_checked"] = now
-                    item["last_updated"] = now
+                    }
             except Exception as e:
                 log(f"检查 {item.get('full_name', '?')} Release 失败: {e}", "WARN")
+            return None
+
+        updates: list[dict] = []
+        # 并发检查：GitHub API 认证用户限制 5000/hour，8 并发在 burst 安全范围内
+        max_workers = min(8, len(db_items)) if db_items else 1
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {executor.submit(check_one, item): item for item in db_items}
+            for future in as_completed(futures):
+                result = future.result()
+                if result:
+                    updates.append(result)
+
         log(f"Release 检查完成: {len(updates)} 个仓库有新版本", "OK")
         return updates
 

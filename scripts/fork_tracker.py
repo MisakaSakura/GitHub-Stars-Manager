@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Fork 管理：检测 Fork 的上游更新"""
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
 
 from base_tracker import BaseTracker
@@ -19,19 +20,19 @@ class ForkTracker(BaseTracker):
         return forks
 
     def check(self, forks: list[dict], days: int = 7) -> list[dict]:
-        """检查每个 Fork 的上游最近 N 天内是否有更新"""
-        log("检查 Fork 上游更新...", "STEP")
+        """检查每个 Fork 的上游最近 N 天内是否有更新（并发）"""
+        log(f"检查 Fork 上游更新: {len(forks)} 个仓库...", "STEP")
         cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
-        outdated = []
-        for fork in forks:
+
+        def check_one(fork: dict) -> dict | None:
             try:
                 full_name = fork.get("full_name")
                 if not full_name or "/" not in full_name:
-                    continue
+                    return None
                 owner, repo = full_name.split("/")
                 detail = self.gh.get_repo_info(owner, repo)
                 if not detail or not detail.get("parent"):
-                    continue
+                    return None
                 parent = detail["parent"]
                 fork_pushed = fork.get("pushed_at") or detail.get("pushed_at")
                 parent_pushed = parent.get("pushed_at")
@@ -39,13 +40,24 @@ class ForkTracker(BaseTracker):
                 if (fork_pushed and parent_pushed and
                         parent_pushed > fork_pushed and
                         parent_pushed >= cutoff):
-                    outdated.append({
+                    return {
                         "full_name": full_name,
                         "parent_full_name": parent.get("full_name"),
                         "parent_pushed_at": parent_pushed,
-                    })
+                    }
             except Exception as e:
                 log(f"检查 {fork.get('full_name', '?')} 失败: {e}", "WARN")
+            return None
+
+        outdated: list[dict] = []
+        max_workers = min(8, len(forks)) if forks else 1
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {executor.submit(check_one, fork): fork for fork in forks}
+            for future in as_completed(futures):
+                result = future.result()
+                if result:
+                    outdated.append(result)
+
         log(f"Fork 检查完成: {len(outdated)} 个仓库上游有更新", "OK")
         return outdated
 

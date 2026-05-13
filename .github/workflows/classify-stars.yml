@@ -15,12 +15,12 @@ on:
 
   workflow_dispatch:
     inputs:
-      force_refresh:
-        description: '强制全量刷新（重新分类所有未保护项目）'
+      mode:
+        description: '运行模式'
         required: false
-        default: 'false'
+        default: 'incremental'
         type: choice
-        options: ['false', 'true']
+        options: ['incremental', 'deep', 'full', 'custom']
 
       use_llm:
         description: '启用 LLM 智能分类（需要设置 LLM_KEY Secret）'
@@ -83,34 +83,6 @@ on:
         type: choice
         options: ['ignore', 'migrate', 'replace']
 
-      check_releases:
-        description: '检查已订阅仓库的新 Release（传统方式）'
-        required: false
-        default: 'false'
-        type: choice
-        options: ['false', 'true']
-
-      check_all_releases:
-        description: '检查所有仓库的新 Release（生成周报）'
-        required: false
-        default: 'true'
-        type: choice
-        options: ['false', 'true']
-
-      check_forks:
-        description: '检查 Fork 仓库的上游更新'
-        required: false
-        default: 'false'
-        type: choice
-        options: ['false', 'true']
-
-      subscribe_releases:
-        description: '首次运行时标记所有仓库订阅 Release'
-        required: false
-        default: 'false'
-        type: choice
-        options: ['false', 'true']
-
       retry_failed:
         description: '重试之前 AI 分析失败的项目'
         required: false
@@ -123,6 +95,35 @@ on:
         required: false
         default: 'email'
         type: string
+
+      # --- 以下仅在 mode=custom 时生效 ---
+      force_refresh:
+        description: '[custom] 强制全量刷新'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+      check_all_releases:
+        description: '[custom] 检查所有 Release'
+        required: false
+        default: 'true'
+        type: choice
+        options: ['false', 'true']
+
+      check_forks:
+        description: '[custom] 检查 Fork 上游更新'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+      subscribe_releases:
+        description: '[custom] 标记所有仓库订阅 Release'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
 
 permissions:
   contents: write
@@ -182,18 +183,19 @@ jobs:
           mkdir -p docs data
 
           # P1: 构建参数列表，避免 eval 带来的命令注入风险
+          # 运行模式：schedule 自动运行默认 incremental；手动运行使用 inputs.mode
+          MODE="${{ github.event.inputs.mode }}"
+          if [ -z "$MODE" ]; then
+            MODE="incremental"
+          fi
+
           ARGS=(
             "--token" "$GH_TOKEN"
             "--user" "$GH_USER"
             "--db" "./data/stars_db.json"
             "--output" "./docs"
-            "--incremental"
+            "--mode" "$MODE"
           )
-
-          # 强制刷新
-          if [ "${{ github.event.inputs.force_refresh }}" = "true" ]; then
-            ARGS+=("--force-refresh")
-          fi
 
           # LLM 智能增强
           if [ "${{ github.event.inputs.use_llm }}" = "true" ] && [ -n "$LLM_KEY" ]; then
@@ -227,19 +229,24 @@ jobs:
           LIST_STRATEGY="${{ github.event.inputs.lists_strategy }}"
           ARGS+=("--lists-strategy" "${LIST_STRATEGY:-ignore}")
 
-          # Release / Fork 追踪
-          # 每周一自动运行默认全量检查 Release（生成周报）
-          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event.inputs.check_all_releases }}" = "true" ]; then
-            ARGS+=("--check-all-releases")
-          elif [ "${{ github.event.inputs.check_releases }}" = "true" ]; then
-            ARGS+=("--check-releases")
+          # custom 模式下的手动开关（其他模式由 --mode 自动处理）
+          if [ "$MODE" = "custom" ]; then
+            if [ "${{ github.event.inputs.force_refresh }}" = "true" ]; then
+              ARGS+=("--force-refresh")
+            fi
+            if [ "${{ github.event.inputs.check_all_releases }}" = "true" ]; then
+              ARGS+=("--check-all-releases")
+            elif [ "${{ github.event.inputs.check_releases }}" = "true" ]; then
+              ARGS+=("--check-releases")
+            fi
+            if [ "${{ github.event.inputs.check_forks }}" = "true" ]; then
+              ARGS+=("--check-forks")
+            fi
+            if [ "${{ github.event.inputs.subscribe_releases }}" = "true" ]; then
+              ARGS+=("--subscribe-releases")
+            fi
           fi
-          if [ "${{ github.event.inputs.check_forks }}" = "true" ]; then
-            ARGS+=("--check-forks")
-          fi
-          if [ "${{ github.event.inputs.subscribe_releases }}" = "true" ]; then
-            ARGS+=("--subscribe-releases")
-          fi
+
           if [ "${{ github.event.inputs.retry_failed }}" = "true" ]; then
             ARGS+=("--retry-failed")
           fi

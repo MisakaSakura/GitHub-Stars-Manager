@@ -109,24 +109,41 @@
 > - 每周变化（新增项目 + 新 Release）会在报告的"本周摘要"区块中高亮显示
 > - 如需查看纯增量变化，可查看通知消息或 Git commit diff
 
-### Actions 手动运行选项说明
+### Actions 运行模式
 
-| 选项 | 默认值 | 用途 | 为什么这样默认 |
-|------|--------|------|---------------|
-| `check_all_releases` | **true** | 检查所有仓库的新 Release，生成周报摘要 | 周报是核心功能，手动运行通常就是想看动态 |
-| `use_llm` | false | 启用 LLM 智能分类增强 | 消耗 Token，需用户明确同意且配置 `LLM_KEY` |
-| `force_llm` | false | 无视 30 天间隔强制启用 LLM | 平时按间隔自动调度，手动强制是例外操作 |
-| `force_refresh` | false | 重新分类所有未保护项目 | 按需手动触发；增量模式下也会按 `auto_refresh_days` 自动执行 |
-| `auto_refresh_days` | 90 | 自动全量刷新间隔天数 | 比 LLM 间隔更长，避免频繁全量重分类 |
-| `send_notify` | false | 发送通知到邮箱/QQ/TG/企业微信 | 可能打扰用户，按需开启 |
-| `check_forks` | false | 检查 Fork 仓库的上游更新 | 非核心需求，按需开启 |
-| `sync_notion` | false | 同步到 Notion 数据库 | 需配置 Notion Secret，按需开启 |
-| `lists_strategy` | ignore | 首次运行时处理 GitHub Lists | 大多数用户没有 Lists，避免误操作 |
-| `retry_failed` | false | 重试之前 LLM 分析失败的项目 | 失败项目通常是无效仓库，按需重试 |
+工具提供 **4 种运行模式**，通过 `mode` 参数一键切换。你不再需要手动组合 `--incremental`、`--force-refresh`、`--check-all-releases` 等细碎开关。
+
+| 模式 | 作用 | 自动启用的功能 | 建议频率 | 耗时 |
+|------|------|---------------|---------|------|
+| **`incremental`** ⭐ | 日常增量更新 | 增量拉取 + Release 检查 | 每周（自动运行） | 3-5 min |
+| **`deep`** | 深度整理 | 增量拉取 + **强制刷新规则** + Release + Fork | 每月/每季度 | 15-25 min |
+| **`full`** | 全量刷新 | **全量拉取** + 强制刷新 + Release + Fork + 订阅标记 | 首次/年度/大幅调整规则后 | 20-35 min |
+| **`custom`** | 自定义 | 完全由其他开关控制 | 按需 | 不定 |
+
+**模式详解**：
+
+- **incremental（增量）**：只拉取最近 star 的项目，已有项目只更新 stars 数，分类不变。检查所有仓库的 Release 生成周报。**日常自动运行就是这个模式。**
+- **deep（深度）**：在增量基础上，**对所有未保护项目重新执行规则分类**（`force-refresh`），同时检查 Release + Fork。适合验证规则是否有遗漏、分类是否合理。
+- **full（全量）**：**非增量拉取**（确保没有遗漏任何 Stars），对所有未保护项目重新规则分类，检查 Release + Fork，并标记所有仓库订阅 Release。适合首次运行、年度大扫除、或规则大幅调整后的全库梳理。
+- **custom（自定义）**：保留给高级用户，可以单独控制 `--incremental`、`--force-refresh`、`--check-all-releases`、`--check-forks`、`--subscribe-releases` 等每个开关。
 
 **自动运行（schedule）与手动运行的区别**：
-- **自动运行（每周一）**：默认 `--incremental --check-all-releases`，自动做增量分类 + 全量 Release 检查。若距离上次全量刷新超过 90 天，增量模式会自动升级为全量刷新
-- **手动运行**：默认 `--incremental --check-all-releases`，和自动运行一致。可额外勾选 `use_llm`、`force_refresh` 等做深度维护
+- **自动运行（每周一）**：固定 `--mode incremental`，自动做增量分类 + Release 检查。若距离上次全量刷新超过 `auto_refresh_days`（默认 90 天），增量模式会自动升级为强制刷新
+- **手动运行**：默认 `--mode incremental`，和自动运行一致。可切换为 `deep` 或 `full` 做深度维护，或 `custom` 精细控制
+
+### Actions 手动运行选项说明
+
+| 选项 | 默认值 | 用途 |
+|------|--------|------|
+| `mode` | **incremental** | 运行模式：`incremental` / `deep` / `full` / `custom` |
+| `use_llm` | false | 启用 LLM 智能分类增强（需配置 `LLM_KEY`） |
+| `force_llm` | false | 无视间隔强制启用 LLM（`use_llm=true` 时生效） |
+| `send_notify` | false | 发送通知到邮箱/QQ/TG/企业微信 |
+| `sync_notion` | false | 同步到 Notion 数据库 |
+| `lists_strategy` | ignore | 首次运行时处理 GitHub Lists |
+| `retry_failed` | false | 重试之前 LLM 分析失败的项目 |
+
+> 💡 **custom 模式专属开关**：`force_refresh`、`check_all_releases`、`check_forks`、`subscribe_releases`。其他模式下这些开关由 `mode` 自动控制。
 
 ---
 
@@ -200,26 +217,27 @@ LLM_CONFIG = {
 
 | 参数 | 推荐设置 | 说明 |
 |------|----------|------|
+| `mode` | **`full`** | 首次运行建议全量模式，确保所有项目都被覆盖 |
 | `use_llm` | ✅ `true` | 启用 LLM 智能分类 |
 | `llm_provider` | 你的提供商 | `moonshot` / `deepseek` / `openai` / `openrouter` |
 | `llm_model` | 留空 或 填模型名 | 留空使用 provider 默认模型；可指定如 `deepseek-chat` |
 | `llm_base` | 兼容服务的 Base URL | 如 `https://api.mimo.run/v1`，选 `openai` provider 时填写 |
 | `force_llm` | ✅ `true`（仅首次） | 无视 30 天间隔，确保所有项目都被分析 |
-| `force_refresh` | 可选 `true` | 重新分类所有未保护项目（已有规则分类的项目也会被 LLM 增强） |
+| `lists_strategy` | `migrate`（如有 Lists） | 从 GitHub Lists 迁移已有分类 |
 
-点击 **Run workflow** 后等待 2-5 分钟（取决于项目数量）。运行成功后：
+点击 **Run workflow** 后等待 5-10 分钟（取决于项目数量）。运行成功后：
 1. 查看 Commit → 确认 `stars_db.json` 和 `stars_ai.json` 有更新
 2. 查看 Pages 报告 → 项目卡片上会出现 🤖 标记表示 LLM 增强
 3. 检查分类结果 → 不满意的手动编辑 `stars_db.json` 并设置 `manual_override: true`
 
 #### 5. 日常使用模式
 
-| 模式 | 操作 | 频率 |
-|------|------|------|
-| **自动周报** | 无需操作，每周一自动运行 | 每周 |
-| **LLM 维护** | 手动触发 → `use_llm=true` | 每月 1 次 |
-| **深度整理** | `use_llm=true` + `force_llm=true` + `force_refresh=true` | 每季度或调整规则后 |
-| **纯增量** | 默认自动运行，不勾 LLM | 每周 |
+| 场景 | mode | LLM | 频率 | 耗时 |
+|------|------|-----|------|------|
+| **自动周报** | `incremental`（自动） | ❌ | 每周 | 3-5 min |
+| **LLM 维护** | `incremental` | `use_llm=true` | 每月 1 次 | 8-15 min |
+| **深度整理** | `deep` | `use_llm=true` + `force_llm=true` | 每季度或调整规则后 | 15-25 min |
+| **年度大扫除** | `full` | `use_llm=true` + `force_llm=true` | 每年 | 20-35 min |
 
 > 💡 **为什么自动运行默认不启用 LLM？** LLM 调用消耗 Token，而大部分用户的 Stars 变化量很小（每周几个新项目），自动启用会造成不必要的费用。建议每月手动触发一次 LLM 维护即可。
 
@@ -323,8 +341,11 @@ MetaCubeX/mihomo,mihomo,MetaCubeX,网络 / 代理,工具 / Tool,Clash / Mihomo �
 ### 场景 C：首次运行后，规则调整想重新分类
 
 ```bash
-# 强制刷新所有项目（但 manual_override 项目仍被保护）
-python scripts/classifier.py --token ghp_xxx --user yourname --force-refresh
+# 深度整理：重新规则分类所有未保护项目 + Release + Fork 检查
+python scripts/classifier.py --token ghp_xxx --user yourname --mode deep
+
+# 深度整理 + LLM 全量分析（验证规则盲区）
+python scripts/classifier.py --token ghp_xxx --user yourname --mode deep --llm-key sk-xxx --force-llm
 ```
 
 ---
@@ -339,18 +360,27 @@ python scripts/classifier.py --token ghp_xxx --user yourname --force-refresh
 - **手动保护项目** → 完全跳过
 
 ```bash
-python scripts/classifier.py --token ghp_xxx --user yourname --incremental
+# 等价于 --mode incremental（默认）
+python scripts/classifier.py --token ghp_xxx --user yourname
 ```
 
-### 强制全量刷新
+### 深度整理
 
-调整分类规则后，想让所有项目重新分类：
+调整分类规则后，验证规则是否有遗漏，同时 LLM 增强：
 
 ```bash
-python scripts/classifier.py --token ghp_xxx --user yourname --force-refresh
+python scripts/classifier.py --token ghp_xxx --user yourname --mode deep --llm-key sk-xxx --force-llm
 ```
 
-> ⚠️ 强制刷新会覆盖所有**未保护**的自动分类，但 `manual_override = true` 的项目仍然跳过。
+### 全量刷新
+
+年度大扫除或规则大幅调整后，全库重新梳理：
+
+```bash
+python scripts/classifier.py --token ghp_xxx --user yourname --mode full --llm-key sk-xxx --force-llm
+```
+
+> ⚠️ `deep` / `full` 模式会覆盖所有**未保护**的自动分类，但 `manual_override = true` 的项目仍然跳过。
 
 ### GitHub Lists 集成
 
@@ -647,11 +677,11 @@ A: GitHub 更新了界面。路径是：Settings → Pages → Build and deploym
 A: 本工具**不会修改你的 GitHub Lists**。原因：GitHub 目前没有公开稳定的 Lists 写入 REST API（无法通过 API 创建 List 或添加项目）。工具的核心价值是生成本地 HTML 报告。如果你想在 GitHub 上使用分类，可以手动参考报告中的分类结果创建 Lists。
 
 **Q: 调整分类规则后，如何让已有项目重新分类？**
-A: 运行一次 `--force-refresh`：
+A: 运行一次 `--mode deep`：
 ```bash
-python scripts/classifier.py --token ghp_xxx --user yourname --force-refresh
+python scripts/classifier.py --token ghp_xxx --user yourname --mode deep
 ```
-这会重新分类所有**未保护**（`manual_override=false`）的项目。已保护的项目不受影响。
+这会重新分类所有**未保护**（`manual_override=false`）的项目，同时检查 Release 和 Fork。已保护的项目不受影响。如需 LLM 全量分析，加 `--llm-key sk-xxx --force-llm`。
 
 ---
 

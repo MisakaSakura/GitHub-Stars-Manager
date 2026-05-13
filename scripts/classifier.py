@@ -7,11 +7,10 @@ GitHub Stars 自动分类工具 v4 — CLI 入口
       Notion 导出、多通道通知、HTML 报告、Release/Fork 追踪
 
 用法：
-  首次全量：python classifier.py --token ghp_xxx --user yourname
-  增量更新：python classifier.py --token ghp_xxx --user yourname --incremental
-  强制刷新：python classifier.py --token ghp_xxx --user yourname --force-refresh
-  启用 LLM：python classifier.py --token ghp_xxx --user yourname --llm-key sk-xxx
-  启用通知：python classifier.py --token ghp_xxx --user yourname --notify
+  模式运行：python classifier.py --token ghp_xxx --user yourname --mode incremental
+  深度整理：python classifier.py --token ghp_xxx --user yourname --mode deep --llm-key sk-xxx
+  全量刷新：python classifier.py --token ghp_xxx --user yourname --mode full --llm-key sk-xxx
+  启用通知：python classifier.py --token ghp_xxx --user yourname --mode incremental --notify
 """
 
 import argparse
@@ -50,10 +49,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--output", default="./docs", help="输出目录")
 
     # 运行模式
+    parser.add_argument("--mode", default="incremental",
+                        choices=["incremental", "deep", "full", "custom"],
+                        help="""运行模式：
+  incremental: 增量更新（日常用）— 只处理新项目，检查 Release
+  deep: 深度整理 — 增量 + 强制刷新规则分类 + Release + Fork
+  full: 全量刷新 — 非增量拉取 + 强制刷新 + Release + Fork + 订阅标记
+  custom: 自定义 — 完全由其他开关控制，适合高级用户
+                        """)
     parser.add_argument("--incremental", action="store_true",
-                        help="增量模式：只处理新 star 的项目，已有项目保留分类")
+                        help="增量模式：只处理新 star 的项目（--mode custom 时可用）")
     parser.add_argument("--force-refresh", action="store_true",
-                        help="强制刷新：重新分类所有项目，但 manual_override 项目仍被保护")
+                        help="强制刷新：重新分类所有项目（--mode custom 时可用）")
     parser.add_argument("--auto-refresh-days", type=int, default=90,
                         help="自动全量刷新间隔天数（默认 90，增量模式下到期自动升级）")
 
@@ -112,8 +119,53 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _apply_mode(args: argparse.Namespace) -> argparse.Namespace:
+    """根据 mode 自动设置对应的开关组合"""
+    if args.mode == "custom":
+        return args
+
+    mode_configs = {
+        "incremental": {
+            "incremental": True,
+            "check_all_releases": True,
+        },
+        "deep": {
+            "incremental": True,
+            "force_refresh": True,
+            "check_all_releases": True,
+            "check_forks": True,
+        },
+        "full": {
+            "force_refresh": True,
+            "check_all_releases": True,
+            "check_forks": True,
+            "subscribe_releases": True,
+        },
+    }
+
+    config = mode_configs.get(args.mode, {})
+    for key, value in config.items():
+        setattr(args, key, value)
+
+    # 日志输出模式说明
+    mode_desc = {
+        "incremental": "增量更新（日常）",
+        "deep": "深度整理（规则梳理 + LLM 增强）",
+        "full": "全量刷新（全库重新分类）",
+    }
+    print(f"[模式] {args.mode}: {mode_desc.get(args.mode, '')}")
+    enabled = [k for k, v in config.items() if v]
+    if enabled:
+        print(f"[自动启用] {', '.join(enabled)}")
+    if args.llm_key and args.mode in ("deep", "full") and not args.force_llm:
+        print("[提示] 当前为深度/全量模式，建议加 --force-llm 进行全量 LLM 分析")
+
+    return args
+
+
 def main() -> None:
     args = parse_args()
+    args = _apply_mode(args)
     pipeline = Pipeline(args)
     try:
         pipeline.run()
