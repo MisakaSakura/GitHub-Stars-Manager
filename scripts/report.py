@@ -194,7 +194,8 @@ class ReportGenerator:
                 if new_items:
                     wd_parts.append(f'<div class="wd-section"><h3>🆕 新收录 ({len(new_items)})</h3><div class="wd-list">')
                     for it in new_items:
-                        wd_parts.append(f'<div class="wd-item"><a href="{it["html_url"]}" target="_blank">{it["full_name"]}</a><span class="wd-eco">{it["ecology"]}</span></div>')
+                        url = it.get("url") or it.get("html_url", "#")
+                        wd_parts.append(f'<div class="wd-item"><a href="{url}" target="_blank">{it["full_name"]}</a><span class="wd-eco">{it["ecology"]}</span></div>')
                     wd_parts.append('</div></div>')
                 if release_updates:
                     wd_parts.append(f'<div class="wd-section"><h3>🚀 新 Release ({len(release_updates)})</h3><div class="wd-list">')
