@@ -25,16 +25,20 @@ class LLMClassifier:
         from config import LLM_CONFIG
         self.batch_size = LLM_CONFIG.get("batch_size", 1)
 
+        # 优先级：CLI 传入 > config_llm.py 配置 > provider 默认值
+        config_base = LLM_CONFIG.get("api_base")
+        fallback_base = api_base or config_base
+
         if self.provider == "openai":
-            self.api_base = api_base or "https://api.openai.com/v1"
+            self.api_base = fallback_base or "https://api.openai.com/v1"
         elif self.provider == "moonshot":
-            self.api_base = api_base or "https://api.moonshot.cn/v1"
+            self.api_base = fallback_base or "https://api.moonshot.cn/v1"
         elif self.provider == "deepseek":
-            self.api_base = api_base or "https://api.deepseek.com/v1"
+            self.api_base = fallback_base or "https://api.deepseek.com/v1"
         elif self.provider == "openrouter":
-            self.api_base = api_base or "https://openrouter.ai/api/v1"
+            self.api_base = fallback_base or "https://openrouter.ai/api/v1"
         else:
-            self.api_base = api_base or "https://api.openai.com/v1"
+            self.api_base = fallback_base or "https://api.openai.com/v1"
 
     def _load_cache(self):
         if os.path.exists(self.cache_file):

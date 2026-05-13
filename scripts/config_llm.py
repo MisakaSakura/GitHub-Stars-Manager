@@ -6,7 +6,8 @@ LLM_CONFIG = {
     # 注意：LLM 启用由 --llm-key 参数控制，不再使用此 enabled 字段
     "provider": "openai",  # 支持: openai, moonshot, deepseek, openrouter
     "api_key": None,
-    "api_base": None,  # 自定义 base url，如 "https://api.moonshot.cn/v1"
+    "api_base": None,  # 自定义 base url，如 "https://api.moonshot.cn/v1" 或 "https://api.mimo.run/v1"
+                         # 优先级：--llm-base CLI 参数 > 此处配置 > provider 内置默认值
     "model": "gpt-4o-mini",  # 或 "moonshot-v1-8k", "deepseek-chat"
     "max_tokens": 256,
     "temperature": 0.1,

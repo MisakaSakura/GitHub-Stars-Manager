@@ -161,6 +161,39 @@
 
 > ⚠️ **安全提示**：Secret 一旦保存不可查看，只能删除后重新添加。建议先在本地文本编辑器确认 Key 正确再粘贴。
 
+#### 3.5 配置自定义 API Base URL（可选）
+
+如果你使用**兼容 OpenAI 格式的第三方服务**（如 mimo、Azure OpenAI、私有化部署），需要配置 Base URL。有两种方式：
+
+**方式 A：Repository Variables（推荐，自动生效）**
+
+进入仓库 **Settings → Secrets and variables → Actions → Variables → New repository variable**：
+
+| Variable | 值 | 说明 |
+|----------|-----|------|
+| `LLM_BASE` | `https://api.mimo.run/v1` | 你的兼容服务 Base URL，**必须**以 `/v1` 结尾 |
+
+配置了 Variable 后，无论是手动触发还是未来自动启用 LLM，都会自动使用这个 Base URL，无需每次填写。
+
+**方式 B：config_llm.py（代码级配置）**
+
+编辑 `scripts/config_llm.py`：
+
+```python
+LLM_CONFIG = {
+    "provider": "openai",  # 兼容 OpenAI 格式的服务统一选 openai
+    "api_base": "https://api.mimo.run/v1",  # 自定义端点
+    "model": "gpt-4o-mini",
+    ...
+}
+```
+
+**Base URL 优先级**（从高到低）：
+1. Actions 手动输入 `llm_base`
+2. Repository Variable `LLM_BASE`
+3. `config_llm.py` 中的 `api_base`
+4. Provider 内置默认值（如 `https://api.openai.com/v1`）
+
 #### 4. 首次启用 LLM
 
 进入 **Actions → Auto Classify GitHub Stars → Run workflow**，按以下配置：

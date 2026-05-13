@@ -168,6 +168,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           GH_USER: ${{ github.actor }}
           LLM_KEY: ${{ secrets.LLM_KEY }}
+          LLM_BASE: ${{ github.event.inputs.llm_base || vars.LLM_BASE }}
           NOTION_KEY: ${{ secrets.NOTION_KEY }}
           NOTION_DB: ${{ secrets.NOTION_DB }}
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
@@ -200,8 +201,9 @@ jobs:
             if [ -n "${{ github.event.inputs.llm_model }}" ]; then
               ARGS+=("--llm-model" "${{ github.event.inputs.llm_model }}")
             fi
-            if [ -n "${{ github.event.inputs.llm_base }}" ]; then
-              ARGS+=("--llm-base" "${{ github.event.inputs.llm_base }}")
+            # llm_base 来源优先级：手动输入 > Repository Variables > config_llm.py
+            if [ -n "$LLM_BASE" ]; then
+              ARGS+=("--llm-base" "$LLM_BASE")
             fi
             if [ "${{ github.event.inputs.force_llm }}" = "true" ]; then
               ARGS+=("--force-llm")
