@@ -6,7 +6,7 @@ import csv
 import json
 import os
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from html import escape
 
 from utils import log
@@ -41,7 +41,9 @@ class ReportGenerator:
     def generate_html(self, output_dir: str, weekly_data: dict | None = None) -> str:
         items = self._inject_ai_fields(list(self.db.values()))
         total = len(items)
-        timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        now_utc = datetime.now(timezone.utc)
+        now_cst = now_utc.astimezone(timezone(timedelta(hours=8)))
+        timestamp = now_utc.strftime("%Y-%m-%d %H:%M UTC") + " / " + now_cst.strftime("%m-%d %H:%M CST")
 
         stats = {
             "platform": Counter([r["platform"] for r in items]),
@@ -113,7 +115,9 @@ class ReportGenerator:
         if not history:
             return None
 
-        timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        now_utc = datetime.now(timezone.utc)
+        now_cst = now_utc.astimezone(timezone(timedelta(hours=8)))
+        timestamp = now_utc.strftime("%Y-%m-%d %H:%M UTC") + " / " + now_cst.strftime("%m-%d %H:%M CST")
         rows: list[str] = []
         for r in history[:200]:  # 最多显示最近 200 条
             body = r.get("body", "")
