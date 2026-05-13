@@ -30,10 +30,23 @@ h1{color:#58a6ff;margin-bottom:8px;font-size:28px}
 .br{background:#e3b34122;color:#e3b341;border:1px solid #e3b34144}
 .btg{display:inline-block;padding:1px 5px;border-radius:8px;background:#23863622;color:#3fb950;border:1px solid #23863644;font-size:10px;margin-right:3px;margin-bottom:2px}
 .bpl{display:inline-block;padding:1px 5px;border-radius:8px;background:#1f6feb22;color:#58a6ff;border:1px solid #1f6feb44;font-size:10px;margin-right:3px;margin-bottom:2px}
-.weekly-digest{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;margin-bottom:20px;max-height:420px;overflow-y:auto;transition:max-height 0.3s ease}
+.weekly-digest{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;margin-bottom:20px;max-height:520px;overflow-y:auto;transition:max-height 0.3s ease}
 .weekly-digest.collapsed{padding:14px 20px;max-height:52px;overflow:hidden}
 .weekly-digest.collapsed #wd-body{display:none}
 .weekly-digest.collapsed .wd-header{margin-bottom:0}
+.wd-tabs{display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid #30363d;padding-bottom:8px;flex-wrap:wrap}
+.wd-tab{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#8b949e;background:transparent;border:none;cursor:pointer;white-space:nowrap}
+.wd-tab:hover{color:#c9d1d9}
+.wd-tab.active{color:#58a6ff;background:#1f6feb22}
+.wd-tab-content{display:none}
+.wd-tab-content.active{display:block}
+.wd-notes{color:#8b949e;font-size:11px;margin-top:4px;line-height:1.5;max-height:60px;overflow:hidden;position:relative}
+.wd-notes.expanded{max-height:none}
+.wd-notes-toggle{color:#58a6ff;font-size:11px;cursor:pointer;margin-top:2px;display:inline-block}
+.wd-ai-digest{color:#a371f7;font-size:11px;margin-top:4px;font-style:italic;border-left:2px solid #a371f7;padding-left:8px}
+.wd-summary-card{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.6;color:#c9d1d9}
+.wd-summary-card .wd-summary-title{color:#e3b341;font-size:12px;font-weight:600;margin-bottom:6px}
+.wd-summary-card .wd-summary-body{color:#8b949e}
 .wd-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .weekly-digest h2{color:#e3b341;font-size:16px;margin:0}
 .wd-toggle{background:#21262d;color:#8b949e;border:1px solid #30363d;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer}
@@ -146,6 +159,20 @@ function tw(){
   const btn=wd.querySelector('.wd-toggle');
   wd.classList.toggle('collapsed');
   btn.textContent=wd.classList.contains('collapsed')?'展开 ▼':'收起 ▲';
+}
+function wst(btn,id){
+  const body=btn.closest('#wd-body');
+  body.querySelectorAll('.wd-tab').forEach(t=>t.classList.remove('active'));
+  body.querySelectorAll('.wd-tab-content').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  const target=body.querySelector('#wd-tab-'+id);
+  if(target)target.classList.add('active');
+}
+function wtn(el){
+  const notes=el.previousElementSibling;
+  if(!notes)return;
+  notes.classList.toggle('expanded');
+  el.textContent=notes.classList.contains('expanded')?'收起':'展开';
 }
 function fl(){
   const fp=document.getElementById('fp').value,ft=document.getElementById('ft').value,fl=document.getElementById('fl').value,fe=document.getElementById('fe').value,fr=document.getElementById('fr').value,fs=document.getElementById('fs').value;

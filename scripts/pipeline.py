@@ -305,6 +305,52 @@ class Pipeline:
             self.db.save_meta()
         log("数据库已保存", "OK")
 
+    def _generate_ai_summary(self) -> str:
+        """用 LLM 综合生成本周动态总结"""
+        if not self.llm:
+            return ""
+        parts: list[str] = []
+        # 热门 Stars
+        star_changes = getattr(self, "star_changes", {})
+        if star_changes:
+            top = sorted(star_changes.items(), key=lambda x: x[1], reverse=True)[:5]
+            parts.append("本周 Stars 增长最多的项目：")
+            for key, delta in top:
+                item = self.db.get(key)
+                if item:
+                    parts.append(f"- {key}: +{delta} stars")
+        # 新 Release
+        if self.release_updates:
+            parts.append("\n本周新 Release：")
+            for ru in self.release_updates:
+                ai_digest = ru.get("ai_digest", "")
+                line = f"- {ru['full_name']} {ru['old_tag']} → {ru['new_tag']}"
+                if ai_digest:
+                    line += f"（{ai_digest}）"
+                parts.append(line)
+        # 分类变更
+        classification_changes = getattr(self, "classification_changes", {})
+        if classification_changes:
+            parts.append("\n本周分类调整：")
+            for key, changes in list(classification_changes.items())[:5]:
+                change_str = ", ".join([f"{k} {v['from']}→{v['to']}" for k, v in changes.items()])
+                parts.append(f"- {key}: {change_str}")
+        if not parts:
+            return ""
+        prompt = (
+            "请根据以下本周 GitHub Stars 项目动态数据，用 3-5 句话生成一段简洁的中文总结。"
+            "总结要突出重要更新和亮点，语气轻松自然，像技术周刊的开篇语。"
+            "只输出总结内容，不要任何其他文字。\n\n"
+            + "\n".join(parts)
+        )
+        try:
+            from config import LLM_SYSTEM_PROMPT
+            summary = self.llm.summarize(prompt, system_prompt=LLM_SYSTEM_PROMPT, max_tokens=256)
+            return summary or ""
+        except Exception as e:
+            log(f"AI 动态总结生成失败: {e}", "WARN")
+            return ""
+
     def _generate_reports(self) -> None:
         if self.args.no_report or self.args.dry_run:
             if self.args.dry_run:
@@ -314,14 +360,16 @@ class Pipeline:
         # Build weekly digest data for HTML report
         # 使用 engine 记录的本次实际新增项目，避免 first_seen 被错误重置导致全部项目被视为新收录
         new_items = [self.db.get(k) for k in (getattr(self, "new_keys", None) or set()) if self.db.get(k)]
+        ai_summary = self._generate_ai_summary()
         weekly_data = {
             "new_items": new_items,
             "release_updates": self.release_updates,
             "star_changes": getattr(self, "star_changes", {}),
             "fork_updates": getattr(self, "fork_updates", []),
             "classification_changes": getattr(self, "classification_changes", {}),
+            "ai_summary": ai_summary,
         } if (new_items or self.release_updates or getattr(self, "star_changes", {}) or
-              getattr(self, "fork_updates", []) or getattr(self, "classification_changes", {})) else None
+              getattr(self, "fork_updates", []) or getattr(self, "classification_changes", {}) or ai_summary) else None
         report.generate_html(self.args.output, weekly_data=weekly_data)
         report.generate_csv(self.args.output)
         report.generate_json(self.args.output)

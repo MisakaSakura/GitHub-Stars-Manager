@@ -191,46 +191,95 @@ class ReportGenerator:
             star_changes = weekly_data.get("star_changes", {})
             fork_updates = weekly_data.get("fork_updates", [])
             classification_changes = weekly_data.get("classification_changes", {})
-            has_content = new_items or release_updates or star_changes or fork_updates or classification_changes
-            if has_content:
+            ai_summary = weekly_data.get("ai_summary", "")
+
+            # 构建各区域 tab 内容
+            tabs_html: list[str] = []
+            contents_html: list[str] = []
+            first_tab = True
+
+            def add_tab(tab_id: str, label: str, content: str) -> None:
+                nonlocal first_tab
+                active = "active" if first_tab else ""
+                tabs_html.append(f'<button class="wd-tab {active}" onclick="wst(this,\'{tab_id}\')">{label}</button>')
+                contents_html.append(f'<div id="wd-tab-{tab_id}" class="wd-tab-content {active}">{content}</div>')
+                first_tab = False
+
+            # 新收录
+            if new_items:
+                ni_parts: list[str] = []
+                ni_parts.append(f'<div class="wd-section"><h3>🆕 新收录 ({len(new_items)})</h3><div class="wd-list">')
+                for it in new_items:
+                    url = it.get("url") or it.get("html_url", "#")
+                    ni_parts.append(f'<div class="wd-item"><a href="{url}" target="_blank">{it["full_name"]}</a><span class="wd-eco">{it["ecology"]}</span></div>')
+                ni_parts.append('</div></div>')
+                add_tab("new", f"🆕 新收录 ({len(new_items)})", "".join(ni_parts))
+
+            # 本周热门
+            if star_changes:
+                sc_parts: list[str] = []
+                top_changes = sorted(star_changes.items(), key=lambda x: x[1], reverse=True)[:10]
+                sc_parts.append(f'<div class="wd-section"><h3>🔥 本周热门 (Stars +)</h3><div class="wd-list">')
+                for key, delta in top_changes:
+                    item = self.db.get(key)
+                    if item:
+                        url = item.get("url") or "#"
+                        sc_parts.append(f'<div class="wd-item"><a href="{url}" target="_blank">{item["full_name"]}</a><span class="wd-tag">+{delta:,} ⭐</span></div>')
+                sc_parts.append('</div></div>')
+                add_tab("hot", f"🔥 热门 ({len(star_changes)})", "".join(sc_parts))
+
+            # 分类变更
+            if classification_changes:
+                cc_parts: list[str] = []
+                cc_parts.append(f'<div class="wd-section"><h3>📝 分类变更 ({len(classification_changes)})</h3><div class="wd-list">')
+                for key, changes in list(classification_changes.items())[:10]:
+                    item = self.db.get(key)
+                    if item:
+                        url = item.get("url") or "#"
+                        change_str = ", ".join([f"{k}: {v['from']} → {v['to']}" for k, v in changes.items()])
+                        cc_parts.append(f'<div class="wd-item"><a href="{url}" target="_blank">{item["full_name"]}</a><span class="wd-tag">{change_str}</span></div>')
+                cc_parts.append('</div></div>')
+                add_tab("classify", f"📝 分类变更 ({len(classification_changes)})", "".join(cc_parts))
+
+            # 新 Release
+            if release_updates:
+                ru_parts: list[str] = []
+                ru_parts.append(f'<div class="wd-section"><h3>🚀 新 Release ({len(release_updates)})</h3><div class="wd-list">')
+                for ru in release_updates:
+                    ru_parts.append(f'<div class="wd-item"><a href="{ru["html_url"]}" target="_blank">{ru["full_name"]}</a><span class="wd-tag">{ru["old_tag"]} → {ru["new_tag"]}</span></div>')
+                    # Release Notes
+                    body = ru.get("body", "")
+                    if body:
+                        plain = body.replace('\r\n', '\n').replace('\n', ' ')[:300]
+                        ru_parts.append(f'<div class="wd-notes">{escape(plain)}</div><span class="wd-notes-toggle" onclick="wtn(this)">展开</span>')
+                    # AI 摘要
+                    ai_digest = ru.get("ai_digest", "")
+                    if ai_digest:
+                        ru_parts.append(f'<div class="wd-ai-digest">🤖 {escape(ai_digest)}</div>')
+                ru_parts.append('</div></div>')
+                add_tab("release", f"🚀 Release ({len(release_updates)})", "".join(ru_parts))
+
+            # Fork 上游更新
+            if fork_updates:
+                fu_parts: list[str] = []
+                fu_parts.append(f'<div class="wd-section"><h3>🔱 Fork 上游更新 ({len(fork_updates)})</h3><div class="wd-list">')
+                for fu in fork_updates:
+                    parent_url = f"https://github.com/{fu['parent_full_name']}"
+                    fu_parts.append(f'<div class="wd-item"><a href="{parent_url}" target="_blank">{fu["full_name"]}</a><span class="wd-tag">← {fu["parent_full_name"]} ({fu["parent_pushed_at"][:10]})</span></div>')
+                fu_parts.append('</div></div>')
+                add_tab("fork", f"🔱 Fork ({len(fork_updates)})", "".join(fu_parts))
+
+            if tabs_html:
                 wd_parts.append('<div class="weekly-digest collapsed" id="wd-main">')
                 wd_parts.append('<div class="wd-header"><h2>📅 本周摘要</h2><button class="wd-toggle" onclick="tw()">展开 ▼</button></div>')
                 wd_parts.append('<div id="wd-body">')
-                if new_items:
-                    wd_parts.append(f'<div class="wd-section"><h3>🆕 新收录 ({len(new_items)})</h3><div class="wd-list">')
-                    for it in new_items:
-                        url = it.get("url") or it.get("html_url", "#")
-                        wd_parts.append(f'<div class="wd-item"><a href="{url}" target="_blank">{it["full_name"]}</a><span class="wd-eco">{it["ecology"]}</span></div>')
-                    wd_parts.append('</div></div>')
-                if star_changes:
-                    top_changes = sorted(star_changes.items(), key=lambda x: x[1], reverse=True)[:10]
-                    wd_parts.append(f'<div class="wd-section"><h3>🔥 本周热门 (Stars +)</h3><div class="wd-list">')
-                    for key, delta in top_changes:
-                        item = self.db.get(key)
-                        if item:
-                            url = item.get("url") or "#"
-                            wd_parts.append(f'<div class="wd-item"><a href="{url}" target="_blank">{item["full_name"]}</a><span class="wd-tag">+{delta:,} ⭐</span></div>')
-                    wd_parts.append('</div></div>')
-                if classification_changes:
-                    wd_parts.append(f'<div class="wd-section"><h3>📝 分类变更 ({len(classification_changes)})</h3><div class="wd-list">')
-                    for key, changes in list(classification_changes.items())[:10]:
-                        item = self.db.get(key)
-                        if item:
-                            url = item.get("url") or "#"
-                            change_str = ", ".join([f"{k}: {v['from']} → {v['to']}" for k, v in changes.items()])
-                            wd_parts.append(f'<div class="wd-item"><a href="{url}" target="_blank">{item["full_name"]}</a><span class="wd-tag">{change_str}</span></div>')
-                    wd_parts.append('</div></div>')
-                if release_updates:
-                    wd_parts.append(f'<div class="wd-section"><h3>🚀 新 Release ({len(release_updates)})</h3><div class="wd-list">')
-                    for ru in release_updates:
-                        wd_parts.append(f'<div class="wd-item"><a href="{ru["html_url"]}" target="_blank">{ru["full_name"]}</a><span class="wd-tag">{ru["old_tag"]} → {ru["new_tag"]}</span></div>')
-                    wd_parts.append('</div></div>')
-                if fork_updates:
-                    wd_parts.append(f'<div class="wd-section"><h3>🔱 Fork 上游更新 ({len(fork_updates)})</h3><div class="wd-list">')
-                    for fu in fork_updates:
-                        parent_url = f"https://github.com/{fu['parent_full_name']}"
-                        wd_parts.append(f'<div class="wd-item"><a href="{parent_url}" target="_blank">{fu["full_name"]}</a><span class="wd-tag">← {fu["parent_full_name"]} ({fu["parent_pushed_at"][:10]})</span></div>')
-                    wd_parts.append('</div></div>')
+                # AI 总结卡片
+                if ai_summary:
+                    wd_parts.append(f'<div class="wd-summary-card"><div class="wd-summary-title">🤖 本周动态总结</div><div class="wd-summary-body">{escape(ai_summary)}</div></div>')
+                wd_parts.append('<div class="wd-tabs">')
+                wd_parts.extend(tabs_html)
+                wd_parts.append('</div>')
+                wd_parts.extend(contents_html)
                 wd_parts.append('</div></div>')
         weekly_digest = "".join(wd_parts) if wd_parts else ""
 
