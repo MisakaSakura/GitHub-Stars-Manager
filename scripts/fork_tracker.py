@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Fork 管理：检测 Fork 的上游更新"""
 
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
 
@@ -50,13 +51,15 @@ class ForkTracker(BaseTracker):
             return None
 
         outdated: list[dict] = []
+        lock = threading.Lock()
         max_workers = min(8, len(forks)) if forks else 1
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {executor.submit(check_one, fork): fork for fork in forks}
             for future in as_completed(futures):
                 result = future.result()
                 if result:
-                    outdated.append(result)
+                    with lock:
+                        outdated.append(result)
 
         log(f"Fork 检查完成: {len(outdated)} 个仓库上游有更新", "OK")
         return outdated

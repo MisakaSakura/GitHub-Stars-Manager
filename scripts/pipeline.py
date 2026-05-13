@@ -493,8 +493,8 @@ class Pipeline:
             _safe_print("\n💡 首次运行提示:")
             _safe_print('   1. 检查生成的报告，对不满意的项目修改 data/stars_db.json')
             _safe_print('   2. 给满意的项目添加 "manual_override": true 避免被覆盖')
-            _safe_print("   3. 下次运行使用 --incremental 只处理新项目")
-            _safe_print("   4. 如需重新分类所有项目，使用 --force-refresh")
+            _safe_print("   3. 日常使用 --mode incremental 只处理新项目")
+            _safe_print("   4. 如需重新分类所有项目，使用 --mode deep 或 --mode full")
 
     # ---------- 工具方法 ----------
 

@@ -71,9 +71,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="导入已有分类后，不对新项目自动分类")
 
     # GitHub Lists 处理策略
-    parser.add_argument("--lists-strategy", default="auto",
+    parser.add_argument("--lists-strategy", default="ignore",
                         choices=["auto", "prompt", "migrate", "replace", "ignore"],
-                        help="GitHub Lists 处理策略")
+                        help="GitHub Lists 处理策略（默认 ignore，避免误操作）")
 
     # LLM
     parser.add_argument("--llm-key", help="LLM API Key（启用智能分类增强）")
@@ -127,7 +127,6 @@ def _apply_mode(args: argparse.Namespace) -> argparse.Namespace:
     mode_configs = {
         "incremental": {
             "incremental": True,
-            "check_all_releases": True,
         },
         "deep": {
             "incremental": True,

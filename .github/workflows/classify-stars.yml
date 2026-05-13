@@ -198,6 +198,11 @@ jobs:
             "--mode" "$MODE"
           )
 
+          # schedule 自动运行默认检查所有 Release（周报功能）
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            ARGS+=("--check-all-releases")
+          fi
+
           # LLM 智能增强
           # 联动逻辑：force_llm=true 自动视为 use_llm=true
           USE_LLM="${{ github.event.inputs.use_llm }}"
@@ -206,8 +211,10 @@ jobs:
             USE_LLM="true"
           fi
           # full 模式默认启用 LLM（如果配置了 LLM_KEY）
+          # use_llm=false 视为用户明确关闭，其他情况（包括默认未勾选）均自动启用
           if [ "$MODE" = "full" ] && [ -n "$LLM_KEY" ] && [ "$USE_LLM" != "false" ]; then
             USE_LLM="true"
+            echo "[模式联动] full 模式自动启用 LLM（已配置 LLM_KEY）"
           fi
 
           if [ "$USE_LLM" = "true" ] && [ -n "$LLM_KEY" ]; then
@@ -232,11 +239,6 @@ jobs:
             fi
           fi
 
-          # 通知
-          if [ "${{ github.event.inputs.send_notify }}" = "true" ]; then
-            ARGS+=("--notify" "--notify-channels" "email")
-          fi
-
           # GitHub Lists 策略（schedule 触发时 inputs 为空，使用默认值 ignore）
           LIST_STRATEGY="${{ github.event.inputs.lists_strategy }}"
           ARGS+=("--lists-strategy" "${LIST_STRATEGY:-ignore}")
@@ -248,8 +250,6 @@ jobs:
             fi
             if [ "${{ github.event.inputs.check_all_releases }}" = "true" ]; then
               ARGS+=("--check-all-releases")
-            elif [ "${{ github.event.inputs.check_releases }}" = "true" ]; then
-              ARGS+=("--check-releases")
             fi
             if [ "${{ github.event.inputs.check_forks }}" = "true" ]; then
               ARGS+=("--check-forks")
@@ -263,9 +263,9 @@ jobs:
             ARGS+=("--retry-failed")
           fi
 
-          # 通知通道
+          # 通知
           if [ "${{ github.event.inputs.send_notify }}" = "true" ]; then
-            ARGS+=("--notify-channels" "${{ github.event.inputs.notify_channels }}")
+            ARGS+=("--notify" "--notify-channels" "${{ github.event.inputs.notify_channels }}")
           fi
 
           echo "执行命令: python scripts/classifier.py ${ARGS[@]}"
@@ -278,9 +278,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
-          git add -f data/stars_db.json
-          # 只有当 requirements.txt 内容真正有变化时才添加（避免时间戳修改导致空提交）
-          if ! git diff --cached --quiet -- requirements.txt 2>/dev/null; then
+          git add -f data/stars_db.json data/stars_ai.json data/releases_history.json
+          if [ -f data/stars_db.meta.json ]; then
+            git add -f data/stars_db.meta.json
+          fi
+          # requirements.txt 若在工作区有修改则添加（注意：此处是工作区 vs HEAD，不是 --cached）
+          if ! git diff --quiet -- requirements.txt 2>/dev/null; then
             git add requirements.txt
           fi
           if git diff --cached --quiet; then
