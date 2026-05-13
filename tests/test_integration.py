@@ -26,6 +26,12 @@ class MockGitHubAPI:
     def get_latest_release(self, owner, repo):
         return self._releases.get(f"{owner}/{repo}")
 
+    def list_releases(self, owner, repo, per_page=10):
+        rel = self._releases.get(f"{owner}/{repo}")
+        if rel is None:
+            return []
+        return [rel] if isinstance(rel, dict) else rel
+
     def get_repo_info(self, owner, repo):
         return self._repo_info.get(f"{owner}/{repo}")
 
@@ -156,7 +162,7 @@ class TestReleaseTrackerWithStarItem(unittest.TestCase):
         gh = MockGitHubAPI(releases={
             "owner/repo": {
                 "tag_name": "v2.0.0",
-                "published_at": "2024-06-01T00:00:00Z",
+                "published_at": "2099-06-01T00:00:00Z",
                 "html_url": "https://github.com/owner/repo/releases/v2.0.0",
             }
         })

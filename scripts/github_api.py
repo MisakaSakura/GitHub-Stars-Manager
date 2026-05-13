@@ -108,6 +108,10 @@ class GitHubAPI:
     def get_latest_release(self, owner: str, repo: str) -> dict | None:
         return self._get(f"/repos/{owner}/{repo}/releases/latest")
 
+    def list_releases(self, owner: str, repo: str, per_page: int = 10) -> list[dict]:
+        """获取仓库最近 releases 列表（用于捕获一周内的多次发布）"""
+        return self._get(f"/repos/{owner}/{repo}/releases?per_page={per_page}") or []
+
     def get_repo_info(self, owner: str, repo: str) -> dict | None:
         return self._get(f"/repos/{owner}/{repo}")
 

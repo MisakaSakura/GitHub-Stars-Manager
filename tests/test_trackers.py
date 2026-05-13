@@ -20,15 +20,13 @@ class TestReleaseTracker(unittest.TestCase):
         items = [{"full_name": "a/b", "subscribe_releases": False}]
         result = tracker.check(items)
         self.assertEqual(result, [])
-        gh.get_latest_release.assert_not_called()
+        gh.list_releases.assert_not_called()
 
     def test_check_new_release(self):
         gh = MagicMock()
-        gh.get_latest_release.return_value = {
-            "tag_name": "v2.0",
-            "published_at": "2024-01-01T00:00:00Z",
-            "html_url": "https://github.com/a/b/releases/v2.0",
-        }
+        gh.list_releases.return_value = [
+            {"tag_name": "v2.0", "published_at": "2099-01-01T00:00:00Z", "html_url": "https://github.com/a/b/releases/v2.0"},
+        ]
         tracker = ReleaseTracker(gh)
         items = [{
             "full_name": "a/b",
@@ -43,7 +41,9 @@ class TestReleaseTracker(unittest.TestCase):
 
     def test_check_no_change(self):
         gh = MagicMock()
-        gh.get_latest_release.return_value = {"tag_name": "v1.0"}
+        gh.list_releases.return_value = [
+            {"tag_name": "v1.0", "published_at": "2099-01-01T00:00:00Z"},
+        ]
         tracker = ReleaseTracker(gh)
         items = [{
             "full_name": "a/b",
@@ -62,15 +62,35 @@ class TestReleaseTracker(unittest.TestCase):
         self.assertIn("v1", text)
         self.assertIn("v2", text)
 
+    def test_check_multiple_releases_in_week(self):
+        """一周内多次发布应全部捕获，intermediate_tags 记录中间版本"""
+        gh = MagicMock()
+        gh.list_releases.return_value = [
+            {"tag_name": "v1.3", "published_at": "2099-01-03T00:00:00Z", "html_url": "https://github.com/a/b/releases/v1.3"},
+            {"tag_name": "v1.2", "published_at": "2099-01-02T00:00:00Z", "html_url": "https://github.com/a/b/releases/v1.2"},
+            {"tag_name": "v1.1", "published_at": "2099-01-01T00:00:00Z", "html_url": "https://github.com/a/b/releases/v1.1"},
+            {"tag_name": "v1.0", "published_at": "2098-01-01T00:00:00Z", "html_url": "https://github.com/a/b/releases/v1.0"},
+        ]
+        tracker = ReleaseTracker(gh)
+        items = [{
+            "full_name": "a/b",
+            "name": "b",
+            "subscribe_releases": True,
+            "last_release_tag": "v1.0",
+        }]
+        result = tracker.check(items)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["new_tag"], "v1.3")
+        self.assertEqual(result[0]["old_tag"], "v1.0")
+        self.assertEqual(result[0]["intermediate_tags"], ["v1.2", "v1.1"])
+
     # --- check_all tests ---
 
     def test_check_all_ignores_subscription_flag(self):
         gh = MagicMock()
-        gh.get_latest_release.return_value = {
-            "tag_name": "v2.0",
-            "published_at": "2024-01-01T00:00:00Z",
-            "html_url": "https://github.com/a/b/releases/v2.0",
-        }
+        gh.list_releases.return_value = [
+            {"tag_name": "v2.0", "published_at": "2099-01-01T00:00:00Z", "html_url": "https://github.com/a/b/releases/v2.0"},
+        ]
         tracker = ReleaseTracker(gh)
         items = [{
             "full_name": "a/b",
@@ -84,11 +104,9 @@ class TestReleaseTracker(unittest.TestCase):
 
     def test_check_all_baseline_first_discovery(self):
         gh = MagicMock()
-        gh.get_latest_release.return_value = {
-            "tag_name": "v1.0",
-            "published_at": "2024-01-01T00:00:00Z",
-            "html_url": "https://github.com/a/b/releases/v1.0",
-        }
+        gh.list_releases.return_value = [
+            {"tag_name": "v1.0", "published_at": "2099-01-01T00:00:00Z", "html_url": "https://github.com/a/b/releases/v1.0"},
+        ]
         tracker = ReleaseTracker(gh)
         items = [{
             "full_name": "a/b",
@@ -101,7 +119,9 @@ class TestReleaseTracker(unittest.TestCase):
 
     def test_check_all_no_change(self):
         gh = MagicMock()
-        gh.get_latest_release.return_value = {"tag_name": "v1.0"}
+        gh.list_releases.return_value = [
+            {"tag_name": "v1.0", "published_at": "2099-01-01T00:00:00Z"},
+        ]
         tracker = ReleaseTracker(gh)
         items = [{
             "full_name": "a/b",

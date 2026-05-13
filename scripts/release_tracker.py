@@ -24,32 +24,59 @@ class ReleaseTracker(BaseTracker):
         updates: list[dict] = []
         mode_label = "全量" if baseline_mode else "订阅"
         log(f"检查 Release 更新 ({mode_label})...", "STEP")
+        from datetime import datetime, timezone, timedelta
+        week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+
         for item in db_items:
             try:
                 owner, repo = item["full_name"].split("/")
-                latest = self.gh.get_latest_release(owner, repo)
-                if not latest:
+                releases = self.gh.list_releases(owner, repo, per_page=30)
+                if not releases:
                     continue
-                latest_tag = latest.get("tag_name")
+
                 current_tag = item.get("last_release_tag")
                 now = datetime.now(timezone.utc).isoformat()
+
                 if baseline_mode and not current_tag:
-                    # 首次发现：设为 baseline，不产生通知
-                    item["last_release_tag"] = latest_tag
+                    # 首次发现：设为最新 baseline，不产生通知
+                    item["last_release_tag"] = releases[0].get("tag_name")
                     item["last_release_checked"] = now
                     continue
-                if latest_tag and latest_tag != current_tag:
+
+                # 定位 current_tag 在列表中的位置（list_releases 默认倒序：最新在前）
+                current_idx = None
+                for i, r in enumerate(releases):
+                    if r.get("tag_name") == current_tag:
+                        current_idx = i
+                        break
+
+                if current_idx is not None:
+                    candidate_releases = releases[:current_idx]
+                else:
+                    # current_tag 不在最近 30 条内，取全部列表再过滤
+                    candidate_releases = releases
+
+                # 只保留一周内的 release
+                new_releases = [
+                    r for r in candidate_releases
+                    if r.get("published_at", "") >= week_ago
+                ]
+
+                if new_releases:
+                    latest = new_releases[0]  # 最新的一条
+                    intermediate = [r.get("tag_name") for r in new_releases[1:]]
                     updates.append({
                         "full_name": item["full_name"],
                         "name": item["name"],
                         "owner": owner,
                         "old_tag": current_tag,
-                        "new_tag": latest_tag,
+                        "new_tag": latest.get("tag_name"),
+                        "intermediate_tags": intermediate,
                         "published_at": latest.get("published_at", ""),
                         "html_url": latest.get("html_url", ""),
                         "body": latest.get("body", "")[:2000],
                     })
-                    item["last_release_tag"] = latest_tag
+                    item["last_release_tag"] = latest.get("tag_name")
                     item["last_release_checked"] = now
                     item["last_updated"] = now
             except Exception as e:
@@ -81,4 +108,8 @@ class ReleaseTracker(BaseTracker):
         return self._truncate(updates, limit=10, title="🚀 新 Release 提醒")
 
     def _format_item(self, item: dict) -> str:
-        return f"  {item['owner']}/{item['name']}: {item['old_tag'] or '无'} → {item['new_tag']}"
+        line = f"  {item['owner']}/{item['name']}: {item['old_tag'] or '无'} → {item['new_tag']}"
+        intermediate = item.get("intermediate_tags")
+        if intermediate:
+            line += f" (还有 {', '.join(intermediate)})"
+        return line
