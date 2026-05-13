@@ -130,6 +130,86 @@
 
 ---
 
+### 🤖 Actions LLM 部署指南
+
+#### 1. 选择 LLM 提供商
+
+| 提供商 | 推荐模型 | 特点 | 适用场景 |
+|--------|----------|------|----------|
+| **Moonshot (Kimi)** | `moonshot-v1-8k` | 国内访问稳定，中文理解好 | 🇨🇳 国内用户首选 |
+| **DeepSeek** | `deepseek-chat` | 价格低，推理能力强 | 💰 性价比首选 |
+| **OpenAI** | `gpt-4o-mini` | 速度快，分类准确 | 🌐 有海外访问条件 |
+| **OpenRouter** | `anthropic/claude-3.5-sonnet` 等 | 聚合平台，可自由切换模型 | 🔧 需要灵活切换 |
+
+#### 2. 获取 API Key
+
+| 提供商 | 获取地址 | 免费额度 |
+|--------|----------|----------|
+| Moonshot | [platform.moonshot.cn](https://platform.moonshot.cn) → API Key 管理 | 新用户有 ¥15 赠送 |
+| DeepSeek | [platform.deepseek.com](https://platform.deepseek.com) → API Keys | 新用户有 ¥10 赠送 |
+| OpenAI | [platform.openai.com](https://platform.openai.com) → API keys | 需绑卡，按量计费 |
+| OpenRouter | [openrouter.ai/keys](https://openrouter.ai/keys) | 部分模型有免费额度 |
+
+#### 3. 配置 Secrets
+
+进入仓库 **Settings → Secrets and variables → Actions → New repository secret**：
+
+| Secret | 值 |
+|--------|-----|
+| `LLM_KEY` | 你的 API Key（完整字符串，不要加引号） |
+
+> ⚠️ **安全提示**：Secret 一旦保存不可查看，只能删除后重新添加。建议先在本地文本编辑器确认 Key 正确再粘贴。
+
+#### 4. 首次启用 LLM
+
+进入 **Actions → Auto Classify GitHub Stars → Run workflow**，按以下配置：
+
+| 参数 | 推荐设置 | 说明 |
+|------|----------|------|
+| `use_llm` | ✅ `true` | 启用 LLM 智能分类 |
+| `llm_provider` | 你的提供商 | `moonshot` / `deepseek` / `openai` / `openrouter` |
+| `llm_model` | 留空 或 填模型名 | 留空使用 provider 默认模型；可指定如 `deepseek-chat` |
+| `force_llm` | ✅ `true`（仅首次） | 无视 30 天间隔，确保所有项目都被分析 |
+| `force_refresh` | 可选 `true` | 重新分类所有未保护项目（已有规则分类的项目也会被 LLM 增强） |
+
+点击 **Run workflow** 后等待 2-5 分钟（取决于项目数量）。运行成功后：
+1. 查看 Commit → 确认 `stars_db.json` 和 `stars_ai.json` 有更新
+2. 查看 Pages 报告 → 项目卡片上会出现 🤖 标记表示 LLM 增强
+3. 检查分类结果 → 不满意的手动编辑 `stars_db.json` 并设置 `manual_override: true`
+
+#### 5. 日常使用模式
+
+| 模式 | 操作 | 频率 |
+|------|------|------|
+| **自动周报** | 无需操作，每周一自动运行 | 每周 |
+| **LLM 维护** | 手动触发 → `use_llm=true` | 每月 1 次 |
+| **深度整理** | `use_llm=true` + `force_llm=true` + `force_refresh=true` | 每季度或调整规则后 |
+| **纯增量** | 默认自动运行，不勾 LLM | 每周 |
+
+> 💡 **为什么自动运行默认不启用 LLM？** LLM 调用消耗 Token，而大部分用户的 Stars 变化量很小（每周几个新项目），自动启用会造成不必要的费用。建议每月手动触发一次 LLM 维护即可。
+
+#### 6. Token 消耗与费用估算
+
+以 **400 个项目**为例（首次全量分析）：
+
+| 提供商 | 估算 Token | 参考费用 |
+|--------|-----------|----------|
+| DeepSeek (`deepseek-chat`) | ~80K | ~¥0.5 |
+| Moonshot (`moonshot-v1-8k`) | ~80K | ~¥0.8 |
+| OpenAI (`gpt-4o-mini`) | ~80K | ~$0.05 |
+
+**后续增量费用**（每月 10 个新项目 + 30 天到期的 100 个老项目重新分析）：
+
+| 场景 | 估算 Token | DeepSeek 费用 |
+|------|-----------|---------------|
+| 新项目（10 个） | ~2K | ~¥0.01 |
+| 到期重分析（100 个） | ~20K | ~¥0.15 |
+| **每月总计** | ~22K | **~¥0.16** |
+
+> 💰 **省钱技巧**：`llm_interval_days` 默认 30 天，已分析成功的老项目不会每次都被重新调用。首次分析后，后续每月费用通常不到 ¥1。
+
+---
+
 ## ⚠️ 首次运行行为说明（重要）
 
 ### 场景 A：全新开始（没有已有分类）
