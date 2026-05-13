@@ -306,50 +306,72 @@ class Pipeline:
         log("数据库已保存", "OK")
 
     def _generate_ai_summary(self) -> str:
-        """用 LLM 综合生成本周动态总结"""
-        if not self.llm:
-            return ""
-        parts: list[str] = []
-        # 热门 Stars
+        """综合生成本周动态总结。LLM 可用时用 AI 生成，否则用规则生成简洁文本。"""
+        # 收集各项动态数据
+        new_items_count = len(getattr(self, "new_keys", set()))
         star_changes = getattr(self, "star_changes", {})
+        release_updates = self.release_updates or []
+        classification_changes = getattr(self, "classification_changes", {})
+        fork_updates = getattr(self, "fork_updates", [])
+
+        has_any = (new_items_count or star_changes or release_updates or
+                   classification_changes or fork_updates)
+        if not has_any:
+            return ""
+
+        # 构建数据片段用于 LLM 或规则总结
+        data_parts: list[str] = []
+        if new_items_count:
+            data_parts.append(f"新收录 {new_items_count} 个项目")
+        if star_changes:
+            top_names = [key for key, _ in sorted(star_changes.items(), key=lambda x: x[1], reverse=True)[:3]]
+            data_parts.append(f"{len(star_changes)} 个项目 stars 增长显著（{', '.join(top_names)}）")
+        if release_updates:
+            release_names = [f"{ru['full_name']} {ru['old_tag']}→{ru['new_tag']}" for ru in release_updates[:3]]
+            data_parts.append(f"{len(release_updates)} 个新 Release（{'; '.join(release_names)}）")
+        if classification_changes:
+            data_parts.append(f"{len(classification_changes)} 个项目分类被重新调整")
+        if fork_updates:
+            data_parts.append(f"{len(fork_updates)} 个 Fork 仓库上游有更新")
+
+        # 无 LLM 时返回规则生成的简洁文本
+        if not self.llm:
+            return "本周动态：" + "；".join(data_parts) + "。"
+
+        # LLM 可用时生成高质量总结
+        llm_parts: list[str] = []
         if star_changes:
             top = sorted(star_changes.items(), key=lambda x: x[1], reverse=True)[:5]
-            parts.append("本周 Stars 增长最多的项目：")
+            llm_parts.append("本周 Stars 增长最多的项目：")
             for key, delta in top:
-                item = self.db.get(key)
-                if item:
-                    parts.append(f"- {key}: +{delta} stars")
-        # 新 Release
-        if self.release_updates:
-            parts.append("\n本周新 Release：")
-            for ru in self.release_updates:
+                llm_parts.append(f"- {key}: +{delta} stars")
+        if release_updates:
+            llm_parts.append("\n本周新 Release：")
+            for ru in release_updates:
                 ai_digest = ru.get("ai_digest", "")
                 line = f"- {ru['full_name']} {ru['old_tag']} → {ru['new_tag']}"
                 if ai_digest:
                     line += f"（{ai_digest}）"
-                parts.append(line)
-        # 分类变更
-        classification_changes = getattr(self, "classification_changes", {})
+                llm_parts.append(line)
         if classification_changes:
-            parts.append("\n本周分类调整：")
+            llm_parts.append("\n本周分类调整：")
             for key, changes in list(classification_changes.items())[:5]:
                 change_str = ", ".join([f"{k} {v['from']}→{v['to']}" for k, v in changes.items()])
-                parts.append(f"- {key}: {change_str}")
-        if not parts:
-            return ""
+                llm_parts.append(f"- {key}: {change_str}")
+
         prompt = (
             "请根据以下本周 GitHub Stars 项目动态数据，用 3-5 句话生成一段简洁的中文总结。"
             "总结要突出重要更新和亮点，语气轻松自然，像技术周刊的开篇语。"
             "只输出总结内容，不要任何其他文字。\n\n"
-            + "\n".join(parts)
+            + "\n".join(llm_parts)
         )
         try:
             from config import LLM_SYSTEM_PROMPT
             summary = self.llm.summarize(prompt, system_prompt=LLM_SYSTEM_PROMPT, max_tokens=256)
-            return summary or ""
+            return summary or "本周动态：" + "；".join(data_parts) + "。"
         except Exception as e:
             log(f"AI 动态总结生成失败: {e}", "WARN")
-            return ""
+            return "本周动态：" + "；".join(data_parts) + "。"
 
     def _generate_reports(self) -> None:
         if self.args.no_report or self.args.dry_run:
