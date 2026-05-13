@@ -145,16 +145,19 @@ class TestForkTracker(unittest.TestCase):
         self.assertEqual(result[0]["name"], "f1")
 
     def test_check_upstream_update(self):
+        from datetime import datetime, timezone, timedelta
+        recent = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+        old = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
         gh = MagicMock()
         gh.get_repo_info.return_value = {
             "parent": {
                 "full_name": "upstream/repo",
-                "pushed_at": "2024-06-01T00:00:00Z",
+                "pushed_at": recent,
             },
-            "pushed_at": "2024-01-01T00:00:00Z",
+            "pushed_at": old,
         }
         tracker = ForkTracker(gh)
-        forks = [{"full_name": "user/repo", "pushed_at": "2024-01-01T00:00:00Z"}]
+        forks = [{"full_name": "user/repo", "pushed_at": old}]
         result = tracker.check(forks)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["parent_full_name"], "upstream/repo")

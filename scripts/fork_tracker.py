@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Fork 管理：检测 Fork 的上游更新"""
 
+from datetime import datetime, timezone, timedelta
+
 from base_tracker import BaseTracker
 from utils import log
 
@@ -16,9 +18,10 @@ class ForkTracker(BaseTracker):
         log(f"发现 {len(forks)} 个 Fork 仓库", "OK")
         return forks
 
-    def check(self, forks: list[dict]) -> list[dict]:
-        """检查每个 Fork 的上游是否有更新"""
+    def check(self, forks: list[dict], days: int = 7) -> list[dict]:
+        """检查每个 Fork 的上游最近 N 天内是否有更新"""
         log("检查 Fork 上游更新...", "STEP")
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
         outdated = []
         for fork in forks:
             try:
@@ -32,7 +35,10 @@ class ForkTracker(BaseTracker):
                 parent = detail["parent"]
                 fork_pushed = fork.get("pushed_at") or detail.get("pushed_at")
                 parent_pushed = parent.get("pushed_at")
-                if fork_pushed and parent_pushed and parent_pushed > fork_pushed:
+                # 只检测最近 N 天内有更新的上游
+                if (fork_pushed and parent_pushed and
+                        parent_pushed > fork_pushed and
+                        parent_pushed >= cutoff):
                     outdated.append({
                         "full_name": full_name,
                         "parent_full_name": parent.get("full_name"),
