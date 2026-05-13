@@ -32,6 +32,7 @@ class FakeArgs:
             "llm_base": None,
             "llm_interval_days": 30,
             "force_llm": False,
+            "auto_refresh_days": 90,
             "notion_key": None,
             "notion_db": None,
             "notion_clear": False,

@@ -222,20 +222,44 @@ class Pipeline:
                 pass
         log("README 摘要获取完成", "OK")
 
+    def _should_auto_refresh(self) -> bool:
+        """判断是否需要自动全量刷新（增量模式下按间隔自动升级）"""
+        if self.args.force_refresh:
+            return False  # 用户已显式强制刷新
+        if not self.args.incremental:
+            return False  # 非增量模式本身就是全量
+        last = self.db.meta.get("last_full_refresh_at", "")
+        if not last:
+            return True  # 从未全量刷新过
+        from datetime import datetime, timezone, timedelta
+        last_dt = datetime.fromisoformat(last)
+        interval = timedelta(days=self.args.auto_refresh_days)
+        if datetime.now(timezone.utc) - last_dt >= interval:
+            return True
+        return False
+
     def _classify(self) -> None:
         if self.is_first_run and self.args.subscribe_releases:
             log("已标记所有仓库订阅 Release", "OK")
+
+        force_refresh = self.args.force_refresh
+        if not force_refresh and self._should_auto_refresh():
+            log(f"自动全量刷新：距离上次已超过 {self.args.auto_refresh_days} 天", "STEP")
+            force_refresh = True
 
         self.engine = IncrementalEngine(self.db, self.rule, self.llm, self.ai_db)
         self.stats = self.engine.process(
             self.items,
             incremental=self.args.incremental,
-            force_refresh=self.args.force_refresh,
+            force_refresh=force_refresh,
             use_llm=bool(self.llm),
             retry_failed=self.args.retry_failed,
             subscribe_all_releases=self.args.subscribe_releases,
             llm_interval_days=self.args.llm_interval_days
         )
+
+        # 记录本次是否为全量刷新（用于 _save 中更新时间戳）
+        self._did_full_refresh = force_refresh
 
         # 将 LLM 结果同步到独立 AI 数据库
         if self.llm and self.ai_db:
@@ -270,6 +294,10 @@ class Pipeline:
         if self.llm:
             from datetime import datetime, timezone
             self.db.meta["last_llm_classify_at"] = datetime.now(timezone.utc).isoformat()
+            self.db.save_meta()
+        if getattr(self, "_did_full_refresh", False):
+            from datetime import datetime, timezone
+            self.db.meta["last_full_refresh_at"] = datetime.now(timezone.utc).isoformat()
             self.db.save_meta()
         log("数据库已保存", "OK")
 

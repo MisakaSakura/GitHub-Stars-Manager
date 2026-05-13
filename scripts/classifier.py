@@ -54,6 +54,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="增量模式：只处理新 star 的项目，已有项目保留分类")
     parser.add_argument("--force-refresh", action="store_true",
                         help="强制刷新：重新分类所有项目，但 manual_override 项目仍被保护")
+    parser.add_argument("--auto-refresh-days", type=int, default=90,
+                        help="自动全量刷新间隔天数（默认 90，增量模式下到期自动升级）")
 
     # 首次运行/导入
     parser.add_argument("--import-json", metavar="PATH", help="从 JSON 文件导入已有分类")
