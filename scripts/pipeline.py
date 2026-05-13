@@ -199,14 +199,18 @@ class Pipeline:
                     log(f"LLM 间隔保护：距上次分析还有 {days_left} 天，本次跳过（--force-llm 可强制启用）", "INFO")
                     return
         from config import LLM_CONFIG
-        model = self.args.llm_model or LLM_CONFIG.get("model", "gpt-4o-mini")
+        default_model = LLM_CONFIG.get("model", "gpt-4o-mini")
+        model = self.args.llm_model or default_model
         self.llm = LLMClassifier(
             api_key=self.args.llm_key,
             provider=self.args.llm_provider,
             api_base=self.args.llm_base,
             model=model
         )
-        log(f"LLM 已启用: {self.args.llm_provider} / {model}")
+        if not self.args.llm_model:
+            log(f"LLM 使用 provider 默认模型: {self.args.llm_provider} / {model}")
+        else:
+            log(f"LLM 已启用: {self.args.llm_provider} / {model}")
 
     def _fetch(self) -> None:
         self.items = self.gh.fetch_all(self.args.user)
