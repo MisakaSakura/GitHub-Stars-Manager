@@ -262,6 +262,7 @@ class Pipeline:
         self._did_full_refresh = force_refresh
         self.new_keys = self.engine.new_keys
         self.star_changes = self.engine.star_changes
+        self.classification_changes = self.engine.classification_changes
 
         # 将 LLM 结果同步到独立 AI 数据库
         if self.llm and self.ai_db:
@@ -316,7 +317,10 @@ class Pipeline:
             "new_items": new_items,
             "release_updates": self.release_updates,
             "star_changes": getattr(self, "star_changes", {}),
-        } if (new_items or self.release_updates or getattr(self, "star_changes", {})) else None
+            "fork_updates": getattr(self, "fork_updates", []),
+            "classification_changes": getattr(self, "classification_changes", {}),
+        } if (new_items or self.release_updates or getattr(self, "star_changes", {}) or
+              getattr(self, "fork_updates", []) or getattr(self, "classification_changes", {})) else None
         report.generate_html(self.args.output, weekly_data=weekly_data)
         report.generate_csv(self.args.output)
         report.generate_json(self.args.output)

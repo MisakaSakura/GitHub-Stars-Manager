@@ -34,6 +34,7 @@ class IncrementalEngine:
         }
         self.new_keys: set[str] = set()
         self.star_changes: dict[str, int] = {}
+        self.classification_changes: dict[str, dict] = {}
 
     def _needs_llm(self, key: str, existing, force_refresh: bool, retry_failed: bool, llm_interval_days: int) -> bool:
         """判断项目是否需要 LLM 分析：独立增量策略，不受规则增量模式影响"""
@@ -92,6 +93,27 @@ class IncrementalEngine:
         return self.stats
 
     @staticmethod
+    def _snapshot_classification(item) -> dict:
+        """截取项目分类字段的快照，用于变更对比"""
+        return {
+            "platform": item.get("platform", ""),
+            "type": item.get("type", ""),
+            "ecology": item.get("ecology", ""),
+            "ecology_role": item.get("ecology_role", ""),
+        }
+
+    def _record_classification_change(self, key: str, before, after) -> None:
+        """记录分类字段变化，支持 dict 或 StarItem 作为 before/after"""
+        old = before if isinstance(before, dict) else self._snapshot_classification(before)
+        new = after if isinstance(after, dict) else self._snapshot_classification(after)
+        changes = {}
+        for field in ("platform", "type", "ecology", "ecology_role"):
+            if old.get(field) != new.get(field):
+                changes[field] = {"from": old.get(field), "to": new.get(field)}
+        if changes:
+            self.classification_changes[key] = changes
+
+    @staticmethod
     def _apply_llm_override(target, llm_result: dict | None, existing_eco: str | None) -> None:
         """将 LLM 结果应用到目标对象的分类字段（消除重复逻辑）"""
         if not llm_result or llm_result.get("confidence", 0) <= 0.7:
@@ -127,6 +149,7 @@ class IncrementalEngine:
                 classification.first_seen = existing.first_seen
                 classification.manual_override = False
                 classification.override_fields = []
+                self._record_classification_change(key, existing, classification)
                 self.db.set(key, classification)
                 self.stats["updated"] += 1
                 return
@@ -137,12 +160,15 @@ class IncrementalEngine:
                 existing.topics = item.get("topics", [])
                 existing.last_updated = datetime.now(timezone.utc).isoformat()
                 # 增量模式下规则分类跳过，但 LLM 覆盖仍然应用（修正已有项目分类）
+                old_fields = self._snapshot_classification(existing)
                 self._apply_llm_override(existing, llm_result, existing.get("ecology"))
+                self._record_classification_change(key, old_fields, existing)
                 self.stats["skipped"] += 1
                 return
 
             classification = self._classify_item(item, use_llm, llm_result, subscribe_all_releases)
             classification.first_seen = existing.first_seen
+            self._record_classification_change(key, existing, classification)
             self.db.set(key, classification)
             self.stats["updated"] += 1
             return
