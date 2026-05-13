@@ -109,6 +109,24 @@
 > - 每周变化（新增项目 + 新 Release）会在报告的"本周摘要"区块中高亮显示
 > - 如需查看纯增量变化，可查看通知消息或 Git commit diff
 
+### Actions 手动运行选项说明
+
+| 选项 | 默认值 | 用途 | 为什么这样默认 |
+|------|--------|------|---------------|
+| `check_all_releases` | **true** | 检查所有仓库的新 Release，生成周报摘要 | 周报是核心功能，手动运行通常就是想看动态 |
+| `use_llm` | false | 启用 LLM 智能分类增强 | 消耗 Token，需用户明确同意且配置 `LLM_KEY` |
+| `force_llm` | false | 无视 30 天间隔强制启用 LLM | 平时按间隔自动调度，手动强制是例外操作 |
+| `force_refresh` | false | 重新分类所有未保护项目 | 全量重分类耗时较长，按需手动触发 |
+| `send_notify` | false | 发送通知到邮箱/QQ/TG/企业微信 | 可能打扰用户，按需开启 |
+| `check_forks` | false | 检查 Fork 仓库的上游更新 | 非核心需求，按需开启 |
+| `sync_notion` | false | 同步到 Notion 数据库 | 需配置 Notion Secret，按需开启 |
+| `lists_strategy` | ignore | 首次运行时处理 GitHub Lists | 大多数用户没有 Lists，避免误操作 |
+| `retry_failed` | false | 重试之前 LLM 分析失败的项目 | 失败项目通常是无效仓库，按需重试 |
+
+**自动运行（schedule）与手动运行的区别**：
+- **自动运行（每周一）**：默认 `--incremental --check-all-releases`，自动做增量分类 + 全量 Release 检查
+- **手动运行**：默认 `--incremental --check-all-releases`，和自动运行一致。可额外勾选 `use_llm`、`force_refresh` 等做深度维护
+
 ---
 
 ## ⚠️ 首次运行行为说明（重要）

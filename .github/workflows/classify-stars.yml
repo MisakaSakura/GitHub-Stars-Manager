@@ -87,7 +87,7 @@ on:
       check_all_releases:
         description: '检查所有仓库的新 Release（生成周报）'
         required: false
-        default: 'false'
+        default: 'true'
         type: choice
         options: ['false', 'true']
 
