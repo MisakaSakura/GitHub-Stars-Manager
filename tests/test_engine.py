@@ -240,3 +240,41 @@ class TestIncrementalEngine(unittest.TestCase):
         }]
         stats = self.engine.process(items)
         self.assertEqual(stats["error"], 1)
+
+    def test_new_keys_tracks_only_new_items(self):
+        """new_keys 应只包含本次运行实际新增的项目"""
+        self.db.set("user/old", {
+            "full_name": "user/old", "name": "old", "owner": "user",
+            "first_seen": "2024-01-01", "last_updated": "2024-01-01",
+        })
+        items = [
+            _fake_item(name="old"),  # 已有项目
+            _fake_item(name="new"),  # 新项目
+        ]
+        stats = self.engine.process(items, force_refresh=True)
+        self.assertEqual(stats["updated"], 1)
+        self.assertEqual(stats["new"], 1)
+        self.assertEqual(self.engine.new_keys, {"user/new"})
+        self.assertNotIn("user/old", self.engine.new_keys)
+
+    def test_star_changes_tracked_for_existing(self):
+        """star_changes 应记录已有项目的 stars 增长"""
+        self.db.set("user/repo", {
+            "full_name": "user/repo", "name": "repo", "owner": "user",
+            "stars": 100, "first_seen": "2024-01-01", "last_updated": "2024-01-01",
+        })
+        items = [_fake_item(name="repo", stars=150)]
+        stats = self.engine.process(items, incremental=True)
+        self.assertEqual(stats["skipped"], 1)
+        self.assertEqual(self.engine.star_changes.get("user/repo"), 50)
+
+    def test_star_changes_not_tracked_when_no_growth(self):
+        """stars 没有增长时不应记录"""
+        self.db.set("user/repo", {
+            "full_name": "user/repo", "name": "repo", "owner": "user",
+            "stars": 100, "first_seen": "2024-01-01", "last_updated": "2024-01-01",
+        })
+        items = [_fake_item(name="repo", stars=100)]
+        stats = self.engine.process(items, incremental=True)
+        self.assertEqual(stats["skipped"], 1)
+        self.assertNotIn("user/repo", self.engine.star_changes)

@@ -260,6 +260,8 @@ class Pipeline:
 
         # 记录本次是否为全量刷新（用于 _save 中更新时间戳）
         self._did_full_refresh = force_refresh
+        self.new_keys = self.engine.new_keys
+        self.star_changes = self.engine.star_changes
 
         # 将 LLM 结果同步到独立 AI 数据库
         if self.llm and self.ai_db:
@@ -308,14 +310,13 @@ class Pipeline:
             return
         report = ReportGenerator(self.db, ai_db=self.ai_db)
         # Build weekly digest data for HTML report
-        from datetime import datetime, timezone, timedelta
-        now = datetime.now(timezone.utc)
-        week_ago = (now - timedelta(days=7)).isoformat()
-        new_items = [r for r in self.db.values() if r.get("first_seen", "") >= week_ago]
+        # 使用 engine 记录的本次实际新增项目，避免 first_seen 被错误重置导致全部项目被视为新收录
+        new_items = [self.db.get(k) for k in (getattr(self, "new_keys", None) or set()) if self.db.get(k)]
         weekly_data = {
             "new_items": new_items,
             "release_updates": self.release_updates,
-        } if (new_items or self.release_updates) else None
+            "star_changes": getattr(self, "star_changes", {}),
+        } if (new_items or self.release_updates or getattr(self, "star_changes", {})) else None
         report.generate_html(self.args.output, weekly_data=weekly_data)
         report.generate_csv(self.args.output)
         report.generate_json(self.args.output)

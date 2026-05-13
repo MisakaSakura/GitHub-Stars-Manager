@@ -188,21 +188,33 @@ class ReportGenerator:
         if weekly_data:
             new_items = weekly_data.get("new_items", [])
             release_updates = weekly_data.get("release_updates", [])
-            if new_items or release_updates:
-                wd_parts.append('<div class="weekly-digest">')
-                wd_parts.append('<h2>📅 本周摘要</h2>')
+            star_changes = weekly_data.get("star_changes", {})
+            has_content = new_items or release_updates or star_changes
+            if has_content:
+                wd_parts.append('<div class="weekly-digest" id="wd-main">')
+                wd_parts.append('<div class="wd-header"><h2>📅 本周摘要</h2><button class="wd-toggle" onclick="tw()">收起 ▲</button></div>')
+                wd_parts.append('<div id="wd-body">')
                 if new_items:
                     wd_parts.append(f'<div class="wd-section"><h3>🆕 新收录 ({len(new_items)})</h3><div class="wd-list">')
                     for it in new_items:
                         url = it.get("url") or it.get("html_url", "#")
                         wd_parts.append(f'<div class="wd-item"><a href="{url}" target="_blank">{it["full_name"]}</a><span class="wd-eco">{it["ecology"]}</span></div>')
                     wd_parts.append('</div></div>')
+                if star_changes:
+                    top_changes = sorted(star_changes.items(), key=lambda x: x[1], reverse=True)[:10]
+                    wd_parts.append(f'<div class="wd-section"><h3>🔥 本周热门 (Stars +)</h3><div class="wd-list">')
+                    for key, delta in top_changes:
+                        item = self.db.get(key)
+                        if item:
+                            url = item.get("url") or "#"
+                            wd_parts.append(f'<div class="wd-item"><a href="{url}" target="_blank">{item["full_name"]}</a><span class="wd-tag">+{delta:,} ⭐</span></div>')
+                    wd_parts.append('</div></div>')
                 if release_updates:
                     wd_parts.append(f'<div class="wd-section"><h3>🚀 新 Release ({len(release_updates)})</h3><div class="wd-list">')
                     for ru in release_updates:
                         wd_parts.append(f'<div class="wd-item"><a href="{ru["html_url"]}" target="_blank">{ru["full_name"]}</a><span class="wd-tag">{ru["old_tag"]} → {ru["new_tag"]}</span></div>')
                     wd_parts.append('</div></div>')
-                wd_parts.append('</div>')
+                wd_parts.append('</div></div>')
         weekly_digest = "".join(wd_parts) if wd_parts else ""
 
         with open(self.template_path, "r", encoding="utf-8") as f:

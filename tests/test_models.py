@@ -66,3 +66,16 @@ class TestStarItem(unittest.TestCase):
         star = StarItem.from_dict(d)
         self.assertEqual(star.full_name, "a/b")
         self.assertFalse(hasattr(star, "unknown_field"))
+
+    def test_from_dict_fallback_first_seen(self):
+        """旧数据没有 first_seen 时应兜底为很早时间，避免被误判为新收录"""
+        d = {"full_name": "a/b", "name": "b", "owner": "a"}
+        star = StarItem.from_dict(d)
+        self.assertTrue(star.first_seen)
+        self.assertEqual(star.first_seen, "1970-01-01T00:00:00+00:00")
+
+    def test_from_dict_preserves_existing_first_seen(self):
+        """已有 first_seen 时应保留原值"""
+        d = {"full_name": "a/b", "name": "b", "owner": "a", "first_seen": "2024-06-01T00:00:00+00:00"}
+        star = StarItem.from_dict(d)
+        self.assertEqual(star.first_seen, "2024-06-01T00:00:00+00:00")

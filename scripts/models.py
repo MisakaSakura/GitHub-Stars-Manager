@@ -69,7 +69,11 @@ class StarItem:
     def from_dict(cls, data: Dict[str, Any]) -> "StarItem":
         """从字典创建 StarItem，忽略未知字段"""
         known = {f.name for f in cls.__dataclass_fields__.values()}
-        return cls(**{k: v for k, v in data.items() if k in known})
+        filtered = {k: v for k, v in data.items() if k in known}
+        # 兜底：旧数据可能没有 first_seen，避免被误判为新收录
+        if not filtered.get("first_seen"):
+            filtered["first_seen"] = filtered.get("last_updated") or "1970-01-01T00:00:00+00:00"
+        return cls(**filtered)
 
     # --- dict 兼容层（迁移期间使用）---
     def __getitem__(self, key: str):

@@ -32,6 +32,8 @@ class IncrementalEngine:
             "new": 0, "updated": 0, "skipped": 0,
             "protected": 0, "llm_enhanced": 0, "error": 0
         }
+        self.new_keys: set[str] = set()
+        self.star_changes: dict[str, int] = {}
 
     def _needs_llm(self, key: str, existing, force_refresh: bool, retry_failed: bool, llm_interval_days: int) -> bool:
         """判断项目是否需要 LLM 分析：独立增量策略，不受规则增量模式影响"""
@@ -114,6 +116,12 @@ class IncrementalEngine:
                 self.stats["protected"] += 1
                 return
 
+            # 记录 stars 变化（用于周报动态）
+            old_stars = existing.get("stars", 0)
+            new_stars = item.get("stargazers_count", 0)
+            if new_stars > old_stars:
+                self.star_changes[key] = new_stars - old_stars
+
             if force_refresh:
                 classification = self._classify_item(item, use_llm, llm_result, subscribe_all_releases)
                 classification.first_seen = existing.first_seen
@@ -124,7 +132,7 @@ class IncrementalEngine:
                 return
 
             if incremental:
-                existing.stars = item.get("stargazers_count", 0)
+                existing.stars = new_stars
                 existing.description = item.get("description") or ""
                 existing.topics = item.get("topics", [])
                 existing.last_updated = datetime.now(timezone.utc).isoformat()
@@ -141,6 +149,7 @@ class IncrementalEngine:
 
         classification = self._classify_item(item, use_llm, llm_result, subscribe_all_releases)
         self.db.set(key, classification)
+        self.new_keys.add(key)
         self.stats["new"] += 1
 
     def _classify_item(self, item: dict, use_llm: bool, llm_result: dict | None = None, subscribe_all_releases: bool = False) -> StarItem:
