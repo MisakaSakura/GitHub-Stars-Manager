@@ -395,6 +395,9 @@ class Pipeline:
         report.generate_html(self.args.output, weekly_data=weekly_data)
         report.generate_csv(self.args.output)
         report.generate_json(self.args.output)
+        # 生成独立的 Release 更新日志页面
+        history_path = os.path.join(os.path.dirname(self.args.db), "releases_history.json")
+        report.generate_releases_log(self.args.output, history_path=history_path)
 
     def _sync_notion(self) -> None:
         if not (self.args.notion_key and self.args.notion_db) or self.args.dry_run:
@@ -417,6 +420,46 @@ class Pipeline:
             self.release_updates = self.release_tracker.digest_with_llm(self.release_updates, self.llm)
         if self.release_updates:
             self.db.save()
+            self._save_release_history()
+
+    def _save_release_history(self) -> None:
+        """将本次检测到的 Release 追加到历史记录，按 full_name + new_tag 去重"""
+        if not self.release_updates:
+            return
+        history_path = os.path.join(os.path.dirname(self.args.db), "releases_history.json")
+        existing: list[dict] = []
+        if os.path.exists(history_path):
+            try:
+                with open(history_path, "r", encoding="utf-8") as f:
+                    existing = json.load(f)
+            except Exception:
+                existing = []
+
+        seen = {(r.get("full_name"), r.get("new_tag")) for r in existing}
+        for ru in self.release_updates:
+            key = (ru.get("full_name"), ru.get("new_tag"))
+            if key not in seen:
+                existing.append({
+                    "full_name": ru["full_name"],
+                    "name": ru["name"],
+                    "owner": ru["owner"],
+                    "old_tag": ru["old_tag"],
+                    "new_tag": ru["new_tag"],
+                    "published_at": ru.get("published_at", ""),
+                    "html_url": ru.get("html_url", ""),
+                    "body": ru.get("body", ""),
+                    "ai_digest": ru.get("ai_digest", ""),
+                    "detected_at": datetime.now(timezone.utc).isoformat(),
+                })
+                seen.add(key)
+
+        existing.sort(key=lambda x: x.get("published_at", ""), reverse=True)
+        # 保留最近 500 条
+        existing = existing[:500]
+
+        with open(history_path, "w", encoding="utf-8") as f:
+            json.dump(existing, f, ensure_ascii=False, indent=2)
+        log(f"Release 历史已更新: {len(existing)} 条记录", "OK")
 
     def _track_forks(self) -> None:
         if not self.args.check_forks or self.args.dry_run:
