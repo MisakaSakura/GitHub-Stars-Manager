@@ -212,8 +212,9 @@ jobs:
             ARGS+=("--notify" "--notify-channels" "email")
           fi
 
-          # GitHub Lists 策略
-          ARGS+=("--lists-strategy" "${{ github.event.inputs.lists_strategy }}")
+          # GitHub Lists 策略（schedule 触发时 inputs 为空，使用默认值 ignore）
+          LIST_STRATEGY="${{ github.event.inputs.lists_strategy }}"
+          ARGS+=("--lists-strategy" "${LIST_STRATEGY:-ignore}")
 
           # Release / Fork 追踪
           # 每周一自动运行默认全量检查 Release（生成周报）
