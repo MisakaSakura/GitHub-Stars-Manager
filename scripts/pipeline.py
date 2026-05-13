@@ -65,10 +65,11 @@ class Pipeline:
         self._enrich()
         self._classify()
         self._save()
-        self._generate_reports()
         self._sync_notion()
         self._track_releases()
         self._track_forks()
+        # 报告生成必须在追踪之后，否则 Release/Fork 更新不会出现在周报中
+        self._generate_reports()
         self._notify()
         self._print_summary()
 
