@@ -186,6 +186,28 @@ document.querySelectorAll('.rl-body').forEach(function(b){{if(b.scrollHeight>200
         return path
 
     @staticmethod
+    def _relative_time(iso_str: str) -> str:
+        """ISO 时间转中文相对时间（如 3小时前）"""
+        if not iso_str:
+            return ""
+        from datetime import datetime, timezone
+        try:
+            dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
+            now = datetime.now(timezone.utc)
+            delta = now - dt
+            if delta.days >= 1:
+                return f"{delta.days}天前"
+            hours = delta.seconds // 3600
+            if hours >= 1:
+                return f"{hours}小时前"
+            minutes = delta.seconds // 60
+            if minutes >= 1:
+                return f"{minutes}分钟前"
+            return "刚刚"
+        except Exception:
+            return ""
+
+    @staticmethod
     def _render_release_body(text: str) -> str:
         """简单渲染 Release Notes 为 HTML（保留格式 + 简单 Markdown）"""
         if not text:
@@ -377,26 +399,47 @@ document.querySelectorAll('.rl-body').forEach(function(b){{if(b.scrollHeight>200
                 cc_parts.append('</div></div>')
                 add_tab("classify", f"📝 分类变更 ({len(classification_changes)})", "".join(cc_parts))
 
-            # 新 Release
+            # 新 Release（卡片式布局，类似 GitHub Feed）
             if release_updates:
                 ru_parts: list[str] = []
-                ru_parts.append(f'<div class="wd-section"><h3>🚀 新 Release ({len(release_updates)})</h3><div class="wd-list">')
+                ru_parts.append(f'<div class="wd-section"><h3>🚀 新 Release ({len(release_updates)})</h3>')
                 for ru in release_updates:
-                    ru_parts.append(f'<div class="wd-item"><a href="{ru["html_url"]}" target="_blank">{ru["full_name"]}</a><span class="wd-tag">{ru["old_tag"]} → {ru["new_tag"]}</span></div>')
-                    # Release Notes（保留 Markdown 格式）
+                    owner = ru["full_name"].split("/")[0]
+                    avatar_url = f"https://github.com/{owner}.png?size=48"
+                    rel_time = self._relative_time(ru.get("published_at", ""))
+                    # 版本跳转链接：如果有多个中间版本，链接到第一个中间版本或最新版本
+                    version_url = ru["html_url"]
+                    ru_parts.append(
+                        f'<div class="wd-release-card">'
+                        f'  <div class="wd-release-header">'
+                        f'    <img class="wd-release-avatar" src="{avatar_url}" alt="{owner}" loading="lazy" onerror="this.style.display=\'none\'">'
+                        f'    <div class="wd-release-meta">'
+                        f'      <a href="https://github.com/{ru["full_name"]}" target="_blank">{ru["full_name"]}</a> released'
+                        f'      <span class="wd-release-time">{rel_time}</span>'
+                        f'    </div>'
+                        f'  </div>'
+                        f'  <div class="wd-release-version">'
+                        f'    <a href="{version_url}" target="_blank">{ru["new_tag"]}</a>'
+                        f'  </div>'
+                    )
+                    # Release Notes
                     body = ru.get("body", "")
                     if body:
                         body_html = self._render_release_body(body)
-                        ru_parts.append(f'<div class="wd-notes">{body_html}</div><span class="wd-notes-toggle" onclick="wtn(this)">展开</span>')
+                        ru_parts.append(
+                            f'  <div class="wd-release-body">{body_html}</div>'
+                            f'  <span class="wd-release-toggle" onclick="wrt(this)">展开</span>'
+                        )
                     else:
-                        ru_parts.append(f'<div style="color:#484f58;font-size:11px;margin-top:2px;">无更新日志</div>')
+                        ru_parts.append(f'  <div class="wd-release-empty">无更新日志</div>')
                     # AI 摘要
                     ai_digest = ru.get("ai_digest", "")
                     if ai_digest:
-                        ru_parts.append(f'<div class="wd-ai-digest">🤖 {escape(ai_digest)}</div>')
-                # 添加链接到完整 Release 日志页面
+                        ru_parts.append(f'  <div class="wd-ai-digest">🤖 {escape(ai_digest)}</div>')
+                    ru_parts.append('</div>')
+                # 链接到完整 Release 日志页面
                 ru_parts.append(f'<div style="margin-top:10px;text-align:right"><a href="releases.html" target="_blank" style="color:#58a6ff;font-size:12px;text-decoration:none">查看完整 Release 日志 →</a></div>')
-                ru_parts.append('</div></div>')
+                ru_parts.append('</div>')
                 add_tab("release", f"🚀 Release ({len(release_updates)})", "".join(ru_parts))
 
             # Fork 上游更新
@@ -410,8 +453,8 @@ document.querySelectorAll('.rl-body').forEach(function(b){{if(b.scrollHeight>200
                 add_tab("fork", f"🔱 Fork ({len(fork_updates)})", "".join(fu_parts))
 
             if tabs_html:
-                wd_parts.append('<div class="weekly-digest collapsed" id="wd-main">')
-                wd_parts.append('<div class="wd-header"><h2>📅 本周摘要</h2><button class="wd-toggle" onclick="tw()">展开 ▼</button></div>')
+                wd_parts.append('<div class="weekly-digest" id="wd-main">')
+                wd_parts.append('<div class="wd-header"><h2>📅 本周摘要</h2><button class="wd-toggle" onclick="tw()">收起 ▲</button></div>')
                 wd_parts.append('<div id="wd-body">')
                 # AI 总结卡片
                 if ai_summary:
