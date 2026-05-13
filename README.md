@@ -189,8 +189,11 @@
 | Variable | 值 | 说明 |
 |----------|-----|------|
 | `LLM_BASE` | `https://api.mimo.run/v1` | 你的兼容服务 Base URL，**必须**以 `/v1` 结尾 |
+| `LLM_MODEL` | `mimo-v2.5` | 默认使用的 LLM 模型（手动选择 `default` 时生效） |
 
-配置了 Variable 后，无论是手动触发还是未来自动启用 LLM，都会自动使用这个 Base URL，无需每次填写。
+配置了 Variable 后，无论是手动触发还是未来自动启用 LLM，都会自动使用这个 Base URL 和模型，无需每次填写。
+
+**优先级**：手动选择具体模型 > `LLM_MODEL` Variable > provider 默认模型。
 
 **方式 B：config_llm.py（代码级配置）**
 

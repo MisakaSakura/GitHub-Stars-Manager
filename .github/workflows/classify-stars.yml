@@ -45,7 +45,7 @@ on:
         options: ['openai', 'moonshot', 'deepseek', 'openrouter']
 
       llm_model:
-        description: '🤖 LLM 模型（default = 使用 provider 默认：openai→gpt-4o-mini, moonshot→moonshot-v1-8k, deepseek→deepseek-chat）'
+        description: '🤖 LLM 模型（default = 优先使用 Variable LLM_MODEL，其次 provider 默认）'
         required: false
         default: 'default'
         type: choice
@@ -220,9 +220,13 @@ jobs:
 
           if [ "$USE_LLM" = "true" ] && [ -n "$LLM_KEY" ]; then
             ARGS+=("--llm-key" "$LLM_KEY" "--llm-provider" "${{ github.event.inputs.llm_provider }}")
-            LLM_MODEL="${{ github.event.inputs.llm_model }}"
-            if [ -n "$LLM_MODEL" ] && [ "$LLM_MODEL" != "default" ]; then
-              ARGS+=("--llm-model" "$LLM_MODEL")
+            # llm_model 优先级：手动选择 > Repository Variable > provider 默认
+            INPUT_MODEL="${{ github.event.inputs.llm_model }}"
+            VARS_MODEL="${{ vars.LLM_MODEL }}"
+            if [ "$INPUT_MODEL" != "default" ] && [ -n "$INPUT_MODEL" ]; then
+              ARGS+=("--llm-model" "$INPUT_MODEL")
+            elif [ -n "$VARS_MODEL" ]; then
+              ARGS+=("--llm-model" "$VARS_MODEL")
             fi
             # llm_base 来源优先级：手动输入 > Repository Variables > config_llm.py
             if [ -n "$LLM_BASE" ]; then
