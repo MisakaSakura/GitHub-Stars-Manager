@@ -33,6 +33,11 @@ class ReleaseTracker(BaseTracker):
             try:
                 owner, repo = item["full_name"].split("/")
                 releases = self.gh.list_releases(owner, repo, per_page=30)
+                # 防御：API 可能返回非列表或包含 None 的列表
+                if not isinstance(releases, list):
+                    log(f"  {owner}/{repo} list_releases 返回非列表: {type(releases).__name__}", "WARN")
+                    return None, None
+                releases = [r for r in releases if isinstance(r, dict)]
                 if not releases:
                     return None, None
 

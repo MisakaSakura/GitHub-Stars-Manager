@@ -5,6 +5,7 @@
 import os
 import sys
 from collections import Counter
+from datetime import datetime, timezone
 
 from utils import log
 from github_api import GitHubAPI, GitHubAuthError, GitHubRateLimitError
