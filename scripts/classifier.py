@@ -88,10 +88,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     # Release / Fork 追踪
     parser.add_argument("--check-releases", action="store_true",
                         help="检查已订阅仓库是否有新 Release")
+    parser.add_argument("--check-all-releases", action="store_true",
+                        help="检查所有仓库的新 Release（生成周报，无需 subscribe_releases）")
     parser.add_argument("--check-forks", action="store_true",
                         help="检查 Fork 仓库的上游是否有更新")
     parser.add_argument("--subscribe-releases", action="store_true",
                         help="将所有仓库标记为订阅 Release（首次运行时有效）")
+    parser.add_argument("--llm-release-digest", action="store_true",
+                        help="对 Release Notes 生成 AI 摘要（需要配置 LLM）")
 
     # 通知
     parser.add_argument("--notify", action="store_true", help="启用通知")
