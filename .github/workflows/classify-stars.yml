@@ -22,116 +22,50 @@ on:
         type: choice
         options: ['incremental', 'deep', 'full', 'custom']
 
-      # ===== 🤖 AI / LLM 选项 =====
-      use_llm:
-        description: '🤖 启用 LLM 智能分类（需配置 LLM_KEY Secret）'
+      # ===== 🤖 AI / LLM（3 个参数）=====
+      llm_mode:
+        description: '🤖 LLM 模式'
         required: false
-        default: 'false'
+        default: 'auto'
         type: choice
-        options: ['false', 'true']
-
-      force_llm:
-        description: '🤖 无视间隔强制 LLM（勾选后自动启用 use_llm）'
-        required: false
-        default: 'false'
-        type: choice
-        options: ['false', 'true']
+        options: ['auto', 'off', 'force']
 
       llm_preset:
-        description: '🤖 LLM 预设（内置: openai/moonshot/deepseek/openrouter/xiaomimimo；也可输入自定义预设名）'
+        description: '🤖 预设（内置: openai/moonshot/deepseek/openrouter/xiaomimimo；也可输入自定义名）'
         required: false
         default: ''
         type: string
 
-      llm_provider:
-        description: '🤖 LLM 提供商（可被 preset 覆盖）'
+      retry_failed:
+        description: '🤖 重试之前 AI 分析失败的项目'
         required: false
-        default: 'openai'
+        default: 'false'
         type: choice
-        options: ['openai', 'moonshot', 'deepseek', 'openrouter']
+        options: ['false', 'true']
 
-      llm_model:
-        description: '🤖 LLM 模型（可被 preset 覆盖；default = 优先 Variable LLM_MODEL）'
-        required: false
-        default: 'default'
-        type: choice
-        options: ['default', 'gpt-4o-mini', 'gpt-4o', 'moonshot-v1-8k', 'deepseek-chat', 'deepseek-reasoner', 'mimo-v2.5']
-
-      llm_base:
-        description: '🤖 LLM Base URL（可被 preset 覆盖；兼容 OpenAI 的第三方服务）'
-        required: false
-        default: ''
-        type: string
-
+      # ===== 📤 导出（1 个参数）=====
       sync_notion:
-        description: '同步到 Notion（需要设置 NOTION_KEY 和 NOTION_DB）'
+        description: '📤 同步到 Notion（clear = 先清空再同步，危险！）'
         required: false
         default: 'false'
         type: choice
-        options: ['false', 'true']
+        options: ['false', 'true', 'clear']
 
-      notion_clear:
-        description: '导出前清空 Notion（危险！会归档所有旧页面）'
+      # ===== 🔔 通知（1 个参数）=====
+      notify:
+        description: '🔔 通知渠道'
         required: false
         default: 'false'
         type: choice
-        options: ['false', 'true']
+        options: ['false', 'email', 'telegram', 'wecom', 'qq', 'all']
 
-      send_notify:
-        description: '发送通知（需要配置对应通知渠道的 Secrets）'
-        required: false
-        default: 'false'
-        type: choice
-        options: ['false', 'true']
-
+      # ===== ⚙️ 其他（2 个参数）=====
       lists_strategy:
-        description: 'GitHub Lists 处理策略（首次运行时生效）'
+        description: '⚙️ GitHub Lists 处理策略（首次运行时生效）'
         required: false
         default: 'ignore'
         type: choice
         options: ['ignore', 'migrate', 'replace']
-
-      retry_failed:
-        description: '重试之前 AI 分析失败的项目'
-        required: false
-        default: 'false'
-        type: choice
-        options: ['false', 'true']
-
-      notify_channels:
-        description: '通知通道（send_notify=true 时生效）'
-        required: false
-        default: 'email'
-        type: string
-
-      # --- 以下仅在 mode=custom 时生效 ---
-      force_refresh:
-        description: '[custom] 强制全量刷新'
-        required: false
-        default: 'false'
-        type: choice
-        options: ['false', 'true']
-
-      check_all_releases:
-        description: '[custom] 检查所有 Release'
-        required: false
-        default: 'true'
-        type: choice
-        options: ['false', 'true']
-
-      check_forks:
-        description: '[custom] 检查 Fork 上游更新'
-        required: false
-        default: 'false'
-        type: choice
-        options: ['false', 'true']
-
-      subscribe_releases:
-        description: '[custom] 标记所有仓库订阅 Release'
-        required: false
-        default: 'false'
-        type: choice
-        options: ['false', 'true']
 
 permissions:
   contents: write
@@ -169,7 +103,6 @@ jobs:
       - name: Install dependencies
         run: |
           pip install requests || true
-          # 确保 requirements.txt 存在（用于缓存 key）
           echo "requests>=2.31.0" > requirements.txt
 
       - name: Run classifier
@@ -179,7 +112,8 @@ jobs:
           LLM_KEY: ${{ secrets.LLM_KEY }}
           LLM_PRESET: ${{ github.event.inputs.llm_preset || vars.LLM_PRESET }}
           LLM_PRESETS: ${{ vars.LLM_PRESETS }}
-          LLM_BASE: ${{ github.event.inputs.llm_base || vars.LLM_BASE }}
+          LLM_BASE: ${{ vars.LLM_BASE }}
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
           NOTION_KEY: ${{ secrets.NOTION_KEY }}
           NOTION_DB: ${{ secrets.NOTION_DB }}
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
@@ -192,8 +126,6 @@ jobs:
         run: |
           mkdir -p docs data
 
-          # P1: 构建参数列表，避免 eval 带来的命令注入风险
-          # 运行模式：schedule 自动运行默认 incremental；手动运行使用 inputs.mode
           MODE="${{ github.event.inputs.mode }}"
           if [ -z "$MODE" ]; then
             MODE="incremental"
@@ -212,78 +144,69 @@ jobs:
             ARGS+=("--check-all-releases")
           fi
 
-          # LLM 智能增强
-          # 联动逻辑：force_llm=true 自动视为 use_llm=true
-          USE_LLM="${{ github.event.inputs.use_llm }}"
-          FORCE_LLM="${{ github.event.inputs.force_llm }}"
-          if [ "$FORCE_LLM" = "true" ]; then
+          # ===== LLM 模式映射 =====
+          # auto:  按 mode 联动（full 模式自动启用）；off = 明确关闭；force = 无视间隔
+          LLM_MODE="${{ github.event.inputs.llm_mode }}"
+          USE_LLM="false"
+          FORCE_LLM="false"
+
+          if [ "$LLM_MODE" = "force" ]; then
             USE_LLM="true"
-          fi
-          # full 模式默认启用 LLM（如果配置了 LLM_KEY）
-          # use_llm=false 视为用户明确关闭，其他情况（包括默认未勾选）均自动启用
-          if [ "$MODE" = "full" ] && [ -n "$LLM_KEY" ] && [ "$USE_LLM" != "false" ]; then
-            USE_LLM="true"
-            echo "[模式联动] full 模式自动启用 LLM（已配置 LLM_KEY）"
+            FORCE_LLM="true"
+          elif [ "$LLM_MODE" = "off" ]; then
+            USE_LLM="false"
+          else
+            # auto: full 模式自动启用（配置了 LLM_KEY 时）
+            if [ "$MODE" = "full" ] && [ -n "$LLM_KEY" ]; then
+              USE_LLM="true"
+              echo "[模式联动] full 模式自动启用 LLM"
+            fi
           fi
 
           if [ "$USE_LLM" = "true" ] && [ -n "$LLM_KEY" ]; then
-            # preset 优先：一行同时设置 provider+base+model
             if [ -n "$LLM_PRESET" ]; then
               ARGS+=("--llm-preset" "$LLM_PRESET")
             fi
-            # 显式参数仍可覆盖 preset（保持向后兼容）
-            ARGS+=("--llm-provider" "${{ github.event.inputs.llm_provider }}")
-            INPUT_MODEL="${{ github.event.inputs.llm_model }}"
-            VARS_MODEL="${{ vars.LLM_MODEL }}"
-            if [ "$INPUT_MODEL" != "default" ] && [ -n "$INPUT_MODEL" ]; then
-              ARGS+=("--llm-model" "$INPUT_MODEL")
-            elif [ -n "$VARS_MODEL" ]; then
-              ARGS+=("--llm-model" "$VARS_MODEL")
-            fi
-            # llm_base 来源优先级：手动输入 > Repository Variables > preset 内置 > config_llm.py
+            # 向后兼容：Variable 级别的 base/model 覆盖
             if [ -n "$LLM_BASE" ]; then
               ARGS+=("--llm-base" "$LLM_BASE")
+            fi
+            if [ -n "$LLM_MODEL" ] && [ "$LLM_MODEL" != "default" ]; then
+              ARGS+=("--llm-model" "$LLM_MODEL")
             fi
             if [ "$FORCE_LLM" = "true" ]; then
               ARGS+=("--force-llm")
             fi
           fi
 
-          # Notion 同步
-          if [ "${{ github.event.inputs.sync_notion }}" = "true" ] && [ -n "$NOTION_KEY" ] && [ -n "$NOTION_DB" ]; then
+          # ===== Notion 同步 =====
+          SYNC_NOTION="${{ github.event.inputs.sync_notion }}"
+          if [ "$SYNC_NOTION" != "false" ] && [ -n "$NOTION_KEY" ] && [ -n "$NOTION_DB" ]; then
             ARGS+=("--notion-key" "$NOTION_KEY" "--notion-db" "$NOTION_DB")
-            if [ "${{ github.event.inputs.notion_clear }}" = "true" ]; then
+            if [ "$SYNC_NOTION" = "clear" ]; then
               ARGS+=("--notion-clear")
             fi
           fi
 
-          # GitHub Lists 策略（schedule 触发时 inputs 为空，使用默认值 ignore）
+          # ===== GitHub Lists 策略 =====
           LIST_STRATEGY="${{ github.event.inputs.lists_strategy }}"
           ARGS+=("--lists-strategy" "${LIST_STRATEGY:-ignore}")
 
-          # custom 模式下的手动开关（其他模式由 --mode 自动处理）
+          # ===== custom 模式默认值 =====
+          # custom 默认启用 force_refresh + check_all_releases，不启用 check_forks / subscribe_releases
           if [ "$MODE" = "custom" ]; then
-            if [ "${{ github.event.inputs.force_refresh }}" = "true" ]; then
-              ARGS+=("--force-refresh")
-            fi
-            if [ "${{ github.event.inputs.check_all_releases }}" = "true" ]; then
-              ARGS+=("--check-all-releases")
-            fi
-            if [ "${{ github.event.inputs.check_forks }}" = "true" ]; then
-              ARGS+=("--check-forks")
-            fi
-            if [ "${{ github.event.inputs.subscribe_releases }}" = "true" ]; then
-              ARGS+=("--subscribe-releases")
-            fi
+            ARGS+=("--force-refresh" "--check-all-releases")
           fi
 
+          # ===== 重试失败 =====
           if [ "${{ github.event.inputs.retry_failed }}" = "true" ]; then
             ARGS+=("--retry-failed")
           fi
 
-          # 通知
-          if [ "${{ github.event.inputs.send_notify }}" = "true" ]; then
-            ARGS+=("--notify" "--notify-channels" "${{ github.event.inputs.notify_channels }}")
+          # ===== 通知 =====
+          NOTIFY="${{ github.event.inputs.notify }}"
+          if [ "$NOTIFY" != "false" ]; then
+            ARGS+=("--notify" "--notify-channels" "$NOTIFY")
           fi
 
           echo "执行命令: python scripts/classifier.py ${ARGS[@]}"
@@ -300,7 +223,6 @@ jobs:
           if [ -f data/stars_db.meta.json ]; then
             git add -f data/stars_db.meta.json
           fi
-          # requirements.txt 若在工作区有修改则添加（注意：此处是工作区 vs HEAD，不是 --cached）
           if ! git diff --quiet -- requirements.txt 2>/dev/null; then
             git add requirements.txt
           fi

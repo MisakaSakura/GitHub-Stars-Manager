@@ -117,7 +117,7 @@
 |------|------|---------------|---------|---------|------|
 | **`incremental`** ⭐ | 日常增量更新 | 增量拉取 + Release 检查 | 按间隔控制（需手动启用） | 每周（自动运行） | 3-5 min |
 | **`deep`** | 深度整理 | 增量拉取 + **强制刷新规则** + Release + Fork | 按间隔控制（需手动启用） | 每月/每季度 | 15-25 min |
-| **`full`** | 全量刷新 | **全量拉取** + 强制刷新 + Release + Fork + 订阅标记 | **配置了 key 则自动 force_llm** | 首次/年度/大幅调整规则后 | 20-35 min |
+| **`full`** | 全量刷新 | **全量拉取** + 强制刷新 + Release + Fork + 订阅标记 | **auto 模式下自动启用 LLM** | 首次/年度/大幅调整规则后 | 20-35 min |
 | **`custom`** | 自定义 | 完全由其他开关控制 | 完全手动控制 | 按需 | 不定 |
 
 **模式详解**：
@@ -136,8 +136,7 @@
 | 选项 | 默认值 | 用途 |
 |------|--------|------|
 | `mode` | **incremental** | 运行模式：`incremental` / `deep` / `full` / `custom` |
-| `use_llm` | false | 启用 LLM 智能分类增强（需配置 `LLM_KEY`） |
-| `force_llm` | false | 无视间隔强制启用 LLM（`use_llm=true` 时生效） |
+| `llm_mode` | auto | `auto` = 按 mode 联动；`off` = 关闭；`force` = 无视间隔 |
 | `send_notify` | false | 发送通知到邮箱/QQ/TG/企业微信 |
 | `sync_notion` | false | 同步到 Notion 数据库 |
 | `lists_strategy` | ignore | 首次运行时处理 GitHub Lists |
@@ -225,13 +224,12 @@
 | `LLM_MODEL` | `model-name` | 默认模型 |
 
 **优先级**（从高到低）：
-1. Actions 手动输入（`llm_provider` / `llm_base` / `llm_model`）
-2. **`LLM_PRESETS`** Variable 中的自定义预设
-3. `config_llm.py` 中的 `CUSTOM_PRESETS`
-4. 内置预设（`PROVIDER_PRESETS`）
-5. `LLM_BASE` / `LLM_MODEL` Variable（向后兼容）
-6. `config_llm.py` 中的 `LLM_CONFIG`
-7. Provider 内置默认值
+1. **`LLM_PRESETS`** Variable 中的自定义预设
+2. `config_llm.py` 中的 `CUSTOM_PRESETS`
+3. 内置预设（`PROVIDER_PRESETS`）
+4. `LLM_BASE` / `LLM_MODEL` Variable（向后兼容）
+5. `config_llm.py` 中的 `LLM_CONFIG`
+6. Provider 内置默认值
 
 #### 4. 首次启用 LLM
 
@@ -239,14 +237,12 @@
 
 | 参数 | 推荐设置 | 说明 |
 |------|----------|------|
-| `mode` | **`full`** | 首次运行建议全量模式，确保所有项目都被覆盖 |
 | `mode` | **`full`** | 首次运行建议全量模式，自动启用所有必要检查 |
-| `use_llm` | ✅ `true` | 启用 LLM 智能分类（full 模式且配置了 LLM_KEY 时自动启用） |
-| `llm_preset` | 你的预设 | 内置：`openai`/`moonshot`/`deepseek`/`openrouter`/`xiaomimimo`；也可输入自定义预设名 |
-| `llm_provider` | 提供商（可被 preset 覆盖） | `moonshot` / `deepseek` / `openai` / `openrouter` |
-| `llm_model` | 模型（可被 preset 覆盖） | 留空使用 preset / provider 默认模型 |
-| `llm_base` | Base URL（可被 preset 覆盖） | 兼容服务的自定义端点 |
-| `force_llm` | ✅ `true`（仅首次） | 无视 30 天间隔，确保所有项目都被分析。勾选后自动联动 `use_llm` |
+| `llm_mode` | **`auto`** | `auto` = 按 mode 联动（full 自动启用）；`off` = 关闭；`force` = 无视间隔 |
+| `llm_preset` | 你的预设 | `xiaomimimo` / `deepseek` / `openai` 等；也可输入自定义预设名 |
+| `retry_failed` | `true`（可选） | 重试之前 AI 分析失败的项目 |
+| `sync_notion` | `false` | `true` = 同步；`clear` = 先清空再同步（危险） |
+| `notify` | `false` | `email` / `telegram` / `wecom` / `qq` / `all` |
 | `lists_strategy` | `migrate`（如有 Lists） | 从 GitHub Lists 迁移已有分类 |
 
 点击 **Run workflow** 后等待 5-10 分钟（取决于项目数量）。运行成功后：
@@ -259,12 +255,12 @@
 | 场景 | mode | LLM | 频率 | 耗时 |
 |------|------|-----|------|------|
 | **自动周报** | `incremental`（自动） | ❌ | 每周 | 3-5 min |
-| **LLM 维护** | `incremental` | `use_llm=true` | 每月 1 次 | 8-15 min |
-| **深度整理** | `deep` | `use_llm=true` + `force_llm=true` | 每季度或调整规则后 | 15-25 min |
+| **LLM 维护** | `incremental` | `llm_mode=force` | 每月 1 次 | 8-15 min |
+| **深度整理** | `deep` | `llm_mode=force` | 每季度或调整规则后 | 15-25 min |
 | **首次/年度大扫除** | `full` | **自动启用**（配置了 LLM_KEY 时） | 首次/每年 | 20-35 min |
 
-> 💡 **AI 选项联动**：勾选了 `force_llm` 会自动启用 `use_llm`，无需重复勾选。
-> 💡 **全量模式自动 AI**：`full` 模式下如果配置了 `LLM_KEY`，即使没勾 `use_llm` 也会自动启用 LLM（反正没配置 key 会优雅跳过）。
+> 💡 **LLM 模式简化**：`auto` 按 mode 自动判断；`off` 明确关闭；`force` 无视间隔强制分析。无需再纠结 use_llm + force_llm 的组合。
+> 💡 **全量模式自动 AI**：`full` + `auto` 模式下如果配置了 `LLM_KEY` 会自动启用 LLM。
 
 > 💡 **为什么自动运行默认不启用 LLM？** LLM 调用消耗 Token，而大部分用户的 Stars 变化量很小（每周几个新项目），自动启用会造成不必要的费用。建议每月手动触发一次 LLM 维护即可。
 
