@@ -172,6 +172,7 @@ tr:hover td{background:var(--bg-hover)}
       <select id="fe" onchange="fl()"><option value="">所有生态</option>{{ECOLOGY_OPTIONS}}</select>
       <select id="fr" onchange="fl()"><option value="">所有角色</option>{{ROLE_OPTIONS}}</select>
       <select id="fs" onchange="fl()"><option value="">所有分析状态</option>{{STATUS_OPTIONS}}</select>
+      <input type="text" id="fsearch" placeholder="🔍 搜索项目名、描述、标签..." oninput="fl()" style="flex:1;min-width:180px;background:var(--bg-input);color:var(--text-primary);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:12px;">
     </div>
     <table>
       <thead><tr><th>项目</th><th>生态</th><th>角色</th><th>平台</th><th>类型</th><th>语言</th><th>支持平台</th><th>Stars</th></tr></thead>
@@ -232,10 +233,12 @@ function wtn(el){
   el.textContent=notes.classList.contains('expanded')?'收起':'展开';
 }
 function fl(){
-  const fp=document.getElementById('fp').value,ft=document.getElementById('ft').value,fl=document.getElementById('fl').value,fe=document.getElementById('fe').value,fr=document.getElementById('fr').value,fs=document.getElementById('fs').value;
+  const fp=document.getElementById('fp').value,ft=document.getElementById('ft').value,flang=document.getElementById('fl').value,fe=document.getElementById('fe').value,fr=document.getElementById('fr').value,fs=document.getElementById('fs').value,fsearch=document.getElementById('fsearch').value.trim().toLowerCase();
   let v=0;
   document.querySelectorAll('#lb tr').forEach(r=>{
-    const s=(!fp||r.dataset.p===fp)&&(!ft||r.dataset.t===ft)&&(!fl||r.dataset.l===fl)&&(!fe||r.dataset.e===fe)&&(!fr||r.dataset.r===fr)&&(!fs||r.dataset.s===fs);
+    const matchFilter=(!fp||r.dataset.p===fp)&&(!ft||r.dataset.t===ft)&&(!flang||r.dataset.l===flang)&&(!fe||r.dataset.e===fe)&&(!fr||r.dataset.r===fr)&&(!fs||r.dataset.s===fs);
+    const matchSearch=!fsearch||r.textContent.toLowerCase().includes(fsearch);
+    const s=matchFilter&&matchSearch;
     r.style.display=s?'':'none';if(s)v++;
   });
   document.getElementById('le').style.display=v?'none':'block';

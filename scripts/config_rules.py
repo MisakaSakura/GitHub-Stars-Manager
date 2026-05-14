@@ -47,7 +47,10 @@ PLATFORM_RULES = {
     ],
     "游戏 / 图形": [
         "game", "graphics", "webgl", "3d", "unity", "unreal", "opengl",
-        "vulkan", "blender", "godot", "raytracing", "bevy", "love2d", "cocos"
+        "vulkan", "blender", "godot", "raytracing", "bevy", "love2d", "cocos",
+        "game-bot", "game-assistant", "game-helper", "auto-play", "automation",
+        "脚本", "辅助", "机器人", "bot", "cheat", "mod", "plugin",
+        "genshin", "honkai", "starrail", "arknights", "maa", "impact"
     ],
     "CLI / 终端": [
         "cli", "terminal", "shell", "command-line", "bash", "zsh",

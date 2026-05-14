@@ -85,6 +85,7 @@ batch 输出格式（JSON 数组，第 N 个元素对应第 N 个项目）:
 [{"platform":"...",...}, {...}, ...]
 
 platform: Web 前端, Web 后端, 移动端, 桌面端, AI / 机器学习, DevOps / 运维, 数据库, 云原生, IoT / 嵌入式, 游戏 / 图形, CLI / 终端, 安全 / 渗透, 网络 / 代理, 音视频 / 流媒体, 其他 / 未分类
+【重要】AI / 机器学习 仅指 AI 模型、训练框架、推理引擎、数据集等核心 AI 项目。使用 AI 技术的游戏辅助工具、自动化脚本、游戏机器人应归类为 游戏 / 图形 或 自动化 / 工作流，不要归为 AI / 机器学习。
 type: 框架 / Framework, 工具 / Tool, 应用 / App, 编辑器 / IDE, 资源合集 / Awesome, 语言 / Compiler, 监控 / 可视化, 自动化 / 工作流, 笔记 / 知识管理, 算法 / 学习, 配置 / Dotfiles, 其他 / 未分类
 ecology: 必须使用标准名称（禁止自由发挥）。标准生态: Clash / Mihomo, MPV, VS Code, Neovim, Obsidian, Home Assistant, Docker, React, Vue, Tailwind CSS, FFmpeg, qBittorrent, Hyprland, Zsh / Oh-My-Zsh, Starship, Alacritty, Kitty, i3 / Sway, AwesomeWM, Firefox, Git, Magisk; 非上述生态填 null 或 独立项目
 ecology_role: 核心 / Core, GUI 前端 / Client, 配置 / Config, 脚本 / Script, 主题 / Theme, 插件 / Plugin, 规则集 / Rules, Web UI / Dashboard, API 封装 / Wrapper, 教程 / Guide, 其他 / Other
