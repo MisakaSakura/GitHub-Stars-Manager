@@ -2,7 +2,7 @@
 
 自动为你的 GitHub Stars 按 **平台、类型、语言、生态归属** 四维分类，生成可搜索的 HTML 报告和周报摘要，支持 LLM 智能增强、增量更新、手动修正保护、Notion 导出、多通道通知、Release 跟踪、Fork 上游跟踪。
 
-> 📌 **设计目标说明**：本工具是**本地分类报告生成器**，不是 GitHub Lists 的同步客户端。分类结果存储在仓库的 `data/stars_db.json` 中，并通过 GitHub Pages 部署为 HTML 报告。由于 GitHub 目前未公开 Lists 的写入 API，工具**不会自动修改你账号中的 GitHub Lists**（Lists 仅作为可选的初始导入源）。
+> 📌 **设计目标说明**：本工具是 **本地分类报告生成器**，不是 GitHub Lists 的同步客户端。分类结果存储在仓库的 `data/stars_db.json` 中，并通过 GitHub Pages 部署为 HTML 报告。由于 GitHub 目前未公开 Lists 的写入 API，工具 **不会自动修改你账号中的 GitHub Lists**（Lists 仅作为可选的初始导入源）。
 
 🔗 **在线报告**: 部署后访问 `https://你的用户名.github.io/你的仓库名/`
 
@@ -104,9 +104,9 @@
 进入 **Actions → Auto Classify GitHub Stars → Run workflow**
 
 > 💡 **报告范围说明**：
-> - 首次运行：全量分类你所有的 Stars，生成**完整报告**（显示所有项目）
-> - 后续增量运行：只处理新 Star 的项目，但报告仍然是**全量重新生成**的
-> - 每周变化（新增项目 + 新 Release）会在报告的"本周摘要"区块中高亮显示
+> - 首次运行：全量分类你所有的 Stars，生成 **完整报告**（显示所有项目）
+> - 后续增量运行：只处理新 Star 的项目，但报告仍然是 **全量重新生成** 的
+> - 每周变化（新增项目 + 新 Release）会在报告的 "本周摘要" 区块中高亮显示
 > - 如需查看纯增量变化，可查看通知消息或 Git commit diff
 
 ### Actions 运行模式
@@ -178,48 +178,60 @@
 
 > ⚠️ **安全提示**：Secret 一旦保存不可查看，只能删除后重新添加。建议先在本地文本编辑器确认 Key 正确再粘贴。
 
-#### 3.5 配置 LLM 端点与模型（可选）
+#### 3.5 配置 LLM 预设（推荐）
 
-如果你使用**兼容 OpenAI 格式的第三方服务**（如 mimo、Azure OpenAI、私有化部署），或想固定使用某个模型，需要配置 Base URL 和 Model。两者一一对应，建议一起配置：
+`LLM_BASE` 和 `LLM_MODEL` 总是一一对应、同时生效、同时废弃，分开管理没有意义。使用 **Preset（预设）** 一行同时搞定 provider + base + model：
 
-| 场景 | LLM_BASE | LLM_MODEL |
-|------|----------|-----------|
-| mimo | `https://api.mimo.run/v1` | `mimo-v2.5` |
-| OpenAI 官方 | 留空 | `gpt-4o-mini` |
-| Moonshot | 留空 | `moonshot-v1-8k` |
-| DeepSeek | 留空 | `deepseek-chat` |
-
-**方式 A：Repository Variables（推荐，自动生效）**
+**方式 A：Repository Variable `LLM_PRESET`（最推荐）**
 
 进入仓库 **Settings → Secrets and variables → Actions → Variables → New repository variable**：
 
 | Variable | 值 | 说明 |
 |----------|-----|------|
-| `LLM_BASE` | `https://api.mimo.run/v1` | 兼容服务 Base URL，**必须**以 `/v1` 结尾；官方 API 留空 |
-| `LLM_MODEL` | `mimo-v2.5` | 默认模型；官方 provider 留空即可 |
+| `LLM_PRESET` | `xiaomimimo` | 预设名称，自动映射到对应的 provider / base / model |
 
-配置了 Variable 后，无论是手动触发还是未来自动启用 LLM，都会自动使用这对 Base URL + Model，无需每次填写。`LLM_BASE` 和 `LLM_MODEL` 建议同时设置或同时留空。
+可用预设：
 
-**优先级**：手动选择具体模型 > `LLM_MODEL` Variable > provider 默认模型。
+| Preset | Provider | Base URL | Model |
+|--------|----------|----------|-------|
+| `openai` | openai | `https://api.openai.com/v1` | `gpt-4o-mini` |
+| `moonshot` | moonshot | `https://api.moonshot.cn/v1` | `moonshot-v1-8k` |
+| `deepseek` | deepseek | `https://api.deepseek.com/v1` | `deepseek-chat` |
+| `openrouter` | openrouter | `https://openrouter.ai/api/v1` | `openrouter/auto` |
+| `xiaomimimo` | openai | `https://api.xiaomimimo.com/v1` | `mimo-v2.5` |
 
-**方式 B：config_llm.py（代码级配置）**
+配置了 `LLM_PRESET` 后，无论是手动触发还是自动运行，都会自动使用该预设的完整配置，无需每次填写。
 
-编辑 `scripts/config_llm.py`：
+**方式 B：通过 Variable 创建多个自定义预设（不修改代码）**
 
-```python
-LLM_CONFIG = {
-    "provider": "openai",  # 兼容 OpenAI 格式的服务统一选 openai
-    "api_base": "https://api.mimo.run/v1",  # 自定义端点
-    "model": "gpt-4o-mini",
-    ...
-}
-```
+如果内置预设不够用，可以在同一个 Variable 里定义多个自己的预设：
 
-**Base URL 优先级**（从高到低）：
-1. Actions 手动输入 `llm_base`
-2. Repository Variable `LLM_BASE`
-3. `config_llm.py` 中的 `api_base`
-4. Provider 内置默认值（如 `https://api.openai.com/v1`）
+| Variable | 值示例 | 说明 |
+|----------|--------|------|
+| `LLM_PRESETS` | `mycompany\|openai\|https://llm.mycompany.com/v1\|company-v1;azure\|openai\|https://xxx.azure.com/v1\|gpt-4o` | 多个预设，用 `;` 分隔，格式为 `名称\|provider\|base\|model` |
+
+定义后通过 `LLM_PRESET=mycompany` 或 Actions 输入 `mycompany` 直接使用。格式规则：
+- 多个预设用 `;` 分隔
+- 每个预设格式：`名称|provider|base_url|model`
+- 示例：`mycompany|openai|https://llm.mycompany.com/v1|company-v1;azure|openai|https://xxx.azure.com/v1|gpt-4o`
+
+**方式 C：单独配置（向后兼容）**
+
+如果你需要覆盖 preset 中的某个字段，仍可单独配置：
+
+| Variable | 值 | 说明 |
+|----------|-----|------|
+| `LLM_BASE` | `https://api.xxx.com/v1` | 兼容服务 Base URL，**必须** 以 `/v1` 结尾 |
+| `LLM_MODEL` | `model-name` | 默认模型 |
+
+**优先级**（从高到低）：
+1. Actions 手动输入（`llm_provider` / `llm_base` / `llm_model`）
+2. **`LLM_PRESETS`** Variable 中的自定义预设
+3. `config_llm.py` 中的 `CUSTOM_PRESETS`
+4. 内置预设（`PROVIDER_PRESETS`）
+5. `LLM_BASE` / `LLM_MODEL` Variable（向后兼容）
+6. `config_llm.py` 中的 `LLM_CONFIG`
+7. Provider 内置默认值
 
 #### 4. 首次启用 LLM
 
@@ -230,9 +242,10 @@ LLM_CONFIG = {
 | `mode` | **`full`** | 首次运行建议全量模式，确保所有项目都被覆盖 |
 | `mode` | **`full`** | 首次运行建议全量模式，自动启用所有必要检查 |
 | `use_llm` | ✅ `true` | 启用 LLM 智能分类（full 模式且配置了 LLM_KEY 时自动启用） |
-| `llm_provider` | 你的提供商 | `moonshot` / `deepseek` / `openai` / `openrouter` |
-| `llm_model` | 留空 或 填模型名 | 留空使用 provider 默认模型；可指定如 `deepseek-chat` |
-| `llm_base` | 兼容服务的 Base URL | 如 `https://api.mimo.run/v1`，选 `openai` provider 时填写 |
+| `llm_preset` | 你的预设 | 内置：`openai`/`moonshot`/`deepseek`/`openrouter`/`xiaomimimo`；也可输入自定义预设名 |
+| `llm_provider` | 提供商（可被 preset 覆盖） | `moonshot` / `deepseek` / `openai` / `openrouter` |
+| `llm_model` | 模型（可被 preset 覆盖） | 留空使用 preset / provider 默认模型 |
+| `llm_base` | Base URL（可被 preset 覆盖） | 兼容服务的自定义端点 |
 | `force_llm` | ✅ `true`（仅首次） | 无视 30 天间隔，确保所有项目都被分析。勾选后自动联动 `use_llm` |
 | `lists_strategy` | `migrate`（如有 Lists） | 从 GitHub Lists 迁移已有分类 |
 
@@ -257,7 +270,7 @@ LLM_CONFIG = {
 
 #### 6. Token 消耗与费用估算
 
-以 **400 个项目**为例（首次全量分析）：
+以 **400 个项目** 为例（首次全量分析）：
 
 | 提供商 | 估算 Token | 参考费用 |
 |--------|-----------|----------|
@@ -281,7 +294,7 @@ LLM_CONFIG = {
 
 ### 场景 A：全新开始（没有已有分类）
 
-**行为**：首次运行会自动创建 `stars_db.json`，对**所有 star 项目执行全新分类**。
+**行为**：首次运行会自动创建 `stars_db.json`，对 **所有 star 项目执行全新分类**。
 
 ```bash
 # 首次运行 - 全新分类所有项目
@@ -384,6 +397,9 @@ python scripts/classifier.py --token ghp_xxx --user yourname
 
 ```bash
 python scripts/classifier.py --token ghp_xxx --user yourname --mode deep --llm-key sk-xxx --force-llm
+
+# 或使用预设
+python scripts/classifier.py --token ghp_xxx --user yourname --mode deep --llm-key sk-xxx --llm-preset xiaomimimo --force-llm
 ```
 
 ### 全量刷新
@@ -394,7 +410,7 @@ python scripts/classifier.py --token ghp_xxx --user yourname --mode deep --llm-k
 python scripts/classifier.py --token ghp_xxx --user yourname --mode full --llm-key sk-xxx --force-llm
 ```
 
-> ⚠️ `deep` / `full` 模式会覆盖所有**未保护**的自动分类，但 `manual_override = true` 的项目仍然跳过。
+> ⚠️ `deep` / `full` 模式会覆盖所有 **未保护** 的自动分类，但 `manual_override = true` 的项目仍然跳过。
 
 ### GitHub Lists 集成
 
@@ -433,7 +449,7 @@ python scripts/classifier.py --token ghp_xxx --user yourname --lists-strategy ig
 }
 ```
 
-commit 后，下次自动运行会**完全跳过**这个项目。
+commit 后，下次自动运行会 **完全跳过** 这个项目。
 
 报告中的 🔒 标记表示手动保护，🤖 标记表示 LLM 增强。
 
@@ -459,11 +475,50 @@ commit 后，下次自动运行会**完全跳过**这个项目。
 
 ## LLM 配置
 
-编辑 `scripts/config_llm.py` 中的 `LLM_CONFIG`：
+### 预设（推荐）
+
+代码中已内置常用服务商的完整配置，只需一个 preset 名称：
+
+| Preset | Provider | Base URL | Model |
+|--------|----------|----------|-------|
+| `openai` | openai | `https://api.openai.com/v1` | `gpt-4o-mini` |
+| `moonshot` | moonshot | `https://api.moonshot.cn/v1` | `moonshot-v1-8k` |
+| `deepseek` | deepseek | `https://api.deepseek.com/v1` | `deepseek-chat` |
+| `openrouter` | openrouter | `https://openrouter.ai/api/v1` | `openrouter/auto` |
+| `xiaomimimo` | openai | `https://api.xiaomimimo.com/v1` | `mimo-v2.5` |
+
+使用方式：
+- CLI：`--llm-preset xiaomimimo`
+- 环境变量：`LLM_PRESET=xiaomimimo`
+- Actions：`llm_preset` input 或 `LLM_PRESET` Repository Variable
+
+**自定义预设**：编辑 `scripts/config_llm.py` 中的 `CUSTOM_PRESETS`，添加你自己的服务商：
+
+```python
+CUSTOM_PRESETS = {
+    "mycompany": {
+        "provider": "openai",
+        "api_base": "https://llm.mycompany.com/v1",
+        "model": "company-model-v1",
+    },
+    "azure": {
+        "provider": "openai",
+        "api_base": "https://my-resource.openai.azure.com/openai/deployments/my-deployment/chat/completions?api-version=2024-02-01",
+        "model": "gpt-4o",
+    },
+}
+```
+
+自定义预设与同名的内置预设合并，**自定义优先覆盖**。添加后通过 `--llm-preset mycompany` 直接使用。
+
+**优先级**：CLI 显式参数 (`--llm-provider`/`--llm-base`/`--llm-model`) > **自定义 preset** > **内置 preset** > `LLM_BASE`/`LLM_MODEL` Variable > `config_llm.py` > 内置默认值。
+
+### 手动配置
+
+如需覆盖 preset 或使用未内置的服务，编辑 `scripts/config_llm.py`：
 
 ```python
 LLM_CONFIG = {
-    "enabled": True,
     "provider": "moonshot",  # openai / moonshot / deepseek / openrouter
     "api_key": None,  # 或通过 --llm-key 参数传入
     "model": "moonshot-v1-8k",
@@ -483,11 +538,11 @@ LLM_CONFIG = {
 **工作原理**：系统有两层控制：
 
 1. **全局开关**（`stars_db.meta.json`）：记录上次 LLM 运行时间。若不足间隔天数，完全不调用 LLM API。
-2. **项目级追踪**（`stars_ai.json`）：每个项目独立记录 `analyzed_at`。即使全局启用 LLM，间隔内已成功分析的项目也会跳过，只分析**新项目**和**间隔到期的老项目**。
+2. **项目级追踪**（`stars_ai.json`）：每个项目独立记录 `analyzed_at`。即使全局启用 LLM，间隔内已成功分析的项目也会跳过，只分析 **新项目** 和 **间隔到期的老项目**。
 
 这意味着：
-- **规则分类**遵循 `--incremental`：已有项目只更新 Stars/描述等元数据
-- **LLM 分析**走独立策略：**全局介入**，既处理新项目，也按间隔重新分析已有项目并修正其分类
+- **规则分类** 遵循 `--incremental`：已有项目只更新 Stars/描述等元数据
+- **LLM 分析** 走独立策略：**全局介入**，既处理新项目，也按间隔重新分析已有项目并修正其分类
 
 ```bash
 # 每月一次 LLM 全局分析（默认 30 天）
@@ -618,8 +673,8 @@ python -m unittest discover -s tests -v
 
 **未覆盖 / 已知限制**：
 - LLM 分类器的实际 API 调用（测试使用 mock 响应，未测试真实 OpenAI/Moonshot/DeepSeek 接口）
-- 大规模仓库性能（>1000 个 Stars 时的内存和 API 速率管理）
-- Notion 大规模同步（>1000 条记录时的逐条创建性能）
+- 大规模仓库性能（> 1000 个 Stars 时的内存和 API 速率管理）
+- Notion 大规模同步（> 1000 条记录时的逐条创建性能）
 - 报告 HTML 模板在极端数据下的渲染（如全为空描述、特殊字符仓库名）
 - Windows GBK 编码回退的实际终端测试（代码中有 fallback 逻辑，但未在 GBK 终端验证）
 - GitHub Lists 的 TTY 交互式提示（仅在非 CI 环境可用，依赖 `sys.stdin.isatty()`）
@@ -652,7 +707,7 @@ pipeline.py (16 阶段 Pipeline)
 ## 常见问题
 
 **Q: 首次运行会覆盖我之前的分类吗？**
-A: 如果数据库不存在，首次运行会**全新分类所有项目**。如果你有已有分类，使用 `--import-json` 或 `--import-csv` 导入，导入的项目会被**自动保护**不被覆盖。
+A: 如果数据库不存在，首次运行会 **全新分类所有项目**。如果你有已有分类，使用 `--import-json` 或 `--import-csv` 导入，导入的项目会被 **自动保护** 不被覆盖。
 
 **Q: 私有仓库的 Stars 需要什么权限？**
 A: Token 需要勾选 `repo` 权限。
@@ -688,14 +743,14 @@ A: 常见原因：
 A: GitHub 更新了界面。路径是：Settings → Pages → Build and deployment → Source 下拉菜单选择 GitHub Actions。
 
 **Q: 为什么我的 GitHub Lists 没有自动更新分类？**
-A: 本工具**不会修改你的 GitHub Lists**。原因：GitHub 目前没有公开稳定的 Lists 写入 REST API（无法通过 API 创建 List 或添加项目）。工具的核心价值是生成本地 HTML 报告。如果你想在 GitHub 上使用分类，可以手动参考报告中的分类结果创建 Lists。
+A: 本工具 **不会修改你的 GitHub Lists**。原因：GitHub 目前没有公开稳定的 Lists 写入 REST API（无法通过 API 创建 List 或添加项目）。工具的核心价值是生成本地 HTML 报告。如果你想在 GitHub 上使用分类，可以手动参考报告中的分类结果创建 Lists。
 
 **Q: 调整分类规则后，如何让已有项目重新分类？**
 A: 运行一次 `--mode deep`：
 ```bash
 python scripts/classifier.py --token ghp_xxx --user yourname --mode deep
 ```
-这会重新分类所有**未保护**（`manual_override=false`）的项目，同时检查 Release 和 Fork。已保护的项目不受影响。如需 LLM 全量分析，加 `--llm-key sk-xxx --force-llm`。
+这会重新分类所有 **未保护**（`manual_override=false`）的项目，同时检查 Release 和 Fork。已保护的项目不受影响。如需 LLM 全量分析，加 `--llm-key sk-xxx --force-llm`。
 
 ---
 

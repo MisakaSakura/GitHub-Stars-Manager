@@ -77,10 +77,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
     # LLM
     parser.add_argument("--llm-key", help="LLM API Key（启用智能分类增强）")
-    parser.add_argument("--llm-provider", default="openai",
-                        help="LLM 提供商: openai/moonshot/deepseek/openrouter")
-    parser.add_argument("--llm-model", help="LLM 模型名称（留空使用默认）")
-    parser.add_argument("--llm-base", help="LLM API Base URL（自定义端点）")
+    parser.add_argument("--llm-preset",
+                        help="LLM 预设（同时设置 provider+base+model）：openai/moonshot/deepseek/openrouter/xiaomimimo")
+    parser.add_argument("--llm-provider", default=None,
+                        help="LLM 提供商: openai/moonshot/deepseek/openrouter（可被 preset 覆盖）")
+    parser.add_argument("--llm-model", help="LLM 模型名称（可被 preset 覆盖）")
+    parser.add_argument("--llm-base", help="LLM API Base URL（可被 preset 覆盖）")
     parser.add_argument("--llm-interval-days", type=int, default=30,
                         help="LLM 分类最小间隔天数（默认 30，节省 Token）")
     parser.add_argument("--force-llm", action="store_true",
@@ -117,6 +119,63 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="重新对之前 AI 分析失败的项目进行分类")
 
     return parser.parse_args(argv)
+
+
+def _parse_env_presets() -> dict:
+    """从 LLM_PRESETS 环境变量解析动态预设。
+    格式：name|provider|base|model[;name|provider|base|model...]
+    示例：mycompany|openai|https://llm.mycompany.com/v1|company-v1
+    """
+    import os
+    env = os.environ.get("LLM_PRESETS", "")
+    if not env:
+        return {}
+    presets = {}
+    for entry in env.split(";"):
+        entry = entry.strip()
+        if not entry:
+            continue
+        parts = entry.split("|")
+        if len(parts) == 4:
+            name, provider, base, model = (p.strip() for p in parts)
+            presets[name] = {"provider": provider, "api_base": base, "model": model}
+    return presets
+
+
+def _apply_preset(args: argparse.Namespace) -> argparse.Namespace:
+    """根据 --llm-preset 自动填充 provider / base / model"""
+    import os
+    from config_llm import PROVIDER_PRESETS, CUSTOM_PRESETS
+
+    # 三层预设合并：环境变量 > 代码自定义 > 内置（同名后者覆盖前者）
+    env_presets = _parse_env_presets()
+    all_presets = {**PROVIDER_PRESETS, **CUSTOM_PRESETS, **env_presets}
+
+    preset_name = args.llm_preset or os.environ.get("LLM_PRESET", "")
+    if not preset_name:
+        return args
+
+    preset = all_presets.get(preset_name)
+    if not preset:
+        print(f"[警告] 未知 LLM preset: {preset_name}，可用: {', '.join(all_presets.keys())}")
+        return args
+
+    # preset 填充默认值；CLI 显式参数优先级高于 preset
+    if not args.llm_provider:
+        args.llm_provider = preset["provider"]
+    if not args.llm_base:
+        args.llm_base = preset["api_base"]
+    if not args.llm_model:
+        args.llm_model = preset["model"]
+    print(f"[Preset] {preset_name} → provider={args.llm_provider}, base={args.llm_base}, model={args.llm_model}")
+    return args
+
+
+def _ensure_defaults(args: argparse.Namespace) -> argparse.Namespace:
+    """在 preset 应用后，为未设置的参数补上默认值"""
+    if not args.llm_provider:
+        args.llm_provider = "openai"
+    return args
 
 
 def _apply_mode(args: argparse.Namespace) -> argparse.Namespace:
@@ -167,6 +226,8 @@ def _apply_mode(args: argparse.Namespace) -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    args = _apply_preset(args)
+    args = _ensure_defaults(args)
     args = _apply_mode(args)
     pipeline = Pipeline(args)
     try:

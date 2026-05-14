@@ -37,22 +37,28 @@ on:
         type: choice
         options: ['false', 'true']
 
+      llm_preset:
+        description: '🤖 LLM 预设（内置: openai/moonshot/deepseek/openrouter/xiaomimimo；也可输入自定义预设名）'
+        required: false
+        default: ''
+        type: string
+
       llm_provider:
-        description: '🤖 LLM 提供商'
+        description: '🤖 LLM 提供商（可被 preset 覆盖）'
         required: false
         default: 'openai'
         type: choice
         options: ['openai', 'moonshot', 'deepseek', 'openrouter']
 
       llm_model:
-        description: '🤖 LLM 模型（default = 优先使用 Variable LLM_MODEL，其次 provider 默认）'
+        description: '🤖 LLM 模型（可被 preset 覆盖；default = 优先 Variable LLM_MODEL）'
         required: false
         default: 'default'
         type: choice
         options: ['default', 'gpt-4o-mini', 'gpt-4o', 'moonshot-v1-8k', 'deepseek-chat', 'deepseek-reasoner', 'mimo-v2.5']
 
       llm_base:
-        description: '🤖 LLM Base URL（兼容 OpenAI 的第三方服务，如 mimo）'
+        description: '🤖 LLM Base URL（可被 preset 覆盖；兼容 OpenAI 的第三方服务）'
         required: false
         default: ''
         type: string
@@ -171,6 +177,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           GH_USER: ${{ github.actor }}
           LLM_KEY: ${{ secrets.LLM_KEY }}
+          LLM_PRESET: ${{ github.event.inputs.llm_preset || vars.LLM_PRESET }}
+          LLM_PRESETS: ${{ vars.LLM_PRESETS }}
           LLM_BASE: ${{ github.event.inputs.llm_base || vars.LLM_BASE }}
           NOTION_KEY: ${{ secrets.NOTION_KEY }}
           NOTION_DB: ${{ secrets.NOTION_DB }}
@@ -219,8 +227,12 @@ jobs:
           fi
 
           if [ "$USE_LLM" = "true" ] && [ -n "$LLM_KEY" ]; then
-            ARGS+=("--llm-key" "$LLM_KEY" "--llm-provider" "${{ github.event.inputs.llm_provider }}")
-            # llm_model 优先级：手动选择 > Repository Variable > provider 默认
+            # preset 优先：一行同时设置 provider+base+model
+            if [ -n "$LLM_PRESET" ]; then
+              ARGS+=("--llm-preset" "$LLM_PRESET")
+            fi
+            # 显式参数仍可覆盖 preset（保持向后兼容）
+            ARGS+=("--llm-provider" "${{ github.event.inputs.llm_provider }}")
             INPUT_MODEL="${{ github.event.inputs.llm_model }}"
             VARS_MODEL="${{ vars.LLM_MODEL }}"
             if [ "$INPUT_MODEL" != "default" ] && [ -n "$INPUT_MODEL" ]; then
@@ -228,7 +240,7 @@ jobs:
             elif [ -n "$VARS_MODEL" ]; then
               ARGS+=("--llm-model" "$VARS_MODEL")
             fi
-            # llm_base 来源优先级：手动输入 > Repository Variables > config_llm.py
+            # llm_base 来源优先级：手动输入 > Repository Variables > preset 内置 > config_llm.py
             if [ -n "$LLM_BASE" ]; then
               ARGS+=("--llm-base" "$LLM_BASE")
             fi

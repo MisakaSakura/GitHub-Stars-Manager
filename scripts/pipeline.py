@@ -191,13 +191,20 @@ class Pipeline:
             last = self.db.meta.get("last_llm_classify_at", "")
             if last:
                 from datetime import datetime, timezone, timedelta
-                last_dt = datetime.fromisoformat(last)
-                interval = timedelta(days=self.args.llm_interval_days)
-                now = datetime.now(timezone.utc)
-                if now - last_dt < interval:
-                    days_left = (last_dt + interval - now).days
-                    log(f"LLM 间隔保护：距上次分析还有 {days_left} 天，本次跳过（--force-llm 可强制启用）", "INFO")
-                    return
+                try:
+                    last_dt = datetime.fromisoformat(last)
+                    # 兼容无时区的旧时间戳（当作 UTC 处理）
+                    if last_dt.tzinfo is None:
+                        last_dt = last_dt.replace(tzinfo=timezone.utc)
+                    interval = timedelta(days=self.args.llm_interval_days)
+                    now = datetime.now(timezone.utc)
+                    if now - last_dt < interval:
+                        days_left = (last_dt + interval - now).days
+                        log(f"LLM 间隔保护：距上次分析还有 {days_left} 天，本次跳过（--force-llm 可强制启用）", "INFO")
+                        return
+                except Exception:
+                    # 时间戳异常，允许继续执行（后续会更新为正确时间戳）
+                    pass
         from config import LLM_CONFIG
         default_model = LLM_CONFIG.get("model", "gpt-4o-mini")
         model = self.args.llm_model or default_model
@@ -276,22 +283,8 @@ class Pipeline:
                 if result:
                     self.ai_db.update_from_llm_result(key, result, status="success")
 
-        # 从 AI 数据库回填 AI 字段到主数据库（供报告渲染使用）
-        self._backfill_ai_fields()
-
-    def _backfill_ai_fields(self) -> None:
-        """从 AI 数据库回填 AI 字段到主数据库中的项目"""
-        if not self.ai_db:
-            return
-        for key, item in self.db.items():
-            ai = self.ai_db.get(key)
-            if ai:
-                item.llm_status = ai.llm_status
-                item.llm_confidence = ai.llm_confidence
-                item.llm_reason = ai.llm_reason
-                item.ai_summary = ai.ai_summary
-                item.ai_tags = ai.ai_tags
-                item.ai_platforms = ai.ai_platforms
+        # AI 字段保留在独立的 AI 数据库中，报告渲染时通过 ReportGenerator._inject_ai_fields 动态注入
+        # 不要在这里回填到主数据库，避免破坏双库架构（StarItem.to_dict() 用 asdict 会导出所有字段）
 
     def _save(self) -> None:
         if self.args.dry_run:

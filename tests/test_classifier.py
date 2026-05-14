@@ -9,7 +9,7 @@ from unittest.mock import patch
 # 将 scripts 目录加入路径
 sys.path.insert(0, "scripts")
 
-from classifier import _apply_mode
+from classifier import _apply_mode, _apply_preset, _ensure_defaults, _parse_env_presets
 
 
 class FakeArgs:
@@ -24,6 +24,10 @@ class FakeArgs:
         self.llm_key = kwargs.get("llm_key", None)
         self.force_llm = kwargs.get("force_llm", False)
         self.no_report = kwargs.get("no_report", False)
+        self.llm_preset = kwargs.get("llm_preset", None)
+        self.llm_provider = kwargs.get("llm_provider", None)
+        self.llm_model = kwargs.get("llm_model", None)
+        self.llm_base = kwargs.get("llm_base", None)
 
 
 class TestApplyMode(unittest.TestCase):
@@ -115,6 +119,171 @@ class TestApplyMode(unittest.TestCase):
         args = FakeArgs(mode="deep", no_report=True)
         result = _apply_mode(args)
         self.assertTrue(result.no_report)
+
+
+class TestApplyPreset(unittest.TestCase):
+    """测试 _apply_preset 的预设映射"""
+
+    def test_no_preset_does_nothing(self):
+        """无 preset 时不修改任何参数"""
+        args = FakeArgs(llm_preset=None, llm_provider=None, llm_model=None, llm_base=None)
+        result = _apply_preset(args)
+        self.assertIsNone(result.llm_provider)
+        self.assertIsNone(result.llm_model)
+        self.assertIsNone(result.llm_base)
+
+    def test_preset_fills_all_fields(self):
+        """有效 preset 自动填充 provider/base/model"""
+        args = FakeArgs(llm_preset="xiaomimimo", llm_provider=None, llm_model=None, llm_base=None)
+        result = _apply_preset(args)
+        self.assertEqual(result.llm_provider, "openai")
+        self.assertEqual(result.llm_model, "mimo-v2.5")
+        self.assertEqual(result.llm_base, "https://api.xiaomimimo.com/v1")
+
+    def test_preset_deepseek(self):
+        """deepseek preset 使用正确的 provider 和 base"""
+        args = FakeArgs(llm_preset="deepseek", llm_provider=None, llm_model=None, llm_base=None)
+        result = _apply_preset(args)
+        self.assertEqual(result.llm_provider, "deepseek")
+        self.assertEqual(result.llm_model, "deepseek-chat")
+        self.assertEqual(result.llm_base, "https://api.deepseek.com/v1")
+
+    def test_preset_does_not_override_explicit_args(self):
+        """CLI 显式参数优先级高于 preset"""
+        args = FakeArgs(
+            llm_preset="xiaomimimo",
+            llm_provider="moonshot",  # 显式覆盖
+            llm_model="custom-model",  # 显式覆盖
+            llm_base="https://custom.com/v1",  # 显式覆盖
+        )
+        result = _apply_preset(args)
+        self.assertEqual(result.llm_provider, "moonshot")
+        self.assertEqual(result.llm_model, "custom-model")
+        self.assertEqual(result.llm_base, "https://custom.com/v1")
+
+    def test_preset_partial_override(self):
+        """部分显式参数覆盖 preset，其余使用 preset 默认值"""
+        args = FakeArgs(
+            llm_preset="xiaomimimo",
+            llm_provider=None,
+            llm_model="my-model",
+            llm_base=None,
+        )
+        result = _apply_preset(args)
+        self.assertEqual(result.llm_provider, "openai")  # from preset
+        self.assertEqual(result.llm_model, "my-model")   # explicit
+        self.assertEqual(result.llm_base, "https://api.xiaomimimo.com/v1")  # from preset
+
+    def test_unknown_preset_warns_and_leaves_args(self):
+        """未知 preset 给出警告但不修改参数"""
+        args = FakeArgs(llm_preset="nonexistent", llm_provider=None, llm_model=None, llm_base=None)
+        result = _apply_preset(args)
+        self.assertIsNone(result.llm_provider)
+        self.assertIsNone(result.llm_model)
+        self.assertIsNone(result.llm_base)
+
+    def test_ensure_defaults_after_preset(self):
+        """preset 后 _ensure_defaults 正确补全 provider 默认值"""
+        args = FakeArgs(llm_preset="deepseek", llm_provider=None)
+        args = _apply_preset(args)
+        args = _ensure_defaults(args)
+        self.assertEqual(args.llm_provider, "deepseek")  # preset 已填充，ensure 不覆盖
+
+    def test_ensure_defaults_without_preset(self):
+        """无 preset 时 _ensure_defaults 补上 openai 默认值"""
+        args = FakeArgs(llm_preset=None, llm_provider=None)
+        args = _apply_preset(args)
+        args = _ensure_defaults(args)
+        self.assertEqual(args.llm_provider, "openai")
+
+    def test_custom_preset_overrides_builtin(self):
+        """CUSTOM_PRESETS 中的同名预设覆盖内置预设"""
+        import config_llm
+        original_custom = config_llm.CUSTOM_PRESETS.copy()
+        try:
+            config_llm.CUSTOM_PRESETS["deepseek"] = {
+                "provider": "openai",
+                "api_base": "https://custom.deepseek.com/v1",
+                "model": "custom-deepseek",
+            }
+            args = FakeArgs(llm_preset="deepseek", llm_provider=None, llm_model=None, llm_base=None)
+            result = _apply_preset(args)
+            self.assertEqual(result.llm_provider, "openai")  # 被自定义覆盖
+            self.assertEqual(result.llm_model, "custom-deepseek")
+            self.assertEqual(result.llm_base, "https://custom.deepseek.com/v1")
+        finally:
+            config_llm.CUSTOM_PRESETS = original_custom
+
+    def test_custom_preset_new_name(self):
+        """CUSTOM_PRESETS 中添加的新预设可用"""
+        import config_llm
+        original_custom = config_llm.CUSTOM_PRESETS.copy()
+        try:
+            config_llm.CUSTOM_PRESETS["mycompany"] = {
+                "provider": "openai",
+                "api_base": "https://llm.mycompany.com/v1",
+                "model": "company-v1",
+            }
+            args = FakeArgs(llm_preset="mycompany", llm_provider=None, llm_model=None, llm_base=None)
+            result = _apply_preset(args)
+            self.assertEqual(result.llm_provider, "openai")
+            self.assertEqual(result.llm_model, "company-v1")
+            self.assertEqual(result.llm_base, "https://llm.mycompany.com/v1")
+        finally:
+            config_llm.CUSTOM_PRESETS = original_custom
+
+    def test_env_presets_parsing(self):
+        """LLM_PRESETS 环境变量解析为多个预设"""
+        import os
+        original = os.environ.get("LLM_PRESETS")
+        try:
+            os.environ["LLM_PRESETS"] = "mycompany|openai|https://llm.mycompany.com/v1|company-v1;azure|openai|https://xxx.azure.com/v1|gpt-4o"
+            presets = _parse_env_presets()
+            self.assertIn("mycompany", presets)
+            self.assertIn("azure", presets)
+            self.assertEqual(presets["mycompany"]["provider"], "openai")
+            self.assertEqual(presets["mycompany"]["api_base"], "https://llm.mycompany.com/v1")
+            self.assertEqual(presets["mycompany"]["model"], "company-v1")
+            self.assertEqual(presets["azure"]["model"], "gpt-4o")
+        finally:
+            if original is None:
+                os.environ.pop("LLM_PRESETS", None)
+            else:
+                os.environ["LLM_PRESETS"] = original
+
+    def test_env_preset_overrides_builtin(self):
+        """LLM_PRESETS 环境变量中的预设覆盖内置预设"""
+        import os
+        original = os.environ.get("LLM_PRESETS")
+        try:
+            os.environ["LLM_PRESETS"] = "deepseek|openai|https://custom.deepseek.com/v1|custom-model"
+            args = FakeArgs(llm_preset="deepseek", llm_provider=None, llm_model=None, llm_base=None)
+            result = _apply_preset(args)
+            self.assertEqual(result.llm_provider, "openai")  # 被环境变量覆盖
+            self.assertEqual(result.llm_model, "custom-model")
+            self.assertEqual(result.llm_base, "https://custom.deepseek.com/v1")
+        finally:
+            if original is None:
+                os.environ.pop("LLM_PRESETS", None)
+            else:
+                os.environ["LLM_PRESETS"] = original
+
+    def test_env_preset_single_entry(self):
+        """LLM_PRESETS 只定义一个预设"""
+        import os
+        original = os.environ.get("LLM_PRESETS")
+        try:
+            os.environ["LLM_PRESETS"] = "solo|moonshot|https://solo.com/v1|solo-model"
+            args = FakeArgs(llm_preset="solo", llm_provider=None, llm_model=None, llm_base=None)
+            result = _apply_preset(args)
+            self.assertEqual(result.llm_provider, "moonshot")
+            self.assertEqual(result.llm_model, "solo-model")
+            self.assertEqual(result.llm_base, "https://solo.com/v1")
+        finally:
+            if original is None:
+                os.environ.pop("LLM_PRESETS", None)
+            else:
+                os.environ["LLM_PRESETS"] = original
 
 
 class TestRelativeTime(unittest.TestCase):

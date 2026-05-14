@@ -17,6 +17,7 @@
 
 ### 🔧 改进
 
+- **LLM Preset 预设** — 新增 `--llm-preset` / `LLM_PRESET`，一行同时绑定 provider + base + model，换服务商只需改一个值。内置 `openai` / `moonshot` / `deepseek` / `openrouter` / `xiaomimimo` 5 个预设
 - **无 LLM 场景优化** — LLM 不可用时，Release 区域仍保留完整的 body 展开阅读；AI 摘要栏自动隐藏；总结栏使用规则文本代替
 - **新收录判定修复** — 不再依赖 `first_seen` 时间戳（存在误判），改为通过 `engine.new_keys` 记录本次实际新增项目
 - **Fork 7 天过滤** — 只检测最近 7 天内的上游更新，避免显示过时数据

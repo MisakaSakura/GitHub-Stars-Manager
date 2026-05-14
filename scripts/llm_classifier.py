@@ -53,11 +53,11 @@ class LLMClassifier:
             json.dump(self.cache, f, ensure_ascii=False, indent=2)
 
     def _make_cache_key(self, item):
+        """缓存键使用稳定的 full_name，避免描述变化导致重复调用"""
         owner = item.get("owner", {})
         login = owner.get("login") if isinstance(owner, dict) else str(owner)
         name = item.get("name", "")
-        desc = item.get("description", "") or ""
-        return f"{login}/{name}:{desc[:50]}"
+        return f"{login}/{name}"
 
     def classify(self, item):
         """单条分类（带缓存）"""
@@ -118,12 +118,9 @@ class LLMClassifier:
 
         try:
             parsed = self._parse_batch_response(content, items)
-            for item in parsed:
-                cache_key = self._make_cache_key({
-                    "owner": {"login": item.split("/")[0]},
-                    "name": item.split("/")[1]
-                })
-                self.cache[cache_key] = parsed[item]
+            for key in parsed:
+                # key 格式为 "owner/name"
+                self.cache[key] = parsed[key]
             self._save_cache()
             return parsed
         except Exception as e:
@@ -178,7 +175,8 @@ Topics: {topics or '无'}
     def summarize(self, text: str, system_prompt: str | None = None, max_tokens: int = 128) -> str | None:
         """通用文本摘要，返回摘要字符串"""
         from config import LLM_CONFIG, LLM_SYSTEM_PROMPT
-        sp = system_prompt or LLM_SYSTEM_PROMPT
+        # 显式区分 "未传入"(None) 和 "传入空字符串"
+        sp = LLM_SYSTEM_PROMPT if system_prompt is None else system_prompt
         result = self._call_api(text, max_tokens=max_tokens, system_prompt=sp)
         return result.strip() if result else None
 
@@ -209,7 +207,11 @@ Topics: {topics or '无'}
             if code != 200:
                 log(f"LLM API 错误 {code}: {body[:200]}", "WARN")
                 return None
-            data = json.loads(body)
+            try:
+                data = json.loads(body)
+            except json.JSONDecodeError:
+                log(f"LLM 响应不是有效 JSON: {body[:200]}", "WARN")
+                return None
             if not isinstance(data, dict):
                 log(f"LLM 响应格式错误: 期望 dict，实际为 {type(data).__name__}", "WARN")
                 return None

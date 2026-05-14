@@ -27,6 +27,7 @@ class FakeArgs:
             "no_auto_classify": False,
             "lists_strategy": "ignore",
             "llm_key": None,
+            "llm_preset": None,
             "llm_provider": "openai",
             "llm_model": None,
             "llm_base": None,

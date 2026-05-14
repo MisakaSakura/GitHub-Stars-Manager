@@ -57,6 +57,9 @@ class IncrementalEngine:
         from datetime import datetime, timezone, timedelta
         try:
             last_dt = datetime.fromisoformat(ai_record.analyzed_at)
+            # 兼容无时区的旧时间戳
+            if last_dt.tzinfo is None:
+                last_dt = last_dt.replace(tzinfo=timezone.utc)
             if datetime.now(timezone.utc) - last_dt >= timedelta(days=llm_interval_days):
                 return True  # 间隔已到，需要重新分析
         except Exception:

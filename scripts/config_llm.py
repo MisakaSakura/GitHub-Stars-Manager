@@ -2,6 +2,51 @@
 # -*- coding: utf-8 -*-
 """LLM 配置：API 参数与系统提示词"""
 
+# 提供商预设：一行 preset 同时搞定 provider + base + model
+# 用法：--llm-preset <name> 或设置环境变量 LLM_PRESET
+# 优先级：CLI 显式参数 > 自定义预设 > 内置预设 > config_llm.py > 内置默认值
+
+# 内置预设（常用服务商）
+PROVIDER_PRESETS = {
+    "openai": {
+        "provider": "openai",
+        "api_base": "https://api.openai.com/v1",
+        "model": "gpt-4o-mini",
+    },
+    "moonshot": {
+        "provider": "moonshot",
+        "api_base": "https://api.moonshot.cn/v1",
+        "model": "moonshot-v1-8k",
+    },
+    "deepseek": {
+        "provider": "deepseek",
+        "api_base": "https://api.deepseek.com/v1",
+        "model": "deepseek-chat",
+    },
+    "openrouter": {
+        "provider": "openrouter",
+        "api_base": "https://openrouter.ai/api/v1",
+        "model": "openrouter/auto",
+    },
+    "xiaomimimo": {
+        "provider": "openai",   # 兼容 OpenAI 格式
+        "api_base": "https://api.xiaomimimo.com/v1",
+        "model": "mimo-v2.5",
+    },
+}
+
+# 自定义预设（用户扩展）
+# 在这里添加你自己的服务商预设，键名就是 --llm-preset 的参数值
+# 自定义预设会覆盖同名的内置预设
+CUSTOM_PRESETS = {
+    # 示例：
+    # "mycompany": {
+    #     "provider": "openai",
+    #     "api_base": "https://llm.mycompany.com/v1",
+    #     "model": "company-model-v1",
+    # },
+}
+
 LLM_CONFIG = {
     # 注意：LLM 启用由 --llm-key 参数控制，不再使用此 enabled 字段
     "provider": "openai",  # 支持: openai, moonshot, deepseek, openrouter
