@@ -86,7 +86,7 @@ batch 输出格式（JSON 数组，第 N 个元素对应第 N 个项目）:
 
 platform: Web 前端, Web 后端, 移动端, 桌面端, AI / 机器学习, DevOps / 运维, 数据库, 云原生, IoT / 嵌入式, 游戏 / 图形, CLI / 终端, 安全 / 渗透, 网络 / 代理, 音视频 / 流媒体, 其他 / 未分类
 type: 框架 / Framework, 工具 / Tool, 应用 / App, 编辑器 / IDE, 资源合集 / Awesome, 语言 / Compiler, 监控 / 可视化, 自动化 / 工作流, 笔记 / 知识管理, 算法 / 学习, 配置 / Dotfiles, 其他 / 未分类
-ecology: 必须使用标准名称（禁止自由发挥）。标准生态: Clash / Mihomo 生态, MPV 播放器生态, VS Code 生态, Neovim 生态, Obsidian 生态, Home Assistant 生态, Docker 生态, React 生态, Vue 生态, Tailwind CSS 生态, FFmpeg 生态, qBittorrent 生态, Hyprland 生态, Zsh / Oh-My-Zsh 生态, Starship 生态, Alacritty 生态, Kitty 生态, i3 / Sway 生态, AwesomeWM 生态; 非上述生态填 null 或 独立项目
+ecology: 必须使用标准名称（禁止自由发挥）。标准生态: Clash / Mihomo, MPV, VS Code, Neovim, Obsidian, Home Assistant, Docker, React, Vue, Tailwind CSS, FFmpeg, qBittorrent, Hyprland, Zsh / Oh-My-Zsh, Starship, Alacritty, Kitty, i3 / Sway, AwesomeWM, Firefox, Git, Magisk; 非上述生态填 null 或 独立项目
 ecology_role: 核心 / Core, GUI 前端 / Client, 配置 / Config, 脚本 / Script, 主题 / Theme, 插件 / Plugin, 规则集 / Rules, Web UI / Dashboard, API 封装 / Wrapper, 教程 / Guide, 其他 / Other
 confidence: 0-1。ai_summary: 50字内。ai_tags: 3-5个关键词。ai_platforms: [linux,mac,windows,docker,web,cli,ios,android]
 """

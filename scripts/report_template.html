@@ -49,13 +49,13 @@ h1{color:var(--accent);margin-bottom:8px;font-size:28px}
 .sbg{background:var(--bg-inner);height:5px;border-radius:3px;margin-top:3px;overflow:hidden}
 .sf{height:100%;border-radius:3px;transition:width 0.5s ease}
 .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
-.bp{background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border)}
-.bt{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border)}
-.bl{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
-.be{background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger-border)}
-.br{background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border)}
-.btg{display:inline-block;padding:1px 5px;border-radius:8px;background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);font-size:10px;margin-right:3px;margin-bottom:2px}
-.bpl{display:inline-block;padding:1px 5px;border-radius:8px;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border);font-size:10px;margin-right:3px;margin-bottom:2px}
+.bp{background:transparent;color:var(--accent);border:1px solid var(--accent-border)}
+.bt{background:transparent;color:var(--success);border:1px solid var(--success-border)}
+.bl{background:transparent;color:var(--purple);border:1px solid var(--purple-border)}
+.be{background:transparent;color:var(--danger);border:1px solid var(--danger-border)}
+.br{background:transparent;color:var(--warning);border:1px solid var(--warning-border)}
+.btg{display:inline-block;padding:1px 5px;border-radius:8px;background:transparent;color:var(--success);border:1px solid var(--success-border);font-size:10px;margin-right:3px;margin-bottom:2px}
+.bpl{display:inline-block;padding:1px 5px;border-radius:8px;background:transparent;color:var(--accent);border:1px solid var(--accent-border);font-size:10px;margin-right:3px;margin-bottom:2px}
 .weekly-digest{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;max-height:520px;overflow-y:auto;transition:max-height 0.3s ease}
 .weekly-digest.collapsed{padding:14px 20px;max-height:52px;overflow:hidden}
 .weekly-digest.collapsed #wd-body{display:none}
@@ -110,9 +110,9 @@ h1{color:var(--accent);margin-bottom:8px;font-size:28px}
 .wd-item{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--bg-body);border-radius:6px;font-size:12px}
 .wd-item a{color:var(--accent);text-decoration:none}
 .wd-item a:hover{text-decoration:underline}
-.wd-eco{color:var(--purple);font-size:11px;background:var(--purple-bg);padding:1px 6px;border-radius:8px}
-.wd-tag{color:var(--success);font-size:11px;background:var(--success-bg);padding:1px 6px;border-radius:8px}
-.wd-expand-toggle{color:var(--accent);font-size:11px;cursor:pointer;margin-top:6px;display:inline-block;font-weight:500}
+.wd-eco{color:var(--purple);font-size:11px;background:transparent;border:1px solid var(--purple-border);padding:1px 6px;border-radius:8px}
+.wd-tag{color:var(--success);font-size:11px;background:transparent;border:1px solid var(--success-border);padding:1px 6px;border-radius:8px}
+.wd-expand-toggle{color:var(--accent);font-size:11px;cursor:pointer;margin-top:6px;display:block;text-align:right;font-weight:500}
 .tg{margin-top:3px}
 .tw{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
 .fb{display:flex;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap}

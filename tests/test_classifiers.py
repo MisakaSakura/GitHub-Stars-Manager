@@ -45,13 +45,13 @@ class TestRuleClassifier(unittest.TestCase):
     def test_classify_ecology_clash(self):
         item = self._make_item("clash-verge", "A Clash GUI client", ["clash", "proxy", "gui"], language="Rust")
         eco, role = RuleClassifier.classify_ecology(item)
-        self.assertEqual(eco, "Clash / Mihomo 生态")
+        self.assertEqual(eco, "Clash / Mihomo")
         self.assertIn(role, ["GUI 前端 / Client", "其他 / Other"])
 
     def test_classify_ecology_core(self):
         item = self._make_item("mihomo", "The Mihomo core", ["proxy", "mihomo"], language="Go")
         eco, role = RuleClassifier.classify_ecology(item)
-        self.assertEqual(eco, "Clash / Mihomo 生态")
+        self.assertEqual(eco, "Clash / Mihomo")
         self.assertEqual(role, "核心 / Core")
 
     def test_classify_ecology_no_match(self):

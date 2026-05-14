@@ -84,133 +84,133 @@ TYPE_RULES = {
 
 # ==================== 生态归属规则 ====================
 ECOLOGY_RULES = {
-    "Clash / Mihomo 生态": {
+    "Clash / Mihomo": {
         "name_patterns": ["clash", "mihomo", "sing-box"],
         "desc_patterns": ["mihomo core", "clash core", "sing-box", "proxy", "代理"],
         "topic_patterns": ["proxy", "vpn", "mihomo", "sing-box"],
         "related_types": ["gui", "config", "rule-set", "dashboard"],
         "core_projects": ["mihomo", "clash", "sing-box"],
     },
-    "MPV 播放器生态": {
+    "MPV": {
         "name_patterns": ["mpv"],
         "desc_patterns": ["mpv", "media player", "lua script", "mpv plugin"],
         "topic_patterns": ["mpv", "media-player"],
         "related_types": ["script", "config", "gui", "skin", "theme", "thumbnail"],
         "core_projects": ["mpv"],
     },
-    "VS Code 生态": {
+    "VS Code": {
         "name_patterns": ["vscode", "vs-code"],
         "desc_patterns": ["vscode extension", "visual studio code", "vs code"],
         "topic_patterns": ["vscode", "vscode-extension"],
         "related_types": ["extension", "theme", "icon-theme", "snippet"],
         "core_projects": ["vscode"],
     },
-    "Neovim 生态": {
+    "Neovim": {
         "name_patterns": ["nvim", "neovim"],
         "desc_patterns": ["neovim", "nvim plugin", "vim plugin"],
         "topic_patterns": ["neovim", "vim"],
         "related_types": ["plugin", "colorscheme", "config", "lsp"],
         "core_projects": ["neovim"],
     },
-    "Obsidian 生态": {
+    "Obsidian": {
         "name_patterns": ["obsidian"],
         "desc_patterns": ["obsidian plugin", "obsidian theme"],
         "topic_patterns": ["obsidian"],
         "related_types": ["plugin", "theme", "snippet"],
         "core_projects": ["obsidian"],
     },
-    "Home Assistant 生态": {
+    "Home Assistant": {
         "name_patterns": ["home-assistant", "hass", "homeassistant"],
         "desc_patterns": ["home assistant", "homeassistant", "smart home"],
         "topic_patterns": ["home-assistant", "smart-home"],
         "related_types": ["integration", "addon", "theme", "card"],
         "core_projects": ["home-assistant"],
     },
-    "Docker 生态": {
+    "Docker": {
         "name_patterns": ["docker", "container"],
         "desc_patterns": ["docker", "container", "dockerfile", "docker-compose"],
         "topic_patterns": ["docker", "containers"],
         "related_types": ["image", "compose", "registry"],
         "core_projects": ["docker", "moby"],
     },
-    "React 生态": {
+    "React": {
         "name_patterns": ["react-"],
         "desc_patterns": ["react component", "react hook", "for react"],
         "topic_patterns": ["react"],
         "related_types": ["component", "hook", "boilerplate"],
         "core_projects": ["react"],
     },
-    "Vue 生态": {
+    "Vue": {
         "name_patterns": ["vue-", "nuxt"],
         "desc_patterns": ["vue", "nuxt", "vuejs"],
         "topic_patterns": ["vue", "vuejs", "nuxt"],
         "related_types": ["component", "plugin", "boilerplate"],
         "core_projects": ["vue", "nuxt"],
     },
-    "Tailwind CSS 生态": {
+    "Tailwind CSS": {
         "name_patterns": ["tailwind"],
         "desc_patterns": ["tailwind", "tailwindcss"],
         "topic_patterns": ["tailwindcss"],
         "related_types": ["plugin", "component", "ui-kit"],
         "core_projects": ["tailwindcss"],
     },
-    "FFmpeg 生态": {
+    "FFmpeg": {
         "name_patterns": ["ffmpeg"],
         "desc_patterns": ["ffmpeg", "video processing", "codec"],
         "topic_patterns": ["ffmpeg"],
         "related_types": ["wrapper", "gui", "binding"],
         "core_projects": ["ffmpeg"],
     },
-    "qBittorrent 生态": {
+    "qBittorrent": {
         "name_patterns": ["qbittorrent", "qbit"],
         "desc_patterns": ["qbittorrent", "bt client", "torrent"],
         "topic_patterns": ["qbittorrent", "torrent"],
         "related_types": ["theme", "plugin", "web-ui"],
         "core_projects": ["qbittorrent"],
     },
-    "Hyprland 生态": {
+    "Hyprland": {
         "name_patterns": ["hypr", "waybar", "wofi", "swww"],
         "desc_patterns": ["hyprland", "wayland compositor", "hypr"],
         "topic_patterns": ["hyprland", "wayland"],
         "related_types": ["dotfiles", "config", "theme", "plugin"],
         "core_projects": ["hyprland"],
     },
-    "Zsh / Oh-My-Zsh 生态": {
+    "Zsh / Oh-My-Zsh": {
         "name_patterns": ["zsh", "oh-my-zsh", "powerlevel"],
         "desc_patterns": ["zsh", "oh-my-zsh", "zsh plugin", "shell theme"],
         "topic_patterns": ["zsh", "oh-my-zsh"],
         "related_types": ["plugin", "theme", "config"],
         "core_projects": ["oh-my-zsh"],
     },
-    "Starship 生态": {
+    "Starship": {
         "name_patterns": ["starship"],
         "desc_patterns": ["starship", "shell prompt"],
         "topic_patterns": ["starship"],
         "related_types": ["preset", "config", "theme"],
         "core_projects": ["starship"],
     },
-    "Alacritty 生态": {
+    "Alacritty": {
         "name_patterns": ["alacritty"],
         "desc_patterns": ["alacritty", "terminal emulator"],
         "topic_patterns": ["alacritty"],
         "related_types": ["theme", "config"],
         "core_projects": ["alacritty"],
     },
-    "Kitty 生态": {
+    "Kitty": {
         "name_patterns": ["kitty"],
         "desc_patterns": ["kitty terminal", "kitty config"],
         "topic_patterns": ["kitty"],
         "related_types": ["theme", "config", "script"],
         "core_projects": ["kitty"],
     },
-    "i3 / Sway 生态": {
+    "i3 / Sway": {
         "name_patterns": ["i3", "sway", "polybar", "rofi", "dunst"],
         "desc_patterns": ["i3wm", "swaywm", "tiling window manager"],
         "topic_patterns": ["i3", "sway", "window-manager"],
         "related_types": ["config", "theme", "script", "bar"],
         "core_projects": ["i3", "sway"],
     },
-    "AwesomeWM 生态": {
+    "AwesomeWM": {
         "name_patterns": ["awesomewm", "awesome-wm"],
         "desc_patterns": ["awesome window manager", "awesomewm"],
         "topic_patterns": ["awesome-wm"],
@@ -242,35 +242,53 @@ ECOLOGY_ROLES = {
 ECOLOGY_ALIASES = {
     # Bilibili
     "b站": "Bilibili", "bilibili": "Bilibili", "哔哩哔哩": "Bilibili",
-    # Clash / Mihomo
+    # Clash / Mihomo（所有变体统一为简洁名称）
     "clash": "Clash / Mihomo", "clash meta": "Clash / Mihomo", "clashmeta": "Clash / Mihomo",
-    "mihomo": "Clash / Mihomo", "clash / mihomo 生态": "Clash / Mihomo",
+    "mihomo": "Clash / Mihomo", "mihomo 生态": "Clash / Mihomo",
+    "clash / mihomo": "Clash / Mihomo", "clash / mihomo 生态": "Clash / Mihomo",
     "clash生态": "Clash / Mihomo", "clash 生态": "Clash / Mihomo",
+    "sing-box": "Clash / Mihomo", "sing-box 生态": "Clash / Mihomo",
     # Docker
-    "docker 生态": "Docker", "docker生态": "Docker",
+    "docker 生态": "Docker", "docker生态": "Docker", "container": "Docker",
     # AI/ML
-    "ai": "AI/ML", "ai agents": "AI/ML", "ai/ml": "AI/ML",
+    "ai": "AI/ML", "ai agents": "AI/ML", "ai/ml": "AI/ML", "人工智能": "AI/ML",
     # 独立项目
     "standalone": "独立项目", "none": "独立项目", "null": "独立项目",
-    "独立项目 / standalone": "独立项目",
-    # 其他常见变体
+    "独立项目 / standalone": "独立项目", "独立": "独立项目",
+    # 其他常见变体（去"生态"后缀统一）
     "android 生态": "Android", "apple 生态": "Apple", "苹果": "Apple",
-    "ffmpeg 生态": "FFmpeg", "ffmpeg": "FFmpeg",
-    "electron 生态": "Electron", "electron": "Electron",
-    "flutter 生态": "Flutter", "flutter": "Flutter",
-    "mpv 播放器生态": "MPV", "mpv": "MPV",
-    "qbittorrent 生态": "qBittorrent", "qbittorrent": "qBittorrent",
-    "hyprland 生态": "Hyprland", "hyprland": "Hyprland",
-    "obsidian 生态": "Obsidian", "obsidian": "Obsidian",
-    "neovim 生态": "Neovim", "neovim": "Neovim", "nvim": "Neovim",
-    "vscode 生态": "VS Code", "vscode": "VS Code",
-    "home assistant 生态": "Home Assistant", "homeassistant": "Home Assistant",
-    "zsh 生态": "Zsh / Oh-My-Zsh", "oh-my-zsh 生态": "Zsh / Oh-My-Zsh",
-    "starship 生态": "Starship", "alacritty 生态": "Alacritty",
-    "kitty 生态": "Kitty", "i3 生态": "i3 / Sway", "sway 生态": "i3 / Sway",
-    "awesome 生态": "AwesomeWM", "awesomewm 生态": "AwesomeWM",
-    "react 生态": "React", "vue 生态": "Vue", "nuxt 生态": "Vue",
-    "tailwind 生态": "Tailwind CSS", "tailwindcss 生态": "Tailwind CSS",
+    "ffmpeg": "FFmpeg", "ffmpeg 生态": "FFmpeg", "ffmpeg生态": "FFmpeg",
+    "electron": "Electron", "electron 生态": "Electron",
+    "flutter": "Flutter", "flutter 生态": "Flutter",
+    "mpv": "MPV", "mpv 播放器生态": "MPV", "mpv播放器生态": "MPV",
+    "qbittorrent": "qBittorrent", "qbittorrent 生态": "qBittorrent", "qbit": "qBittorrent",
+    "hyprland": "Hyprland", "hyprland 生态": "Hyprland", "hypr": "Hyprland",
+    "obsidian": "Obsidian", "obsidian 生态": "Obsidian",
+    "neovim": "Neovim", "neovim 生态": "Neovim", "nvim": "Neovim",
+    "vscode": "VS Code", "vscode 生态": "VS Code", "vs code": "VS Code",
+    "home assistant": "Home Assistant", "home assistant 生态": "Home Assistant",
+    "homeassistant": "Home Assistant", "hass": "Home Assistant",
+    "zsh": "Zsh / Oh-My-Zsh", "zsh 生态": "Zsh / Oh-My-Zsh",
+    "oh-my-zsh": "Zsh / Oh-My-Zsh", "oh-my-zsh 生态": "Zsh / Oh-My-Zsh",
+    "starship": "Starship", "starship 生态": "Starship",
+    "alacritty": "Alacritty", "alacritty 生态": "Alacritty",
+    "kitty": "Kitty", "kitty 生态": "Kitty",
+    "i3": "i3 / Sway", "i3 生态": "i3 / Sway", "sway": "i3 / Sway", "sway 生态": "i3 / Sway",
+    "awesomewm": "AwesomeWM", "awesome 生态": "AwesomeWM", "awesomewm 生态": "AwesomeWM",
+    "awesome wm": "AwesomeWM",
+    "react": "React", "react 生态": "React",
+    "vue": "Vue", "vue 生态": "Vue", "nuxt": "Vue", "nuxt 生态": "Vue",
+    "tailwind": "Tailwind CSS", "tailwind 生态": "Tailwind CSS",
+    "tailwindcss": "Tailwind CSS", "tailwindcss 生态": "Tailwind CSS",
+    # 新发现生态
+    "firefox": "Firefox", "firefox 生态": "Firefox",
+    "git": "Git", "git 生态": "Git",
+    "magisk": "Magisk", "magisk 生态": "Magisk",
+    "bit-torrent": "BitTorrent", "bittorrent": "BitTorrent", "bt": "BitTorrent",
+    "emby": "Emby/Jellyfin", "jellyfin": "Emby/Jellyfin", "emby/jellyfin": "Emby/Jellyfin",
+    "airplay": "AirPlay",
+    "hms": "HMS",
+    "edk2": "EDK2",
 }
 
 # ==================== 全字段归一化映射 ====================
@@ -334,5 +352,5 @@ ECOLOGY_ROLE_ALIASES = {
 # 标准生态名称集合（用于系统提示限制和验证）
 ECOLOGY_STANDARD_NAMES = list(ECOLOGY_RULES.keys()) + [
     "独立项目", "AI/ML", "Android", "Apple", "Bilibili", "BitTorrent",
-    "AirPlay", "HMS", "EDK2", "Emby/Jellyfin",
+    "AirPlay", "HMS", "EDK2", "Emby/Jellyfin", "Firefox", "Git", "Magisk",
 ]
