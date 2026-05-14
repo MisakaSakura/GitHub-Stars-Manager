@@ -137,7 +137,7 @@ class TestApplyPreset(unittest.TestCase):
         args = FakeArgs(llm_preset="xiaomimimo", llm_provider=None, llm_model=None, llm_base=None)
         result = _apply_preset(args)
         self.assertEqual(result.llm_provider, "openai")
-        self.assertEqual(result.llm_model, "mimo-v2.5")
+        self.assertEqual(result.llm_model, "mimo-v2-flash")  # 默认改为性价比最高的 flash
         self.assertEqual(result.llm_base, "https://api.xiaomimimo.com/v1")
 
     def test_preset_deepseek(self):

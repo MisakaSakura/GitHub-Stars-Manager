@@ -66,7 +66,7 @@ class LLMClassifier:
             return self.cache[cache_key]
 
         prompt = self._build_prompt(item)
-        content = self._call_api(prompt)
+        content = self._call_api(prompt, max_tokens=4096)
 
         if content:
             try:
@@ -154,7 +154,9 @@ class LLMClassifier:
     def _classify_batch(self, items, fallback=False):
         """对一批项目执行单次 LLM 调用"""
         prompt = self._build_batch_prompt(items)
-        max_tokens = max(256, 128 * len(items))
+        # xiaomimimo 全系是 reasoning 模型，thinking 过程消耗大量 tokens
+        # max_tokens 必须足够大（文档显示模型支持 64K-128K 输出）
+        max_tokens = max(8192, 1024 * len(items))
         content = self._call_api(prompt, max_tokens=max_tokens)
 
         if not content:
@@ -229,7 +231,7 @@ Topics: {topics or '无'}
   ...
 ]"""
 
-    def summarize(self, text: str, system_prompt: str | None = None, max_tokens: int = 128) -> str | None:
+    def summarize(self, text: str, system_prompt: str | None = None, max_tokens: int = 2048) -> str | None:
         """通用文本摘要，返回摘要字符串"""
         from config import LLM_CONFIG, LLM_SYSTEM_PROMPT
         # 显式区分 "未传入"(None) 和 "传入空字符串"
@@ -306,13 +308,25 @@ Topics: {topics or '无'}
                         log(f"  ↳ 响应格式错误: message 缺失或格式不对", "WARN")
                         return None
                     content = message.get("content")
-                    if not isinstance(content, str):
-                        log(f"  ↳ 响应格式错误: content 缺失或不是字符串 (类型={type(content).__name__})", "WARN")
-                        return None
-                    if not content.strip():
-                        log(f"  ↳ 响应 content 为空字符串", "WARN")
-                        return None
-                    return content
+                    reasoning = message.get("reasoning_content") or message.get("reasoning")
+
+                    # 优先使用标准 content
+                    if isinstance(content, str) and content.strip():
+                        return content
+
+                    # 兼容 reasoning 模型：content 为空时尝试从 reasoning_content 提取
+                    if isinstance(reasoning, str) and reasoning.strip():
+                        log(f"  ↳ content 为空，尝试从 reasoning_content ({len(reasoning)} 字) 提取", "WARN")
+                        extracted = self._extract_json_from_text(reasoning)
+                        if extracted:
+                            log(f"  ↳ 从 reasoning_content 成功提取 JSON", "OK")
+                            return extracted
+                        # 对于 summarize 等场景，直接返回 reasoning 原文
+                        log(f"  ↳ 返回 reasoning_content 原文", "WARN")
+                        return reasoning
+
+                    log(f"  ↳ 响应 content 为空且无 reasoning_content", "WARN")
+                    return None
                 elif code in retry_codes and attempt < max_retries - 1:
                     wait = 2 ** attempt
                     log(f"  ↳ HTTP {code}，{wait}s 后重试 ({attempt + 1}/{max_retries})", "WARN")
@@ -340,6 +354,36 @@ Topics: {topics or '无'}
         if content.endswith("```"):
             content = content[:-3]
         return content.strip()
+
+    @staticmethod
+    def _extract_json_from_text(text: str) -> str | None:
+        """从自然语言文本中提取 JSON 对象或数组（用于 reasoning 模型）"""
+        text = text.strip()
+        # 尝试找 ```json ... ``` 代码块
+        if "```json" in text:
+            start = text.find("```json") + 7
+            end = text.find("```", start)
+            if end > start:
+                return text[start:end].strip()
+        # 尝试找 ``` ... ``` 代码块
+        if "```" in text:
+            start = text.find("```") + 3
+            end = text.find("```", start)
+            if end > start:
+                candidate = text[start:end].strip()
+                if candidate.startswith("[") or candidate.startswith("{"):
+                    return candidate
+        # 尝试找最外层 JSON 数组 [ ... ]
+        arr_start = text.find("[")
+        arr_end = text.rfind("]")
+        if arr_start != -1 and arr_end != -1 and arr_end > arr_start:
+            return text[arr_start:arr_end + 1]
+        # 尝试找最外层 JSON 对象 { ... }
+        obj_start = text.find("{")
+        obj_end = text.rfind("}")
+        if obj_start != -1 and obj_end != -1 and obj_end > obj_start:
+            return text[obj_start:obj_end + 1]
+        return None
 
     def _parse_single_response(self, content):
         content = self._clean_json_content(content)

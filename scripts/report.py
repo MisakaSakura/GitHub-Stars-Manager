@@ -432,7 +432,7 @@ document.querySelectorAll('.rl-body').forEach(function(b){{if(b.scrollHeight>200
                         body_html = self._render_release_body(body)
                         ru_parts.append(
                             f'  <div class="wd-release-body">{body_html}</div>'
-                            f'  <span class="wd-release-toggle" onclick="wrt(this)">展开</span>'
+                            f'  <span class="wd-release-toggle" onclick="wtn(this)">展开</span>'
                         )
                     else:
                         ru_parts.append(f'  <div class="wd-release-empty">无更新日志</div>')

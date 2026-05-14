@@ -28,10 +28,22 @@ PROVIDER_PRESETS = {
         "api_base": "https://openrouter.ai/api/v1",
         "model": "openrouter/auto",
     },
+    # xiaomimimo 全系模型都支持深度思考（reasoning），需配合大 max_tokens 使用
+    # 价格: flash ¥2.1/1M < v2.5 ¥14/1M < pro ¥21/1M；上下文: 256K-1M
     "xiaomimimo": {
-        "provider": "openai",   # 兼容 OpenAI 格式
+        "provider": "openai",
+        "api_base": "https://api.xiaomimimo.com/v1",
+        "model": "mimo-v2-flash",  # 推荐：性价比最高，分类任务够用
+    },
+    "xiaomimimo-v2.5": {
+        "provider": "openai",
         "api_base": "https://api.xiaomimimo.com/v1",
         "model": "mimo-v2.5",
+    },
+    "xiaomimimo-pro": {
+        "provider": "openai",
+        "api_base": "https://api.xiaomimimo.com/v1",
+        "model": "mimo-v2.5-pro",
     },
 }
 
@@ -64,26 +76,16 @@ LLM_CONFIG = {
     "cache_results": True,  # 缓存 LLM 结果避免重复调用
 }
 
-LLM_SYSTEM_PROMPT = """你是一个 GitHub 项目分类专家。请根据项目名称、描述、Topics 和 README 摘要，为项目选择最合适的分类。
+LLM_SYSTEM_PROMPT = """你是 GitHub 项目分类专家。根据项目信息直接输出严格 JSON，不要任何其他内容（不要思考过程、不要解释、不要 markdown 代码块）。
 
-请严格按照以下 JSON 格式输出（不要有任何其他内容）：
-{
-  "platform": "最匹配的平台",
-  "type": "最匹配的类型",
-  "ecology": "最匹配的生态（如果没有则填 null）",
-  "ecology_role": "生态内角色（如果没有则填 null）",
-  "confidence": 0.85,
-  "reason": "简要说明分类理由",
-  "ai_summary": "用50字以内概括这个项目的核心用途",
-  "ai_tags": ["标签1", "标签2", "标签3"],
-  "ai_platforms": ["linux", "mac", "windows", "docker", "web", "cli", "ios", "android"]
-}
+单条输出格式:
+{"platform":"平台","type":"类型","ecology":"生态或null","ecology_role":"角色或null","confidence":0.85,"reason":"分类理由","ai_summary":"50字概括","ai_tags":["标签1"],"ai_platforms":["web","cli"]}
 
-可选的平台：Web 前端, Web 后端, 移动端, 桌面端, AI / 机器学习, DevOps / 运维, 数据库, 云原生, IoT / 嵌入式, 游戏 / 图形, CLI / 终端, 安全 / 渗透, 网络 / 代理, 音视频 / 流媒体, 其他 / 未分类
-可选的类型：框架 / Framework, 工具 / Tool, 应用 / App, 编辑器 / IDE, 资源合集 / Awesome, 语言 / Compiler, 监控 / 可视化, 自动化 / 工作流, 笔记 / 知识管理, 算法 / 学习, 配置 / Dotfiles, 其他 / 未分类
-可选的生态角色：核心 / Core, GUI 前端 / Client, 配置 / Config, 脚本 / Script, 主题 / Theme, 插件 / Plugin, 规则集 / Rules, Web UI / Dashboard, API 封装 / Wrapper, 教程 / Guide, 其他 / 未分类
+batch 输出格式（JSON 数组，第 N 个元素对应第 N 个项目）:
+[{"platform":"...",...}, {...}, ...]
 
-ai_summary 要求：简洁明了，让不看 README 的人也能快速理解项目用途。
-ai_tags 要求：3-5 个关键词标签，类似应用商店分类，如 ["database", "kv-store", "high-performance"]。
-ai_platforms 要求：从 [linux, mac, windows, docker, web, cli, ios, android] 中选择该项目支持的平台。如果无法判断则返回 ["web", "cli"]。
+platform: Web前端/后端, 移动端, 桌面端, AI/ML, DevOps, 数据库, 云原生, IoT, 游戏, CLI, 安全, 网络, 音视频, 其他
+type: 框架, 工具, 应用, 编辑器, 资源合集, 语言, 监控, 自动化, 笔记, 算法, 配置, 其他
+ecology_role: 核心, GUI前端, 配置, 脚本, 主题, 插件, 规则集, WebUI, API封装, 教程, 其他
+confidence: 0-1。ai_summary: 50字内。ai_tags: 3-5个关键词。ai_platforms: [linux,mac,windows,docker,web,cli,ios,android]
 """
