@@ -15,13 +15,23 @@ def _is_ecology_locked(ecology_name: str | None) -> bool:
     return ecology_name in LOCKED_ECOLOGIES
 
 
-def _normalize_ecology(name: str | None) -> str | None:
-    """将 LLM 返回的生态名称归一化为标准名称（解决 'Clash'/'Clash Meta'/... 等变体问题）"""
-    if not name:
-        return name
-    from config_rules import ECOLOGY_ALIASES
-    key = name.strip().lower()
-    return ECOLOGY_ALIASES.get(key, name)
+def _normalize_field(value: str | None, field: str) -> str | None:
+    """将 LLM 返回的分类字段归一化为标准名称。
+    field: platform | type | ecology | ecology_role
+    """
+    if not value:
+        return value
+    from config_rules import (
+        PLATFORM_ALIASES, TYPE_ALIASES, ECOLOGY_ALIASES, ECOLOGY_ROLE_ALIASES
+    )
+    mapping = {
+        "platform": PLATFORM_ALIASES,
+        "type": TYPE_ALIASES,
+        "ecology": ECOLOGY_ALIASES,
+        "ecology_role": ECOLOGY_ROLE_ALIASES,
+    }.get(field, {})
+    key = value.strip().lower()
+    return mapping.get(key, value)
 
 
 def _safe_int(value, default: int = 0) -> int:
@@ -157,13 +167,13 @@ class IncrementalEngine:
             return False
         ecology_locked = existing_eco and _is_ecology_locked(existing_eco)
         # P1 fix: dict.get 值为 None 时返回 None，用 or 保证回退到原值
-        target.platform = llm_result.get("platform") or target.platform
-        target.type = llm_result.get("type") or target.type
+        target.platform = _normalize_field(llm_result.get("platform"), "platform") or target.platform
+        target.type = _normalize_field(llm_result.get("type"), "type") or target.type
         if not ecology_locked:
             if llm_result.get("ecology"):
-                target.ecology = _normalize_ecology(llm_result["ecology"])
+                target.ecology = _normalize_field(llm_result["ecology"], "ecology")
             if llm_result.get("ecology_role"):
-                target.ecology_role = llm_result["ecology_role"]
+                target.ecology_role = _normalize_field(llm_result["ecology_role"], "ecology_role")
         return True
 
     def _process_single(self, item: dict, incremental: bool, force_refresh: bool, use_llm: bool, llm_result: dict | None = None, subscribe_all_releases: bool = False) -> None:

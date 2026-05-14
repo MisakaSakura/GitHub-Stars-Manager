@@ -144,31 +144,38 @@ class ReportGenerator:
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Release 更新日志</title>
 <style>
+:root{{--bg-body:#0d1117;--bg-card:#161b22;--bg-inner:#21262d;--border:#30363d;--text-primary:#c9d1d9;--text-secondary:#8b949e;--text-muted:#484f58;--accent:#58a6ff;--accent-bg:#1f6feb22;--accent-border:#1f6feb44;--success:#3fb950;--success-bg:#23863622;--success-border:#23863644;--purple:#a371f7;--purple-bg:#8957e522;--warning:#e3b341;}}
+@media(prefers-color-scheme:light){{:root{{--bg-body:#ffffff;--bg-card:#f6f8fa;--bg-inner:#eef1f5;--border:#d0d7de;--text-primary:#1f2328;--text-secondary:#656d76;--text-muted:#8c959f;--accent:#0969da;--accent-bg:#0969da15;--accent-border:#0969da30;--success:#1a7f37;--success-bg:#1a7f3715;--success-border:#1a7f3730;--purple:#8250df;--purple-bg:#8250df15;--warning:#9a6700;}}}}
+html[data-theme="dark"]{{--bg-body:#0d1117;--bg-card:#161b22;--bg-inner:#21262d;--border:#30363d;--text-primary:#c9d1d9;--text-secondary:#8b949e;--text-muted:#484f58;--accent:#58a6ff;--accent-bg:#1f6feb22;--accent-border:#1f6feb44;--success:#3fb950;--success-bg:#23863622;--success-border:#23863644;--purple:#a371f7;--purple-bg:#8957e522;--warning:#e3b341;}}
+html[data-theme="light"]{{--bg-body:#ffffff;--bg-card:#f6f8fa;--bg-inner:#eef1f5;--border:#d0d7de;--text-primary:#1f2328;--text-secondary:#656d76;--text-muted:#8c959f;--accent:#0969da;--accent-bg:#0969da15;--accent-border:#0969da30;--success:#1a7f37;--success-bg:#1a7f3715;--success-border:#1a7f3730;--purple:#8250df;--purple-bg:#8250df15;--warning:#9a6700;}}
 *{{margin:0;padding:0;box-sizing:border-box}}
-body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;color:#c9d1d9;padding:24px;max-width:900px;margin:0 auto}}
-h1{{color:#58a6ff;margin-bottom:8px;font-size:24px}}
-.sub{{color:#8b949e;margin-bottom:24px;font-size:14px}}
-.back{{display:inline-block;margin-bottom:20px;color:#58a6ff;text-decoration:none;font-size:14px}}
+body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg-body);color:var(--text-primary);padding:24px;max-width:900px;margin:0 auto}}
+h1{{color:var(--accent);margin-bottom:8px;font-size:24px}}
+.sub{{color:var(--text-secondary);margin-bottom:24px;font-size:14px}}
+.back{{display:inline-block;margin-bottom:20px;color:var(--accent);text-decoration:none;font-size:14px}}
 .back:hover{{text-decoration:underline}}
-.rl-item{{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:16px 20px;margin-bottom:14px}}
+.rl-item{{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:14px}}
 .rl-meta{{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}}
-.rl-repo{{color:#58a6ff;font-weight:600;font-size:14px;text-decoration:none}}
+.rl-repo{{color:var(--accent);font-weight:600;font-size:14px;text-decoration:none}}
 .rl-repo:hover{{text-decoration:underline}}
-.rl-tag{{background:#23863622;color:#3fb950;border:1px solid #23863644;padding:2px 8px;border-radius:10px;font-size:11px}}
-.rl-date{{color:#8b949e;font-size:12px;margin-left:auto}}
-.rl-ai{{color:#a371f7;font-size:12px;font-style:italic;border-left:2px solid #a371f7;padding-left:8px;margin-bottom:8px}}
-.rl-body{{color:#8b949e;font-size:12px;line-height:1.7;max-height:200px;overflow:hidden;position:relative;white-space:pre-wrap;word-break:break-word}}
+.rl-tag{{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);padding:2px 8px;border-radius:10px;font-size:11px}}
+.rl-date{{color:var(--text-secondary);font-size:12px;margin-left:auto}}
+.rl-ai{{color:var(--purple);font-size:12px;font-style:italic;border-left:2px solid var(--purple);padding-left:8px;margin-bottom:8px}}
+.rl-body{{color:var(--text-secondary);font-size:12px;line-height:1.7;max-height:200px;overflow:hidden;position:relative;white-space:pre-wrap;word-break:break-word}}
 .rl-body.expanded{{max-height:none}}
-.rl-body h1,.rl-body h2,.rl-body h3,.rl-body h4{{color:#e3b341;margin:8px 0 4px}}
-.rl-body code{{background:#21262d;padding:1px 4px;border-radius:3px;color:#a371f7;font-family:monospace}}
-.rl-body a{{color:#58a6ff}}
+.rl-body h1,.rl-body h2,.rl-body h3,.rl-body h4{{color:var(--warning);margin:8px 0 4px}}
+.rl-body code{{background:var(--bg-inner);padding:1px 4px;border-radius:3px;color:var(--purple);font-family:monospace}}
+.rl-body a{{color:var(--accent)}}
 .rl-body ul{{margin:4px 0 4px 16px}}
 .rl-body li{{margin:2px 0}}
-.rl-toggle{{color:#58a6ff;font-size:12px;cursor:pointer;margin-top:6px;display:inline-block}}
-.ft{{margin-top:30px;padding-top:16px;border-top:1px solid #30363d;color:#484f58;font-size:12px;text-align:center}}
+.rl-toggle{{color:var(--accent);font-size:12px;cursor:pointer;margin-top:6px;display:inline-block}}
+.ft{{margin-top:30px;padding-top:16px;border-top:1px solid var(--border);color:var(--text-muted);font-size:12px;text-align:center}}
+.theme-toggle{{position:fixed;top:16px;right:16px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;color:var(--text-secondary);z-index:100}}
+.theme-toggle:hover{{color:var(--text-primary);border-color:var(--text-muted)}}
 </style>
 </head>
 <body>
+<button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">🌙</button>
 <a class="back" href="index.html">← 返回分类报告</a>
 <h1>🚀 Release 更新日志</h1>
 <p class="sub">生成时间：{timestamp} · 共 {len(history)} 条记录</p>
@@ -176,8 +183,9 @@ h1{{color:#58a6ff;margin-bottom:8px;font-size:24px}}
 <div class="ft">Generated by GitHub Stars Classifier v4</div>
 <script>
 function rlt(el){{var b=el.previousElementSibling;if(!b)return;b.classList.toggle('expanded');el.textContent=b.classList.contains('expanded')?'收起':'展开更多';}}
-// 为每个 rl-body 添加 toggle 按钮（如果内容超出 200px）
 document.querySelectorAll('.rl-body').forEach(function(b){{if(b.scrollHeight>200){{var t=document.createElement('span');t.className='rl-toggle';t.textContent='展开更多';t.onclick=function(){{rlt(t);}};b.parentNode.appendChild(t);}}}});
+function toggleTheme(){{const html=document.documentElement;const btn=document.getElementById('theme-btn');const current=html.getAttribute('data-theme');let next;if(current==='light'){{next='dark';btn.textContent='🌙';}}else if(current==='dark'){{next='light';btn.textContent='☀️';}}else{{const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;next=prefersDark?'light':'dark';btn.textContent=next==='dark'?'🌙':'☀️';}}html.setAttribute('data-theme',next);localStorage.setItem('gh-stars-theme',next);}}
+(function(){{const saved=localStorage.getItem('gh-stars-theme');if(saved){{document.documentElement.setAttribute('data-theme',saved);document.getElementById('theme-btn').textContent=saved==='dark'?'🌙':'☀️';}}}})();
 </script>
 </body>
 </html>'''
@@ -390,16 +398,29 @@ document.querySelectorAll('.rl-body').forEach(function(b){{if(b.scrollHeight>200
                 sc_parts.append('</div></div>')
                 add_tab("hot", f"🔥 热门 ({len(star_changes)})", "".join(sc_parts))
 
-            # 分类变更
+            # 分类变更（前10个默认显示，其余折叠）
             if classification_changes:
                 cc_parts: list[str] = []
+                all_changes = list(classification_changes.items())
+                visible = all_changes[:10]
+                hidden = all_changes[10:]
                 cc_parts.append(f'<div class="wd-section"><h3>📝 分类变更 ({len(classification_changes)})</h3><div class="wd-list">')
-                for key, changes in list(classification_changes.items())[:10]:
+                for key, changes in visible:
                     item = self.db.get(key)
                     if item:
                         url = item.get("url") or "#"
                         change_str = ", ".join([f"{k}: {v['from']} → {v['to']}" for k, v in changes.items()])
                         cc_parts.append(f'<div class="wd-item"><a href="{url}" target="_blank">{item["full_name"]}</a><span class="wd-tag">{change_str}</span></div>')
+                if hidden:
+                    cc_parts.append('<div class="wd-list-hidden" style="display:none;flex-direction:column;gap:6px">')
+                    for key, changes in hidden:
+                        item = self.db.get(key)
+                        if item:
+                            url = item.get("url") or "#"
+                            change_str = ", ".join([f"{k}: {v['from']} → {v['to']}" for k, v in changes.items()])
+                            cc_parts.append(f'<div class="wd-item"><a href="{url}" target="_blank">{item["full_name"]}</a><span class="wd-tag">{change_str}</span></div>')
+                    cc_parts.append('</div>')
+                    cc_parts.append(f'<span class="wd-expand-toggle" onclick="wet(this)">展开全部 ({len(hidden)} 个) ▼</span>')
                 cc_parts.append('</div></div>')
                 add_tab("classify", f"📝 分类变更 ({len(classification_changes)})", "".join(cc_parts))
 

@@ -273,6 +273,64 @@ ECOLOGY_ALIASES = {
     "tailwind 生态": "Tailwind CSS", "tailwindcss 生态": "Tailwind CSS",
 }
 
+# ==================== 全字段归一化映射 ====================
+# LLM 返回的分类字段都是自由文本或半约束，容易产生空格/中英文/大小写变体。
+# 后处理阶段用这些表统一映射到标准名称。
+
+# 从规则字典自动生成标准名称集合
+PLATFORM_STANDARD_NAMES = list(PLATFORM_RULES.keys()) + ["其他 / 未分类"]
+TYPE_STANDARD_NAMES = list(TYPE_RULES.keys()) + ["其他 / 未分类"]
+ECOLOGY_ROLE_STANDARD_NAMES = list(ECOLOGY_ROLES.keys()) + ["其他 / Other"]
+
+PLATFORM_ALIASES = {
+    # 只处理空格/大小写/格式变体，不强制扩展为完整名称（保留简洁写法）
+    "web前端": "Web 前端", "web 前端": "Web 前端", "webfrontend": "Web 前端", "web前端/后端": "Web 前端",
+    "web后端": "Web 后端", "web 后端": "Web 后端", "webbackend": "Web 后端",
+    "ai/机器学习": "AI / 机器学习", "人工智能": "AI / 机器学习",
+    "devops/运维": "DevOps / 运维", "运维": "DevOps / 运维",
+    "iot/嵌入式": "IoT / 嵌入式", "嵌入式": "IoT / 嵌入式",
+    "游戏/图形": "游戏 / 图形", "graphics": "游戏 / 图形",
+    "cli/终端": "CLI / 终端", "终端": "CLI / 终端", "命令行": "CLI / 终端",
+    "安全/渗透": "安全 / 渗透", "渗透": "安全 / 渗透", "security": "安全 / 渗透",
+    "网络/代理": "网络 / 代理", "代理": "网络 / 代理", "proxy": "网络 / 代理",
+    "音视频/流媒体": "音视频 / 流媒体", "流媒体": "音视频 / 流媒体", "media": "音视频 / 流媒体",
+    "其他/未分类": "其他 / 未分类", "未分类": "其他 / 未分类", "other": "其他 / 未分类",
+    "linux": "Linux", "手机端": "移动端", "pc端": "桌面端", "pc": "桌面端",
+}
+
+TYPE_ALIASES = {
+    # 只处理空格/格式变体，保留 LLM 和测试使用的简洁写法
+    "应用/app": "应用 / App", "app": "应用 / App", "application": "应用 / App",
+    "framework": "框架 / Framework", "library": "框架 / Framework",
+    "tool": "工具 / Tool", "utility": "工具 / Tool",
+    "ide": "编辑器 / IDE", "editor": "编辑器 / IDE",
+    "awesome": "资源合集 / Awesome", "list": "资源合集 / Awesome", "合集": "资源合集 / Awesome",
+    "compiler": "语言 / Compiler", "interpreter": "语言 / Compiler",
+    "monitoring": "监控 / 可视化", "dashboard": "监控 / 可视化", "可视化": "监控 / 可视化",
+    "workflow": "自动化 / 工作流", "automation": "自动化 / 工作流", "工作流": "自动化 / 工作流",
+    "notes": "笔记 / 知识管理", "wiki": "笔记 / 知识管理", "知识管理": "笔记 / 知识管理",
+    "algorithm": "算法 / 学习", "tutorial": "算法 / 学习", "学习": "算法 / 学习",
+    "dotfiles": "配置 / Dotfiles", "config": "配置 / Dotfiles",
+    "其他/未分类": "其他 / 未分类", "未分类": "其他 / 未分类", "other": "其他 / 未分类",
+}
+
+ECOLOGY_ROLE_ALIASES = {
+    "核心": "核心 / Core", "core": "核心 / Core", "kernel": "核心 / Core", "engine": "核心 / Core",
+    "gui前端": "GUI 前端 / Client", "gui 前端": "GUI 前端 / Client", "gui前端/client": "GUI 前端 / Client",
+    "client": "GUI 前端 / Client", "frontend": "GUI 前端 / Client", "app": "GUI 前端 / Client",
+    "配置": "配置 / Config", "config": "配置 / Config", "configuration": "配置 / Config", "dotfiles": "配置 / Config",
+    "脚本": "脚本 / Script", "script": "脚本 / Script", "lua": "脚本 / Script", "automation": "脚本 / Script",
+    "主题": "主题 / Theme", "theme": "主题 / Theme", "skin": "主题 / Theme", "colorscheme": "主题 / Theme",
+    "插件": "插件 / Plugin", "plugin": "插件 / Plugin", "extension": "插件 / Plugin", "addon": "插件 / Plugin",
+    "规则集": "规则集 / Rules", "rules": "规则集 / Rules", "rule": "规则集 / Rules", "filter": "规则集 / Rules",
+    "webui": "Web UI / Dashboard", "web ui": "Web UI / Dashboard", "web-ui": "Web UI / Dashboard",
+    "dashboard": "Web UI / Dashboard", "panel": "Web UI / Dashboard",
+    "api封装": "API 封装 / Wrapper", "api 封装": "API 封装 / Wrapper", "apiwrapper": "API 封装 / Wrapper",
+    "wrapper": "API 封装 / Wrapper", "binding": "API 封装 / Wrapper", "sdk": "API 封装 / Wrapper",
+    "教程": "教程 / Guide", "guide": "教程 / Guide", "tutorial": "教程 / Guide", "awesome": "教程 / Guide",
+    "其他": "其他 / Other", "other": "其他 / Other", "null": "其他 / Other", "none": "其他 / Other", "-": "其他 / Other",
+}
+
 # 标准生态名称集合（用于系统提示限制和验证）
 ECOLOGY_STANDARD_NAMES = list(ECOLOGY_RULES.keys()) + [
     "独立项目", "AI/ML", "Android", "Apple", "Bilibili", "BitTorrent",
