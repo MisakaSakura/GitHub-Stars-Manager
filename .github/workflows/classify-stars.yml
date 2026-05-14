@@ -164,6 +164,7 @@ jobs:
           fi
 
           if [ "$USE_LLM" = "true" ] && [ -n "$LLM_KEY" ]; then
+            ARGS+=("--llm-key" "$LLM_KEY")
             if [ -n "$LLM_PRESET" ]; then
               ARGS+=("--llm-preset" "$LLM_PRESET")
             fi
