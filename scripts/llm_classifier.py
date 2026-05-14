@@ -251,12 +251,20 @@ Topics: {topics or '无'}
 
         # 显式区分 "未传入"(None) 和 "传入空字符串"
         sp = LLM_SYSTEM_PROMPT if system_prompt is None else system_prompt
-        payload = {
-            "model": self.model,
-            "messages": [
+
+        # 兼容模式：部分国产兼容 API 不支持 system role，将 system prompt 合并到 user 中
+        no_system_role = LLM_CONFIG.get("no_system_role", False)
+        if no_system_role:
+            messages = [{"role": "user", "content": f"{sp}\n\n{prompt}"}]
+        else:
+            messages = [
                 {"role": "system", "content": sp},
                 {"role": "user", "content": prompt}
-            ],
+            ]
+
+        payload = {
+            "model": self.model,
+            "messages": messages,
             "max_tokens": max_tokens or LLM_CONFIG.get("max_tokens", 256),
             "temperature": LLM_CONFIG.get("temperature", 0.1),
         }
@@ -266,43 +274,60 @@ Topics: {topics or '无'}
         for attempt in range(max_retries):
             try:
                 code, body = self.client.post_json(url, payload, headers=headers, timeout=LLM_CONFIG.get("timeout", 30))
+                # 调试：无论成功失败，先打印状态码和响应摘要
+                body_preview = body[:500] if body else "<空响应>"
+                log(f"  ↳ API 响应: HTTP {code} | 体长 {len(body)} | 摘要: {body_preview}", "INFO")
+
                 if code == 200:
                     try:
                         data = json.loads(body)
                     except json.JSONDecodeError:
-                        log(f"LLM 响应不是有效 JSON: {body[:200]}", "WARN")
+                        log(f"  ↳ 响应不是有效 JSON", "WARN")
                         return None
                     if not isinstance(data, dict):
-                        log(f"LLM 响应格式错误: 期望 dict，实际为 {type(data).__name__}", "WARN")
+                        log(f"  ↳ 响应格式错误: 期望 dict，实际为 {type(data).__name__}", "WARN")
                         return None
                     choices = data.get("choices")
                     if not isinstance(choices, list) or len(choices) == 0:
-                        log("LLM 响应格式错误: choices 为空或缺失", "WARN")
+                        # 兼容：某些 API 直接在顶层返回 content
+                        alt_content = data.get("content") or data.get("text") or data.get("response")
+                        if isinstance(alt_content, str):
+                            log(f"  ↳ 使用兼容路径获取 content", "OK")
+                            return alt_content
+                        log(f"  ↳ 响应格式错误: choices 为空或缺失，且无兼容字段", "WARN")
                         return None
                     message = choices[0].get("message") if isinstance(choices[0], dict) else None
                     if not isinstance(message, dict):
-                        log("LLM 响应格式错误: message 缺失或格式不对", "WARN")
+                        # 兼容：某些 API choices[0] 直接是字符串 content
+                        alt_content = choices[0] if isinstance(choices[0], str) else None
+                        if alt_content:
+                            log(f"  ↳ 使用兼容路径 choices[0] 字符串", "OK")
+                            return alt_content
+                        log(f"  ↳ 响应格式错误: message 缺失或格式不对", "WARN")
                         return None
                     content = message.get("content")
                     if not isinstance(content, str):
-                        log("LLM 响应格式错误: content 缺失或不是字符串", "WARN")
+                        log(f"  ↳ 响应格式错误: content 缺失或不是字符串 (类型={type(content).__name__})", "WARN")
+                        return None
+                    if not content.strip():
+                        log(f"  ↳ 响应 content 为空字符串", "WARN")
                         return None
                     return content
                 elif code in retry_codes and attempt < max_retries - 1:
                     wait = 2 ** attempt
-                    log(f"LLM API {code}，{wait}s 后重试 ({attempt + 1}/{max_retries})", "WARN")
+                    log(f"  ↳ HTTP {code}，{wait}s 后重试 ({attempt + 1}/{max_retries})", "WARN")
                     time.sleep(wait)
                     continue
                 else:
-                    log(f"LLM API 错误 {code}: {body[:200]}", "WARN")
+                    log(f"  ↳ HTTP {code} 错误: {body[:200]}", "WARN")
                     return None
             except Exception as e:
                 if attempt < max_retries - 1:
                     wait = 2 ** attempt
-                    log(f"LLM 调用失败: {e}，{wait}s 后重试 ({attempt + 1}/{max_retries})", "WARN")
+                    log(f"  ↳ 调用异常: {e}，{wait}s 后重试 ({attempt + 1}/{max_retries})", "WARN")
                     time.sleep(wait)
                     continue
-                log(f"LLM 调用失败: {e}", "WARN")
+                log(f"  ↳ 调用异常: {e}", "WARN")
                 return None
 
     @staticmethod
