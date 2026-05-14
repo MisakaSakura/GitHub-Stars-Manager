@@ -25,6 +25,11 @@ class GitHubAuthError(GitHubAPIError):
     pass
 
 
+class GitHubServerError(GitHubAPIError):
+    """GitHub 服务端错误（5xx）"""
+    pass
+
+
 class GitHubAPI:
     def __init__(self, token: str):
         self.token = token
@@ -42,7 +47,14 @@ class GitHubAPI:
             url += "?" + urllib.parse.urlencode(params)
         code, body = self.client.request(url, headers=self.headers)
         if code == 200:
-            return json.loads(body)
+            if not body:
+                log("API 返回空响应体", "WARN")
+                return None
+            try:
+                return json.loads(body)
+            except json.JSONDecodeError as e:
+                log(f"API 返回无效 JSON: {e}", "ERROR")
+                return None
         elif code == 401:
             raise GitHubAuthError("Token 无效或已过期")
         elif code == 403:
@@ -50,6 +62,9 @@ class GitHubAPI:
         elif code == 404:
             log("资源不存在", "ERROR")
             return None
+        elif code >= 500:
+            # P1 fix: 服务端错误不应被静默吞没
+            raise GitHubServerError(f"GitHub 服务端错误 {code}: {body[:200]}")
         else:
             log(f"API 错误 {code}: {body[:200]}", "ERROR")
             return None
@@ -81,7 +96,7 @@ class GitHubAPI:
         data = self._get(f"/repos/{owner}/{repo}/readme")
         if not data:
             return ""
-        content = data.get("content", "").replace("\n", "")
+        content = (data.get("content") or "").replace("\n", "")
         try:
             decoded = base64.b64decode(content).decode("utf-8")
             text = self._strip_markdown(decoded)

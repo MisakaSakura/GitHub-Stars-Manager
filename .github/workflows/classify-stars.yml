@@ -8,6 +8,12 @@ name: Auto Classify GitHub Stars
 # - 如果你有已有分类想保留，先在本地用 --import-json 导入后再推送到仓库
 # - 或者首次手动触发时不选增量模式，让系统全新分类，之后检查并手动保护满意的项目
 # - 首次运行后，后续会自动走增量模式，不会重复覆盖
+#
+# 双分支数据隔离说明:
+# - main 分支：纯代码，不包含任何数据文件
+# - data  分支：存放 stars_db.json, stars_ai.json, releases_history.json 等所有数据
+# - 本地开发时数据存放在 data/ 目录，不会被提交到 main 分支
+# - Actions 运行时自动从 data 分支拉取/推送数据
 
 on:
   schedule:
@@ -84,11 +90,35 @@ jobs:
   classify:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      # ========== 1. checkout 代码分支 (main) ==========
+      - name: Checkout code (main)
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ========== 2. checkout 数据分支 (data) 到 data/ 目录 ==========
+      - name: Checkout data branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
+          # 清理旧 data 目录（如果有）
+          rm -rf data
+          # 尝试拉取已存在的 data 分支
+          if git ls-remote --heads "${REPO_URL}" data | grep -q data; then
+            git clone --branch data --single-branch "${REPO_URL}" data
+            echo "✅ 已拉取现有 data 分支"
+          else
+            # data 分支不存在，初始化空分支
+            mkdir data
+            cd data
+            git init
+            git remote add origin "${REPO_URL}"
+            git checkout -b data
+            echo "🆕 创建新的 data 分支"
+          fi
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -216,24 +246,34 @@ jobs:
           echo "执行命令: python scripts/classifier.py ${ARGS[@]}"
           python scripts/classifier.py "${ARGS[@]}"
 
-      - name: Commit database updates
+      # ========== 提交数据到 data 分支 ==========
+      - name: Commit data updates (data branch)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd data
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "chore: auto-update stars database [$(date -u +%Y-%m-%d)]"
+            git push origin data || git push -u origin data
+            echo "✅ 数据已推送到 data 分支"
+          fi
+
+      # ========== 提交 requirements.txt 到 main 分支（如有变更）==========
+      - name: Commit requirements.txt (main branch)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
-          git add -f data/stars_db.json data/stars_ai.json data/releases_history.json
-          if [ -f data/stars_db.meta.json ]; then
-            git add -f data/stars_db.meta.json
-          fi
           if ! git diff --quiet -- requirements.txt 2>/dev/null; then
             git add requirements.txt
-          fi
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-          else
-            git commit -m "chore: auto-update stars database [$(date -u +%Y-%m-%d)]"
+            git commit -m "chore: auto-update requirements.txt [$(date -u +%Y-%m-%d)]"
             git push
           fi
 

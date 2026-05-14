@@ -37,6 +37,9 @@ class LLMClassifier:
         # batch_size 优先从 profile 读取，回退到 config
         from config import LLM_CONFIG
         self.batch_size = (self.profile.batch_size if self.profile else None) or LLM_CONFIG.get("batch_size", 5)
+        # P1 fix: 防御 0 或负数
+        if not self.batch_size or self.batch_size <= 0:
+            self.batch_size = 5
 
         # 优先级：CLI 传入 > config_llm.py 配置 > provider 默认值
         config_base = LLM_CONFIG.get("api_base")
@@ -57,7 +60,13 @@ class LLMClassifier:
         if os.path.exists(self.cache_file):
             try:
                 with open(self.cache_file, "r", encoding="utf-8") as f:
-                    self.cache = json.load(f)
+                    raw = json.load(f)
+                # P1 fix: 防御缓存文件被外部编辑为 list 等非 dict 类型
+                if isinstance(raw, dict):
+                    self.cache = raw
+                else:
+                    log("LLM 缓存格式错误（期望 dict），已重置", "WARN")
+                    self.cache = {}
             except Exception:
                 self.cache = {}
 
@@ -290,6 +299,11 @@ Topics: {topics or '无'}
 
         # P1 fix: temperature 优先从 profile 读取，回退到 config
         temperature = self.profile.temperature if self.profile else LLM_CONFIG.get("temperature", 0.1)
+        # P1 fix: 防御 None 或非法类型
+        try:
+            temperature = float(temperature) if temperature is not None else 0.1
+        except (ValueError, TypeError):
+            temperature = 0.1
         payload = {
             "model": self.model,
             "messages": messages,

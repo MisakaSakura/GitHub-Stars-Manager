@@ -42,7 +42,16 @@ class StarsDB:
                     items = json.load(f)
                 if not isinstance(items, list):
                     raise ValueError(f"数据库格式错误: 期望 JSON 数组，实际为 {type(items).__name__}")
-                self.data = {item["full_name"]: StarItem.from_dict(item) for item in items if isinstance(item, dict)}
+                # P1 fix: 单条异常时跳过，不丢弃整库
+                self.data = {}
+                for item in items:
+                    if not isinstance(item, dict):
+                        continue
+                    full_name = item.get("full_name")
+                    if not full_name:
+                        log(f"数据库条目缺少 full_name，已跳过: {item}", "WARN")
+                        continue
+                    self.data[full_name] = StarItem.from_dict(item)
                 log(f"加载数据库: {len(self.data)} 个项目", "OK")
             except Exception as e:
                 log(f"数据库损坏，将重建: {e}", "WARN")

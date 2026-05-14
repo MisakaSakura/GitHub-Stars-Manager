@@ -163,7 +163,15 @@ class IncrementalEngine:
     @staticmethod
     def _apply_llm_override(target, llm_result: dict | None, existing_eco: str | None) -> bool:
         """将 LLM 结果应用到目标对象的分类字段（消除重复逻辑），返回是否实际发生了覆盖"""
-        if not llm_result or llm_result.get("confidence", 0) <= 0.7:
+        if not llm_result:
+            return False
+        # P0 fix: confidence 可能为字符串，强制转换为 float
+        raw_conf = llm_result.get("confidence", 0)
+        try:
+            confidence = float(raw_conf) if raw_conf is not None else 0.0
+        except (ValueError, TypeError):
+            confidence = 0.0
+        if confidence <= 0.7:
             return False
         ecology_locked = existing_eco and _is_ecology_locked(existing_eco)
         # P1 fix: dict.get 值为 None 时返回 None，用 or 保证回退到原值

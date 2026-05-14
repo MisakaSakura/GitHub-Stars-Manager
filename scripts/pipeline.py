@@ -22,6 +22,9 @@ from notify import Notifier
 from lists_manager import ListsManager
 from release_tracker import ReleaseTracker
 from fork_tracker import ForkTracker
+from ecology_discovery import EcologyDiscovery
+from consistency_checker import ConsistencyChecker
+from feedback_loop import FeedbackLoop
 
 from config import NOTIFY_CONFIG
 
@@ -70,6 +73,12 @@ class Pipeline:
         self._sync_notion()
         self._track_releases()
         self._track_forks()
+        # P4: 生态自动发现（在保存之后、报告之前）
+        self._discover_ecologies()
+        # P3: 一致性自检
+        self._check_consistency()
+        # P2: 反馈闭环
+        self._record_feedback()
         # 报告生成必须在追踪之后，否则 Release/Fork 更新不会出现在周报中
         self._generate_reports()
         self._notify()
@@ -261,7 +270,10 @@ class Pipeline:
         if not last:
             return True  # 从未全量刷新过
         from datetime import datetime, timezone, timedelta
-        last_dt = datetime.fromisoformat(last)
+        try:
+            last_dt = datetime.fromisoformat(last)
+        except ValueError:
+            return True  # P0 fix: 无效时间戳视为需要刷新
         interval = timedelta(days=self.args.auto_refresh_days)
         if datetime.now(timezone.utc) - last_dt >= interval:
             return True
@@ -451,6 +463,9 @@ class Pipeline:
                     existing = json.load(f)
             except Exception:
                 existing = []
+        # P0 fix: 防御文件被外部编辑为 dict 等非 list 类型
+        if not isinstance(existing, list):
+            existing = []
 
         seen = {(r.get("full_name"), r.get("new_tag")) for r in existing}
         for ru in self.release_updates:
@@ -485,11 +500,69 @@ class Pipeline:
         forks = self.fork_tracker.get_user_forks(self.args.user)
         self.fork_updates = self.fork_tracker.check(forks)
 
+    def _discover_ecologies(self) -> None:
+        """P4: 生态自动发现 — 扫描独立项目，输出候选生态"""
+        if self.args.dry_run or not self.db:
+            return
+        from config_rules import ECOLOGY_RULES
+        discovery = EcologyDiscovery(self.db, ECOLOGY_RULES)
+        candidates = discovery.discover(top_n=10)
+        if candidates:
+            md = discovery.generate_report(candidates)
+            out_path = os.path.join(self.args.output, "ecology_discovery.md")
+            try:
+                os.makedirs(self.args.output, exist_ok=True)
+                with open(out_path, "w", encoding="utf-8") as f:
+                    f.write(md)
+                log(f"生态发现报告已生成: {out_path}", "OK")
+            except Exception as e:
+                log(f"生态发现报告写入失败: {e}", "WARN")
+
+    def _check_consistency(self) -> None:
+        """P3: 一致性自检 — 发现分类矛盾"""
+        if self.args.dry_run or not self.db:
+            return
+        checker = ConsistencyChecker(self.db)
+        issues = checker.check()
+        md = checker.generate_report()
+        out_path = os.path.join(self.args.output, "consistency_report.md")
+        try:
+            os.makedirs(self.args.output, exist_ok=True)
+            with open(out_path, "w", encoding="utf-8") as f:
+                f.write(md)
+            log(f"一致性报告已生成: {out_path}", "OK")
+        except Exception as e:
+            log(f"一致性报告写入失败: {e}", "WARN")
+
+    def _record_feedback(self) -> None:
+        """P2: 反馈闭环 — 检测人工修正并持久化"""
+        if self.args.dry_run or not self.db:
+            return
+        feedback_path = os.path.join(os.path.dirname(self.args.db), "feedback.json")
+        fb = FeedbackLoop(feedback_path)
+        # 扫描所有 manual_override 项目，对比当前分类与规则分类
+        count = fb.scan_manual_overrides(self.db)
+        if count > 0:
+            fb.save()
+            log(f"反馈数据已保存: {feedback_path}", "OK")
+        # 生成反馈统计报告
+        md = fb.generate_report()
+        out_path = os.path.join(self.args.output, "feedback_report.md")
+        try:
+            os.makedirs(self.args.output, exist_ok=True)
+            with open(out_path, "w", encoding="utf-8") as f:
+                f.write(md)
+            log(f"反馈报告已生成: {out_path}", "OK")
+        except Exception as e:
+            log(f"反馈报告写入失败: {e}", "WARN")
+
     def _notify(self) -> None:
         if not self.args.notify or self.args.dry_run:
             return
         NOTIFY_CONFIG["enabled"] = True
-        NOTIFY_CONFIG["channels"] = self.args.notify_channels.split(",")
+        # P1 fix: 防御空字符串产生无效渠道列表
+        raw_channels = self.args.notify_channels.split(",") if self.args.notify_channels else []
+        NOTIFY_CONFIG["channels"] = [c.strip() for c in raw_channels if c.strip()]
         notifier = Notifier(NOTIFY_CONFIG)
         summary = self._build_summary()
         weekly_digest = self._build_weekly_digest_text()

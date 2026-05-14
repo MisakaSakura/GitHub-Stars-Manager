@@ -112,6 +112,9 @@ class ReportGenerator:
                 history = json.load(f)
         except Exception:
             return None
+        # P0 fix: 防御文件被外部编辑为 dict 等非 list 类型
+        if not isinstance(history, list):
+            return None
         if not history:
             return None
 
@@ -258,8 +261,15 @@ function toggleTheme(){{const html=document.documentElement;const btn=document.g
             else:
                 # 行内代码
                 line = re.sub(r'`([^`]+)`', r'<code>\1</code>', line)
-                # 链接 [text](url)
-                line = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2" target="_blank">\1</a>', line)
+                # 链接 [text](url) — P1 fix: 防御 XSS（过滤危险协议 + escape URL）
+                def _link_repl(m):
+                    text = escape(m.group(1))
+                    url = m.group(2).strip()
+                    # 过滤危险协议
+                    if re.match(r'^(javascript|data|vbscript):', url, re.IGNORECASE):
+                        url = '#'
+                    return f'<a href="{escape(url)}" target="_blank" rel="noopener noreferrer">{text}</a>'
+                line = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', _link_repl, line)
                 # 粗体 **text**
                 line = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', line)
 
@@ -292,7 +302,11 @@ function toggleTheme(){{const html=document.documentElement;const btn=document.g
         rows_parts = []
         for r in sorted(items, key=lambda x: x["stars"], reverse=True):
             stars = f"⭐ {r['stars']:,}"
-            topics = "".join([f'<span class="tt">{escape(str(t))}</span>' for t in r.get("topics", [])])
+            # P1 fix: 防御 topics 为字符串时逐字符渲染
+            raw_topics = r.get("topics", [])
+            if isinstance(raw_topics, str):
+                raw_topics = [raw_topics]
+            topics = "".join([f'<span class="tt">{escape(str(t))}</span>' for t in raw_topics])
             eco_badge = f'<span class="be">{escape(r["ecology"])}</span>' if r["ecology"] != "独立项目 / Standalone" else '<span style="color:#484f58;font-size:11px">-</span>'
             role_badge = f'<span class="br">{escape(r["ecology_role"])}</span>' if r["ecology_role"] != "-" else '<span style="color:#484f58;font-size:11px">-</span>'
             lock = ' 🔒' if r.get("manual_override") else ''
@@ -306,8 +320,16 @@ function toggleTheme(){{const html=document.documentElement;const btn=document.g
             else:
                 llm_icon = ''
             display_desc = r.get("ai_summary") or r["description"]
-            tags_html = tag_badges(r.get("ai_tags"))
-            plat_html = "".join([f'<span class="bpl">{escape(str(p))}</span>' for p in (r.get("ai_platforms") or [])])
+            # P1 fix: 防御 ai_tags 为字符串时逐字符渲染
+            raw_ai_tags = r.get("ai_tags") or []
+            if isinstance(raw_ai_tags, str):
+                raw_ai_tags = [raw_ai_tags]
+            tags_html = tag_badges(raw_ai_tags)
+            # P1 fix: 防御 ai_platforms 为字符串时逐字符渲染
+            raw_plat = r.get("ai_platforms") or []
+            if isinstance(raw_plat, str):
+                raw_plat = [raw_plat]
+            plat_html = "".join([f'<span class="bpl">{escape(str(p))}</span>' for p in raw_plat])
             rows_parts.append(f'<tr data-p="{escape(r["platform"])}" data-t="{escape(r["type"])}" data-l="{escape(r["language"])}" data-e="{escape(r["ecology"])}" data-r="{escape(r["ecology_role"])}" data-s="{escape(llm_status)}"><td><a class="rn" href="{escape(r["url"])}" target="_blank">{escape(r["owner"])}/{escape(r["name"])}</a>{lock}{llm_icon}<div class="rd">{escape(display_desc)}</div><div class="tg">{tags_html}</div><div class="tc">{topics}</div></td><td>{eco_badge}</td><td>{role_badge}</td><td><span class="bp">{escape(r["platform"])}</span></td><td><span class="bt">{escape(r["type"])}</span></td><td><span class="bl">{escape(r["language"])}</span></td><td>{plat_html}</td><td class="st">{stars}</td></tr>')
         rows = "".join(rows_parts)
 
@@ -345,6 +367,7 @@ function toggleTheme(){{const html=document.documentElement;const btn=document.g
                 stars = f"⭐ {f['stars']:,}"
                 parent_info = ""
                 if f.get("parent_full_name"):
+                    # P1 fix: 防御 parent_pushed_at 为 None 时切片崩溃
                     ppa = (f.get("parent_pushed_at") or "未知")[:10]
                     parent_info = f'<div style="color:#8b949e;font-size:11px">← {escape(f["parent_full_name"])} (上游更新: {escape(ppa)})</div>'
                 sync_btn = f'<a href="https://github.com/{escape(f["full_name"])}/sync" target="_blank" style="color:#58a6ff;font-size:11px;text-decoration:none">[Sync]</a>'
@@ -473,7 +496,9 @@ function toggleTheme(){{const html=document.documentElement;const btn=document.g
                 fu_parts.append(f'<div class="wd-section"><h3>🔱 Fork 上游更新 ({len(fork_updates)})</h3><div class="wd-list">')
                 for fu in fork_updates:
                     parent_url = f"https://github.com/{fu['parent_full_name']}"
-                    fu_parts.append(f'<div class="wd-item"><a href="{parent_url}" target="_blank">{fu["full_name"]}</a><span class="wd-tag">← {fu["parent_full_name"]} ({fu["parent_pushed_at"][:10]})</span></div>')
+                    # P1 fix: 防御 parent_pushed_at 为 None 时切片崩溃
+                    ppa = (fu.get("parent_pushed_at") or "")[:10]
+                    fu_parts.append(f'<div class="wd-item"><a href="{parent_url}" target="_blank">{fu["full_name"]}</a><span class="wd-tag">← {fu["parent_full_name"]} ({ppa})</span></div>')
                 fu_parts.append('</div></div>')
                 add_tab("fork", f"🔱 Fork ({len(fork_updates)})", "".join(fu_parts))
 

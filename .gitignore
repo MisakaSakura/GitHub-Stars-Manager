@@ -22,9 +22,12 @@ docs/
 fake_docs/
 fake_db.json
 
-# 数据库目录本身需要被跟踪，但忽略其中的临时文件
-data/*
-!data/stars_db.json
+# ==================== 双分支数据隔离 ====================
+# main 分支：纯代码，不跟踪任何数据文件
+# data 分支：专门存放数据库和持久化数据（stars_db.json, stars_ai.json 等）
+# Actions 运行时会自动 checkout data 分支到 data/ 目录
+# 本地开发时，数据也存放在 data/ 目录（不会被提交到 main 分支）
+data/
 
 # LLM 缓存
 .llm_cache.json
