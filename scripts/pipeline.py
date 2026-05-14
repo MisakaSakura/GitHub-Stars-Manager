@@ -96,8 +96,8 @@ class Pipeline:
 
         self.db = StarsDB(self.args.db)
 
-        # 初始化 AI 数据库（与主数据库解耦）
-        ai_db_path = os.path.splitext(self.args.db)[0] + "_ai.json"
+        # 初始化 AI 数据库（与主数据库解耦，固定文件名 stars_ai.json）
+        ai_db_path = os.path.join(os.path.dirname(self.args.db), "stars_ai.json")
         self.ai_db = AIDatabase(ai_db_path)
         # 向后兼容：从旧版主数据库迁移 AI 字段
         self.ai_db.migrate_from_stars_db(list(self.db.values()))
