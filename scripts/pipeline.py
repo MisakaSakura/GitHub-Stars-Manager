@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Pipeline / Orchestrator：将 classifier.py 的协调逻辑抽取为可测试的阶段"""
 
+import json
 import os
 import sys
 from collections import Counter
