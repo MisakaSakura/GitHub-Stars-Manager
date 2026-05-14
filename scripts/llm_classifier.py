@@ -4,6 +4,7 @@
 
 import json
 import os
+import re
 import time
 
 from http_client import HTTPClient
@@ -268,6 +269,10 @@ Topics: {topics or '无'}
         # 显式区分 "未传入"(None) 和 "传入空字符串"
         sp = LLM_SYSTEM_PROMPT if system_prompt is None else system_prompt
 
+        # P1 fix: system_prompt_mode 实际生效——no_thinking 模式追加强制指令
+        if self.profile and self.profile.system_prompt_mode == "no_thinking":
+            sp = sp + "\n\n【强制】不要输出思考过程，直接输出最终结果。不要包含任何 markdown 代码块标记。"
+
         # system prompt 策略：优先从 profile 读取，回退到 config
         no_system_role = False
         if self.profile:
@@ -283,11 +288,13 @@ Topics: {topics or '无'}
                 {"role": "user", "content": prompt}
             ]
 
+        # P1 fix: temperature 优先从 profile 读取，回退到 config
+        temperature = self.profile.temperature if self.profile else LLM_CONFIG.get("temperature", 0.1)
         payload = {
             "model": self.model,
             "messages": messages,
             "max_tokens": max_tokens or LLM_CONFIG.get("max_tokens", 256),
-            "temperature": LLM_CONFIG.get("temperature", 0.1),
+            "temperature": temperature,
         }
 
         max_retries = 3
@@ -376,33 +383,45 @@ Topics: {topics or '无'}
 
     @staticmethod
     def _extract_json_from_text(text: str) -> str | None:
-        """从自然语言文本中提取 JSON 对象或数组（用于 reasoning 模型）"""
+        """从自然语言文本中提取 JSON 对象或数组（用于 reasoning 模型）
+        P2 fix: 支持多代码块/多候选，优先选最长且以 [ 或 { 开头的"""
         text = text.strip()
-        # 尝试找 ```json ... ``` 代码块
-        if "```json" in text:
-            start = text.find("```json") + 7
-            end = text.find("```", start)
-            if end > start:
-                return text[start:end].strip()
-        # 尝试找 ``` ... ``` 代码块
-        if "```" in text:
-            start = text.find("```") + 3
-            end = text.find("```", start)
-            if end > start:
-                candidate = text[start:end].strip()
-                if candidate.startswith("[") or candidate.startswith("{"):
-                    return candidate
-        # 尝试找最外层 JSON 数组 [ ... ]
+        candidates = []
+
+        # 1. 找所有 ```json ... ``` 代码块
+        for match in re.finditer(r'```json\s*([\s\S]*?)\s*```', text):
+            candidate = match.group(1).strip()
+            if candidate.startswith("[") or candidate.startswith("{"):
+                candidates.append(candidate)
+
+        # 2. 找所有 ``` ... ``` 代码块（排除 json 标签已匹配的）
+        for match in re.finditer(r'```\s*([\s\S]*?)\s*```', text):
+            candidate = match.group(1).strip()
+            if candidate.startswith("json"):
+                candidate = candidate[4:].strip()
+            if candidate.startswith("[") or candidate.startswith("{"):
+                # 去重：避免和 ```json 块重复
+                if candidate not in candidates:
+                    candidates.append(candidate)
+
+        # 3. 找最外层 JSON 数组 [ ... ]
         arr_start = text.find("[")
         arr_end = text.rfind("]")
         if arr_start != -1 and arr_end != -1 and arr_end > arr_start:
-            return text[arr_start:arr_end + 1]
-        # 尝试找最外层 JSON 对象 { ... }
+            candidates.append(text[arr_start:arr_end + 1])
+
+        # 4. 找最外层 JSON 对象 { ... }
         obj_start = text.find("{")
         obj_end = text.rfind("}")
         if obj_start != -1 and obj_end != -1 and obj_end > obj_start:
-            return text[obj_start:obj_end + 1]
-        return None
+            candidates.append(text[obj_start:obj_end + 1])
+
+        if not candidates:
+            return None
+
+        # P2 fix: 优先选最长的候选（完整 JSON 通常更长），数组优先于对象（batch 场景）
+        candidates.sort(key=lambda x: (len(x), x.startswith("[")), reverse=True)
+        return candidates[0]
 
     def _parse_single_response(self, content):
         content = self._clean_json_content(content)

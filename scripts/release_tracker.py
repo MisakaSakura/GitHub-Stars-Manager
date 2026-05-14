@@ -133,7 +133,9 @@ class ReleaseTracker(BaseTracker):
                 continue
             prompt = f"请根据以下 Release Notes，用 20-30 字概括这个版本的主要更新：\n\n{body[:1200]}"
             try:
-                summary = llm.summarize(prompt, system_prompt=system_prompt, max_tokens=64)
+                # P2 fix: 从 profile 读取 release_digest 场景的最大 tokens，避免 reasoning 模型不够
+                max_tokens = llm.profile.get_max_tokens("release_digest") if getattr(llm, "profile", None) else 64
+                summary = llm.summarize(prompt, system_prompt=system_prompt, max_tokens=max_tokens)
                 u["ai_digest"] = summary or ""
             except Exception as e:
                 log(f"LLM 摘要 {u['full_name']} 失败: {e}", "WARN")

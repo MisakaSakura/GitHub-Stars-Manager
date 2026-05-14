@@ -189,8 +189,9 @@ class Pipeline:
         if not self.args.llm_key:
             return
         # P0 fix: 移除全局间隔大闸——由 _needs_llm() 按项目级策略全权决定
-        from config import LLM_CONFIG
-        default_model = LLM_CONFIG.get("model", "gpt-4o-mini")
+        # P2 fix: 使用 model_profiles 的预设默认模型映射
+        from model_profiles import get_preset_default_model
+        default_model = get_preset_default_model(self.args.llm_preset or "")
         model = self.args.llm_model or default_model
         self.llm = LLMClassifier(
             api_key=self.args.llm_key,
@@ -209,8 +210,39 @@ class Pipeline:
     def _enrich(self) -> None:
         if not self.llm:
             return
-        log("获取 README 摘要用于 AI 分析...", "STEP")
-        for item in self.items[:50]:
+        # P2 fix: 先筛选需要 LLM 的项目，再抓 README，避免浪费配额
+        from datetime import datetime, timezone
+        llm_interval = getattr(self.args, 'llm_interval_days', 30)
+        candidates = []
+        for item in self.items:
+            key = f"{item['owner']['login']}/{item['name']}"
+            existing = self.db.get(key)
+            needs = False
+            if not existing:
+                needs = True
+            elif self.ai_db:
+                rec = self.ai_db.get(key)
+                if rec and rec.analyzed_at:
+                    try:
+                        last = datetime.fromisoformat(rec.analyzed_at)
+                        if (datetime.now(timezone.utc) - last).days >= llm_interval:
+                            needs = True
+                    except Exception:
+                        needs = True
+                else:
+                    needs = True
+            else:
+                needs = True
+            if self.ai_db:
+                rec = self.ai_db.get(key)
+                if rec and rec.llm_status == "failed":
+                    needs = True
+            if getattr(self.args, 'force_llm', False):
+                needs = True
+            if needs:
+                candidates.append(item)
+        log(f"获取 README 摘要用于 AI 分析... (共 {len(candidates)} 个候选项目)", "STEP")
+        for item in candidates[:50]:
             try:
                 readme = self.gh.get_readme(item["owner"]["login"], item["name"], max_length=1500)
                 if readme:

@@ -147,8 +147,9 @@ class IncrementalEngine:
         if not llm_result or llm_result.get("confidence", 0) <= 0.7:
             return False
         ecology_locked = existing_eco and _is_ecology_locked(existing_eco)
-        target.platform = llm_result.get("platform", target.platform)
-        target.type = llm_result.get("type", target.type)
+        # P1 fix: dict.get 值为 None 时返回 None，用 or 保证回退到原值
+        target.platform = llm_result.get("platform") or target.platform
+        target.type = llm_result.get("type") or target.type
         if not ecology_locked:
             if llm_result.get("ecology"):
                 target.ecology = llm_result["ecology"]
