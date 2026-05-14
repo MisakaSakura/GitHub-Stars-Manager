@@ -78,6 +78,7 @@ concurrency:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  PYTHONUNBUFFERED: 1  # 强制 Python stdout 无缓冲，LLM 进度在 Actions 日志中实时可见
 
 jobs:
   classify:

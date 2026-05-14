@@ -11,7 +11,7 @@ def log(msg: str, level: str = "INFO") -> None:
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     prefix = {"INFO": "ℹ️", "OK": "✅", "WARN": "⚠️", "ERROR": "❌", "STEP": "🔄"}.get(level, "•")
     try:
-        print(f"[{ts}] {prefix} {msg}")
+        print(f"[{ts}] {prefix} {msg}", flush=True)
     except UnicodeEncodeError:
         prefix_ascii = {"INFO": "[I]", "OK": "[OK]", "WARN": "[W]", "ERROR": "[E]", "STEP": "[>"}.get(level, "[*]")
-        print(f"[{ts}] {prefix_ascii} {msg}")
+        print(f"[{ts}] {prefix_ascii} {msg}", flush=True)

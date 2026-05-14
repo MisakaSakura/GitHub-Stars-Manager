@@ -27,12 +27,12 @@ from config import NOTIFY_CONFIG
 
 
 def _safe_print(msg: str) -> None:
-    """安全打印，在编码不支持时回退 ASCII"""
+    """安全打印，在编码不支持时回退 ASCII，强制 flush 保证 Actions 中实时可见"""
     try:
-        print(msg)
+        print(msg, flush=True)
     except UnicodeEncodeError:
         ascii_msg = msg.encode("ascii", "replace").decode("ascii")
-        print(ascii_msg)
+        print(ascii_msg, flush=True)
 
 
 class Pipeline:
