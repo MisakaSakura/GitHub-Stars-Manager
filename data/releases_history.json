@@ -1,0 +1,50 @@
+[
+  {
+    "full_name": "v2fly/domain-list-community",
+    "name": "domain-list-community",
+    "owner": "v2fly",
+    "old_tag": "20260512150306",
+    "new_tag": "20260514020130",
+    "published_at": "2026-05-14T02:01:38Z",
+    "html_url": "https://github.com/v2fly/domain-list-community/releases/tag/20260514020130",
+    "body": "## What's Changed\n* include:nicegram @ads by @kkkgo in https://github.com/v2fly/domain-list-community/pull/3568\n\n\n**Full Changelog**: https://github.com/v2fly/domain-list-community/compare/20260512150306...20260514020130",
+    "ai_digest": "",
+    "detected_at": "2026-05-14T02:06:58.134429+00:00"
+  },
+  {
+    "full_name": "Hmbown/DeepSeek-TUI",
+    "name": "DeepSeek-TUI",
+    "owner": "Hmbown",
+    "old_tag": "v0.8.34",
+    "new_tag": "v0.8.35",
+    "published_at": "2026-05-14T00:22:12Z",
+    "html_url": "https://github.com/Hmbown/DeepSeek-TUI/releases/tag/v0.8.35",
+    "body": "## Highlights\n\n- Cleaner TUI sidebar behavior: active checklist work stays visible in short layouts, completed live-tool rows age out, and shell helper tasks are labeled with readable names instead of internal task IDs.\n- Broader settings coverage: `/config`, schema-driven settings UI, `/set`, and single-setting display now cover the available setting surface, including animation, paste, vim-mode, synchronized output, context panel, currency, and PDF extraction toggles.\n- Leaner prompt/context hygiene: first-turn project context avoids hidden tool/cache state, `/context` shows named prompt layers, and compaction guidance now separates the 60% manual suggestion from the 80% automatic guardrail.\n- Stronger release hygiene: version checks now catch changelog/package drift and README contributor-credit drift before release.\n- Contributor credit correction: Horace Liu ([@liuhq](https://github.com/liuhq)) is now credited for Nix package support and install documentation contributed during the v0.8.34 cycle.\n\n## Install\n\n### Recommended: npm (one command, both binaries)\n\n```bash\nnpm install -g deepseek-tui\n```\n\nThe wrapper downloads both binaries from this Release and places them in the same directory.\n\n### Docker / GHCR\n\n```bash\ndocker run --rm -it \\\n  -e DEEPSEEK_API_KEY=\"$DEEPSEEK_API_KEY\" \\\n  -v ~/.deepseek:/home/deepseek/.deepseek \\\n  ghcr.io/hmbown/deepseek-tui:v0.8.35\n```\n\nThe image ships the `deepseek` dispatcher and `deepseek-tui` runtime. The `latest` tag is also updated on release.\n\n### Cargo (Linux / macOS)\n\n```bash\ncargo install deepseek-tui-cli deepseek-tui --locked\n```\n\nBoth crates are required: `deepseek-tui-cli` produces the `deepseek` dispatcher and `deepseek-tui` produces the interactive runtime that the dispatcher delegates to. Installing only one binary will fail at runtime with a `MISSING_COMPANION_BINARY` error.\n\n### Manual Download\n\nDownload both binaries for your platform and put them in the same directory, such as `~/.local/bin/`.\n\n| Platform | Di",
+    "ai_digest": "",
+    "detected_at": "2026-05-14T02:06:58.134410+00:00"
+  },
+  {
+    "full_name": "HenryChiao/MIHOMO_YAMLS",
+    "name": "MIHOMO_YAMLS",
+    "owner": "HenryChiao",
+    "old_tag": "backup-2026-05-09_23-13",
+    "new_tag": "backup-2026-05-13_23-38",
+    "published_at": "2026-05-13T23:38:38Z",
+    "html_url": "https://github.com/HenryChiao/MIHOMO_YAMLS/releases/tag/backup-2026-05-13_23-38",
+    "body": "## 📦 Auto Backup\n> 🕒 **Time:** 2026-05-13_23-38\n> 💾 **This release contains configs from:** THEYAMLS, THEINI, THEOPENCLASH\n\n### 📁 YAML 配置目录 (THEYAMLS)\n| Path | Size |\n| :--- | :--- |\n| `General_Config/yyhhyyyyyy/mihomo_multi.yaml` | 12.7 KB |\n| `General_Config/yyhhyyyyyy/mihomo_single.yaml` | 12.4 KB |\n| `General_Config/wanswu/config.yaml` | 23.5 KB |\n| `General_Config/Lanlan13-14/configfull.yaml` | 34.6 KB |\n| `General_Config/Lanlan13-14/configfull_NoAd.yaml` | 34.1 KB |\n| `General_Config/Lanlan13-14/configfull_lite.yaml` | 17.7 KB |\n| `General_Config/liandu2024/clash-all-fallback.yaml` | 17.2 KB |\n| `General_Config/liandu2024/clash-fallback-all.yaml` | 18.6 KB |\n| `General_Config/liandu2024/clash-fallback-dialer.yaml` | 16.3 KB |\n| `General_Config/liandu2024/clash-fallback-std.yaml` | 17.3 KB |\n| `General_Config/liandu2024/clash-fallback.yaml` | 15.9 KB |\n| `General_Config/liuran001/config.yaml` | 13.8 KB |\n| `General_Config/fufu/ConfigForClash.yaml` | 49.3 KB |\n| `General_Config/iKeLee/Clash_Sample.yaml` | 8.4 KB |\n| `General_Config/iKeLee/backup.yaml` | 12.5 KB |\n| `General_Config/JohnsonRan/AIB.yaml` | 11.0 KB |\n| `General_Config/JohnsonRan/AIO.yaml` | 10.8 KB |\n| `General_Config/qichiyuhub/config.yaml` | 12.8 KB |\n| `General_Config/Kerronex/config.yaml` | 18.7 KB |\n| `General_Config/666OS/MihomoPro_Config.yaml` | 22.6 KB |\n| `General_Config/666OS/OneTouch_Config.yaml` | 12.4 KB |\n| `General_Config/Mitchell/config.yaml` | 28.5 KB |\n| `General_Config/Mitchell/config_version2.yaml` | 30.9 KB |\n| `General_Config/Pililink/2-subscription-clash-rule-set.yaml` | 13.4 KB |\n| `General_Config/Pililink/3-subscription-clash-rule-set.yaml` | 13.9 KB |\n| `General_Config/Pililink/base-clash-ruleset.yaml` | 11.5 KB |\n| `General_Config/HenryChiao/MihomoAIO.yaml` | 30.1 KB |\n| `General_Config/HenryChiao/MihomoProMax.yaml` | 27.4 KB |\n| `General_Config/HenryChiao/MihomoProPlus.yaml` | 27.9 KB |\n| `General_Config/lvbibir/mihomo.yaml` | 15.8 KB |\n| `General_Config/ClashConnectRules",
+    "ai_digest": "",
+    "detected_at": "2026-05-14T02:06:58.134421+00:00"
+  },
+  {
+    "full_name": "Comfy-Org/ComfyUI",
+    "name": "ComfyUI",
+    "owner": "Comfy-Org",
+    "old_tag": "v0.21.0",
+    "new_tag": "v0.21.1",
+    "published_at": "2026-05-13T21:08:45Z",
+    "html_url": "https://github.com/Comfy-Org/ComfyUI/releases/tag/v0.21.1",
+    "body": "## What's Changed\r\n* [Partner Nodes] new Flux2ImageNode and GrokImageEditNodeV2 nodes by @bigcat88 in https://github.com/Comfy-Org/ComfyUI/pull/13814\r\n* [Partner Nodes] new ByteDanceSeedreamNodeV2 node with DynamicCombo and Autogrow by @bigcat88 in https://github.com/Comfy-Org/ComfyUI/pull/13811\r\n* [Partner Nodes] new OpenAI Image node with DynamicCombo and Autogrow by @bigcat88 in https://github.com/Comfy-Org/ComfyUI/pull/13838\r\n* model_patcher: Fix safetensors saving of fp8 (CORE-160) by @rattus128 in https://github.com/Comfy-Org/ComfyUI/pull/13835\r\n* Support anima TE lora kohya format. by @comfyanonymous in https://github.com/Comfy-Org/ComfyUI/pull/13847\r\n* feat: Support HiDream-O1-Image (CORE-187) by @kijai in https://github.com/Comfy-Org/ComfyUI/pull/13817\r\n* Fix dtype issue with hidream o1 by @comfyanonymous in https://github.com/Comfy-Org/ComfyUI/pull/13849\r\n* [Partner Nodes] fix Quiver nodes by @bigcat88 in https://github.com/Comfy-Org/ComfyUI/pull/13851\r\n* Mark deprecated cloud-runtime endpoints in spec by @MillerMedia in https://github.com/Comfy-Org/ComfyUI/pull/13789\r\n* Suppress false-positive Spectral lint on WebSocket endpoint by @MillerMedia in https://github.com/Comfy-Org/ComfyUI/pull/13842\r\n* Fix LTXV mid-video multi-frame guide alignment (CORE-129) by @drozbay in https://github.com/Comfy-Org/ComfyUI/pull/13625\r\n* Revert some breaking changes. by @comfyanonymous in https://github.com/Comfy-Org/ComfyUI/pull/13861\r\n* fix: create input directory if missing in LoadAudio define_schema by @angad777 in https://github.com/Comfy-Org/ComfyUI/pull/13834\r\n* Better Hidream O1 mem usage factor for non dynamic vram. by @comfyanonymous in https://github.com/Comfy-Org/ComfyUI/pull/13864\r\n* chore: update embedded docs to v0.5.0 by @comfyui-wiki in https://github.com/Comfy-Org/ComfyUI/pull/13865\r\n* Add Create Video to the essentials tab by @AustinMroz in https://github.com/Comfy-Org/ComfyUI/pull/13863\r\n* feat: Extend Save3D to save vertex colors and textures (CORE-189)",
+    "ai_digest": "",
+    "detected_at": "2026-05-14T02:06:58.134426+00:00"
+  }
+]
