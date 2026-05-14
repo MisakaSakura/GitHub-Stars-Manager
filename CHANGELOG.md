@@ -2,6 +2,29 @@
 
 所有重要变更均记录于此。格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [v4.1.0] - 2026-05-14
+
+### 🆕 新增
+
+- **模型配置中心 `model_profiles.py`** — 独立模块管理所有 AI 提供商模型参数。新增模型只需注册一行，零侵入业务代码
+- **xiaomimimo 多模型预设** — 新增 `xiaomimimo-v2.5`（¥14/1M）和 `xiaomimimo-pro`（¥21/1M）预设，默认 `xiaomimimo` 改为性价比最高的 `mimo-v2-flash`（¥2.1/1M）
+- **Reasoning 模型兼容** — 自动识别 reasoning/thinking 模型，content 为空时从 `reasoning_content` 提取 JSON；system prompt 自动追加"不要思考过程"指令
+- **Actions 实时进度** — `PYTHONUNBUFFERED=1` + `flush=True`，LLM batch 进度在 Actions 日志中实时可见
+- **3 轮 batch 重试策略** — batch 失败不回退到单条，统一收集失败后集中重试，最多 3 轮，避免调用次数爆炸
+- **连续失败保护** — 单轮内连续 3 个 batch 失败自动终止，防止无底洞式 token 消耗
+
+### 🔧 改进
+
+- **max_tokens 大幅提升** — batch: 640→8192 / single: 256→4096 / summarize: 128→2048（针对 reasoning 模型 thinking 过程预留空间）
+- **System prompt 精简** — 去掉可选值列表（节省约 500 tokens），减少 prompt 占用
+- **全局间隔下放** — 移除 `_setup_llm` 中的全局间隔大闸，由 `_needs_llm()` 按项目级策略全权决定
+- **失败状态持久化** — LLM 失败项目写入 `stars_ai.json` 并标记 `status="failed"`，避免下次重复浪费 token
+- **llm_enhanced 统计修正** — 从"batch 返回数"改为"实际被 `_apply_llm_override` 覆盖的项目数"
+- **API 指数退避重试** — 429/5xx 时自动重试 3 次，间隔 1s→2s→4s
+- **Notion/CSV AI 字段注入** — 同步前自动注入 AI 数据库字段
+- **Release 展开按钮修复** — `onclick="wrt(this)"` → `onclick="wtn(this)"`，函数名对齐
+- **Actions deep 模式联动** — `auto` 模式下 deep 模式也自动启用 LLM（之前只有 full）
+
 ## [v4.0.0] - 2026-05-10
 
 ### 🆕 新增

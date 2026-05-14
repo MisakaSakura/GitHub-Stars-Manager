@@ -13,7 +13,7 @@
 | 功能 | 说明 |
 |------|------|
 | 🌿 **生态归属** | 自动识别项目族谱（Clash、MPV、VS Code、Neovim 等 15+ 生态） |
-| 🤖 **LLM 智能增强** | 支持 OpenAI / Moonshot / DeepSeek / OpenRouter，自动补全规则分类盲区 |
+| 🤖 **LLM 智能增强** | 支持 OpenAI / Moonshot / DeepSeek / xiaomimimo / OpenRouter，自动补全规则分类盲区 |
 | 📦 **增量更新** | 只处理新 star 的项目，已有分类保持不变 |
 | 🔒 **手动修正保护** | `manual_override` 标记的项目永久不被覆盖 |
 | 📝 **Notion 导出** | 一键同步到 Notion 数据库 |
@@ -152,11 +152,14 @@
 
 | 提供商 | 推荐模型 | 特点 | 适用场景 |
 |--------|----------|------|----------|
-| **Moonshot (Kimi)** | `moonshot-v1-8k` | 国内访问稳定，中文理解好 | 🇨🇳 国内用户首选 |
-| **DeepSeek** | `deepseek-chat` | 价格低，推理能力强 | 💰 性价比首选 |
-| **OpenAI** | `gpt-4o-mini` | 速度快，分类准确 | 🌐 有海外访问条件 |
+| **xiaomimimo** | `mimo-v2-flash` | ¥2.1/1M，全系 reasoning，max_tokens 需设大 | 🇨🇳 国内性价比首选（flash 版） |
+| **Moonshot (Kimi)** | `moonshot-v1-8k` | 国内访问稳定，中文理解好 | 🇨🇳 国内用户备选 |
+| **DeepSeek** | `deepseek-chat` | ¥2/1M，reasoning 模型，价格便宜 | 💰 性价比备选 |
+| **OpenAI** | `gpt-4o-mini` | 速度快，分类准确，非 reasoning | 🌐 有海外访问条件 |
 | **OpenRouter** | `anthropic/claude-3.5-sonnet` 等 | 聚合平台，可自由切换模型 | 🔧 需要灵活切换 |
 | **兼容 OpenAI 的服务** | 视服务商而定 | 复用 OpenAI SDK，只需改 Base URL | 🔌 已有 API 代理或私有化部署 |
+
+> ⚠️ **Reasoning 模型注意**：xiaomimimo 全系（flash/v2.5/pro）和 DeepSeek-R1 都是 reasoning 模型，会在 `reasoning_content` 中进行链式思考。如果 `max_tokens` 不够大，思考过程会耗尽额度导致 `content` 为空。工具已自动适配：batch 8192 / single 4096 / summarize 2048。
 
 #### 2. 获取 API Key
 
@@ -197,7 +200,7 @@
 | `moonshot` | moonshot | `https://api.moonshot.cn/v1` | `moonshot-v1-8k` |
 | `deepseek` | deepseek | `https://api.deepseek.com/v1` | `deepseek-chat` |
 | `openrouter` | openrouter | `https://openrouter.ai/api/v1` | `openrouter/auto` |
-| `xiaomimimo` | openai | `https://api.xiaomimimo.com/v1` | `mimo-v2.5` |
+| `xiaomimimo` ⭐ | openai | `https://api.xiaomimimo.com/v1` | `mimo-v2-flash` |
 
 配置了 `LLM_PRESET` 后，无论是手动触发还是自动运行，都会自动使用该预设的完整配置，无需每次填写。
 
@@ -266,6 +269,17 @@
 
 #### 6. Token 消耗与费用估算
 
+> 工具已内置 **模型配置中心**（`scripts/model_profiles.py`），自动根据模型 ID 匹配最优 `max_tokens`、`batch_size`、`temperature`。新增模型只需注册一行，零侵入业务代码。
+
+**各场景 max_tokens 自动匹配**：
+
+| 场景 | 非 reasoning（gpt-4o-mini） | reasoning（mimo-v2-flash / deepseek-chat） |
+|------|---------------------------|------------------------------------------|
+| batch 分类（5个项目） | 2048 | **8192** |
+| 单条分类 | 1024 | **4096** |
+| 文本摘要 | 512 | **2048** |
+| Release 摘要 | 512 | **2048** |
+
 以 **400 个项目** 为例（首次全量分析）：
 
 | 提供商 | 估算 Token | 参考费用 |
@@ -283,6 +297,13 @@
 | **每月总计** | ~22K | **~¥0.16** |
 
 > 💰 **省钱技巧**：`llm_interval_days` 默认 30 天，已分析成功的老项目不会每次都被重新调用。首次分析后，后续每月费用通常不到 ¥1。
+>
+> 📊 **全量分析 412 项目预估成本**：
+> - `mimo-v2-flash`（¥2.1/1M）：~¥1.0-1.5
+> - `deepseek-chat`（¥2/1M）：~¥0.9-1.3
+> - `gpt-4o-mini`（~¥4.4/1M）：~¥2.0-3.0
+> - `mimo-v2.5`（¥14/1M）：~¥6-8
+> - `moonshot-v1-8k`（~¥12/1M）：~¥5-7
 
 ---
 
@@ -481,7 +502,7 @@ commit 后，下次自动运行会 **完全跳过** 这个项目。
 | `moonshot` | moonshot | `https://api.moonshot.cn/v1` | `moonshot-v1-8k` |
 | `deepseek` | deepseek | `https://api.deepseek.com/v1` | `deepseek-chat` |
 | `openrouter` | openrouter | `https://openrouter.ai/api/v1` | `openrouter/auto` |
-| `xiaomimimo` | openai | `https://api.xiaomimimo.com/v1` | `mimo-v2.5` |
+| `xiaomimimo` ⭐ | openai | `https://api.xiaomimimo.com/v1` | `mimo-v2-flash` |
 
 使用方式：
 - CLI：`--llm-preset xiaomimimo`

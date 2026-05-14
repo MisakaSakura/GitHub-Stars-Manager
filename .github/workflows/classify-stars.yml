@@ -31,7 +31,7 @@ on:
         options: ['auto', 'off', 'force']
 
       llm_preset:
-        description: '🤖 预设（内置: openai/moonshot/deepseek/openrouter/xiaomimimo；也可输入自定义名）'
+        description: '🤖 预设（内置: openai/moonshot/deepseek/openrouter/xiaomimimo/xiaomimimo-v2.5/xiaomimimo-pro；也可输入自定义名）'
         required: false
         default: ''
         type: string
@@ -146,7 +146,7 @@ jobs:
           fi
 
           # ===== LLM 模式映射 =====
-          # auto:  按 mode 联动（full 模式自动启用）；off = 明确关闭；force = 无视间隔
+          # auto: 按 mode 联动（full/deep 模式自动启用）；off = 明确关闭；force = 无视间隔
           LLM_MODE="${{ github.event.inputs.llm_mode }}"
           USE_LLM="false"
           FORCE_LLM="false"
@@ -157,10 +157,12 @@ jobs:
           elif [ "$LLM_MODE" = "off" ]; then
             USE_LLM="false"
           else
-            # auto: full 模式自动启用（配置了 LLM_KEY 时）
-            if [ "$MODE" = "full" ] && [ -n "$LLM_KEY" ]; then
-              USE_LLM="true"
-              echo "[模式联动] full 模式自动启用 LLM"
+            # auto: full/deep 模式自动启用（配置了 LLM_KEY 时）
+            if [ -n "$LLM_KEY" ]; then
+              if [ "$MODE" = "full" ] || [ "$MODE" = "deep" ]; then
+                USE_LLM="true"
+                echo "[模式联动] $MODE 模式自动启用 LLM"
+              fi
             fi
           fi
 
