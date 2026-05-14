@@ -15,6 +15,15 @@ def _is_ecology_locked(ecology_name: str | None) -> bool:
     return ecology_name in LOCKED_ECOLOGIES
 
 
+def _normalize_ecology(name: str | None) -> str | None:
+    """将 LLM 返回的生态名称归一化为标准名称（解决 'Clash'/'Clash Meta'/... 等变体问题）"""
+    if not name:
+        return name
+    from config_rules import ECOLOGY_ALIASES
+    key = name.strip().lower()
+    return ECOLOGY_ALIASES.get(key, name)
+
+
 def _safe_int(value, default: int = 0) -> int:
     try:
         return int(value) if value else default
@@ -152,7 +161,7 @@ class IncrementalEngine:
         target.type = llm_result.get("type") or target.type
         if not ecology_locked:
             if llm_result.get("ecology"):
-                target.ecology = llm_result["ecology"]
+                target.ecology = _normalize_ecology(llm_result["ecology"])
             if llm_result.get("ecology_role"):
                 target.ecology_role = llm_result["ecology_role"]
         return True

@@ -81,7 +81,7 @@ class ReleaseTracker(BaseTracker):
                         "intermediate_tags": intermediate,
                         "published_at": latest.get("published_at", ""),
                         "html_url": latest.get("html_url", ""),
-                        "body": latest.get("body", "")[:2000],
+                        "body": (latest.get("body") or "")[:2000],
                     }
                     mutations = {
                         "last_release_tag": latest.get("tag_name"),

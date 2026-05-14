@@ -235,3 +235,46 @@ ECOLOGY_ROLES = {
     "API 封装 / Wrapper": ["wrapper", "binding", "sdk", "api"],
     "教程 / Guide": ["guide", "tutorial", "awesome", "collection", "list"],
 }
+
+# ==================== 生态名称归一化 ====================
+# LLM 返回的 ecology 是自由文本，容易产生 "Clash"/"Clash Meta"/"Clash / Mihomo 生态" 等变体。
+# 后处理阶段用此表统一映射到标准名称。
+ECOLOGY_ALIASES = {
+    # Bilibili
+    "b站": "Bilibili", "bilibili": "Bilibili", "哔哩哔哩": "Bilibili",
+    # Clash / Mihomo
+    "clash": "Clash / Mihomo", "clash meta": "Clash / Mihomo", "clashmeta": "Clash / Mihomo",
+    "mihomo": "Clash / Mihomo", "clash / mihomo 生态": "Clash / Mihomo",
+    "clash生态": "Clash / Mihomo", "clash 生态": "Clash / Mihomo",
+    # Docker
+    "docker 生态": "Docker", "docker生态": "Docker",
+    # AI/ML
+    "ai": "AI/ML", "ai agents": "AI/ML", "ai/ml": "AI/ML",
+    # 独立项目
+    "standalone": "独立项目", "none": "独立项目", "null": "独立项目",
+    "独立项目 / standalone": "独立项目",
+    # 其他常见变体
+    "android 生态": "Android", "apple 生态": "Apple", "苹果": "Apple",
+    "ffmpeg 生态": "FFmpeg", "ffmpeg": "FFmpeg",
+    "electron 生态": "Electron", "electron": "Electron",
+    "flutter 生态": "Flutter", "flutter": "Flutter",
+    "mpv 播放器生态": "MPV", "mpv": "MPV",
+    "qbittorrent 生态": "qBittorrent", "qbittorrent": "qBittorrent",
+    "hyprland 生态": "Hyprland", "hyprland": "Hyprland",
+    "obsidian 生态": "Obsidian", "obsidian": "Obsidian",
+    "neovim 生态": "Neovim", "neovim": "Neovim", "nvim": "Neovim",
+    "vscode 生态": "VS Code", "vscode": "VS Code",
+    "home assistant 生态": "Home Assistant", "homeassistant": "Home Assistant",
+    "zsh 生态": "Zsh / Oh-My-Zsh", "oh-my-zsh 生态": "Zsh / Oh-My-Zsh",
+    "starship 生态": "Starship", "alacritty 生态": "Alacritty",
+    "kitty 生态": "Kitty", "i3 生态": "i3 / Sway", "sway 生态": "i3 / Sway",
+    "awesome 生态": "AwesomeWM", "awesomewm 生态": "AwesomeWM",
+    "react 生态": "React", "vue 生态": "Vue", "nuxt 生态": "Vue",
+    "tailwind 生态": "Tailwind CSS", "tailwindcss 生态": "Tailwind CSS",
+}
+
+# 标准生态名称集合（用于系统提示限制和验证）
+ECOLOGY_STANDARD_NAMES = list(ECOLOGY_RULES.keys()) + [
+    "独立项目", "AI/ML", "Android", "Apple", "Bilibili", "BitTorrent",
+    "AirPlay", "HMS", "EDK2", "Emby/Jellyfin",
+]

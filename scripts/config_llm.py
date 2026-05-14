@@ -86,6 +86,7 @@ batch 输出格式（JSON 数组，第 N 个元素对应第 N 个项目）:
 
 platform: Web前端/后端, 移动端, 桌面端, AI/ML, DevOps, 数据库, 云原生, IoT, 游戏, CLI, 安全, 网络, 音视频, 其他
 type: 框架, 工具, 应用, 编辑器, 资源合集, 语言, 监控, 自动化, 笔记, 算法, 配置, 其他
+ecology: 必须使用标准名称（禁止自由发挥）。标准生态: Clash/Mihomo, MPV, VS Code, Neovim, Obsidian, Home Assistant, Docker, React, Vue, Tailwind CSS, FFmpeg, qBittorrent, Hyprland, Zsh/Oh-My-Zsh, Starship, Alacritty, Kitty, i3/Sway, AwesomeWM; 非上述生态填 null 或 独立项目
 ecology_role: 核心, GUI前端, 配置, 脚本, 主题, 插件, 规则集, WebUI, API封装, 教程, 其他
 confidence: 0-1。ai_summary: 50字内。ai_tags: 3-5个关键词。ai_platforms: [linux,mac,windows,docker,web,cli,ios,android]
 """
