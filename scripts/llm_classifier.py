@@ -11,7 +11,9 @@ from utils import log
 
 
 class LLMClassifier:
-    """基于 LLM 的智能分类器，支持真正的批量分类以减少 API 调用"""
+    """基于 LLM 的智能分类器，支持真正的批量分类以减少 API 调用。
+    模型参数（max_tokens、batch_size、system_prompt 策略等）自动从 model_profiles 拉取。
+    """
 
     def __init__(self, api_key, provider="openai", api_base=None, model="gpt-4o-mini"):
         self.api_key = api_key
@@ -22,8 +24,18 @@ class LLMClassifier:
         self._load_cache()
         self.client = HTTPClient()
 
+        # 加载模型参数画像（自动匹配最优配置）
+        from model_profiles import get_profile
+        self.profile = get_profile(model)
+        if self.profile:
+            log(f"[ModelProfile] {model} → batch={self.profile.batch_size}, reasoning={self.profile.is_reasoning}, "
+                f"batch_max_tokens={self.profile.batch_max_tokens}, single_max_tokens={self.profile.single_max_tokens}", "INFO")
+        else:
+            log(f"[ModelProfile] {model} 未注册，使用保守默认值", "WARN")
+
+        # batch_size 优先从 profile 读取，回退到 config
         from config import LLM_CONFIG
-        self.batch_size = LLM_CONFIG.get("batch_size", 1)
+        self.batch_size = (self.profile.batch_size if self.profile else None) or LLM_CONFIG.get("batch_size", 5)
 
         # 优先级：CLI 传入 > config_llm.py 配置 > provider 默认值
         config_base = LLM_CONFIG.get("api_base")
@@ -66,7 +78,8 @@ class LLMClassifier:
             return self.cache[cache_key]
 
         prompt = self._build_prompt(item)
-        content = self._call_api(prompt, max_tokens=4096)
+        max_tokens = self.profile.get_max_tokens("single") if self.profile else 1024
+        content = self._call_api(prompt, max_tokens=max_tokens)
 
         if content:
             try:
@@ -154,9 +167,8 @@ class LLMClassifier:
     def _classify_batch(self, items, fallback=False):
         """对一批项目执行单次 LLM 调用"""
         prompt = self._build_batch_prompt(items)
-        # xiaomimimo 全系是 reasoning 模型，thinking 过程消耗大量 tokens
-        # max_tokens 必须足够大（文档显示模型支持 64K-128K 输出）
-        max_tokens = max(8192, 1024 * len(items))
+        # 自动从 profile 获取 batch 场景的 max_tokens
+        max_tokens = self.profile.get_max_tokens("batch") if self.profile else 2048
         content = self._call_api(prompt, max_tokens=max_tokens)
 
         if not content:
@@ -231,9 +243,11 @@ Topics: {topics or '无'}
   ...
 ]"""
 
-    def summarize(self, text: str, system_prompt: str | None = None, max_tokens: int = 2048) -> str | None:
-        """通用文本摘要，返回摘要字符串"""
+    def summarize(self, text: str, system_prompt: str | None = None, max_tokens: int = None) -> str | None:
+        """通用文本摘要，返回摘要字符串。max_tokens 自动从 profile 读取"""
         from config import LLM_CONFIG, LLM_SYSTEM_PROMPT
+        if max_tokens is None:
+            max_tokens = self.profile.get_max_tokens("summarize") if self.profile else 512
         # 显式区分 "未传入"(None) 和 "传入空字符串"
         sp = LLM_SYSTEM_PROMPT if system_prompt is None else system_prompt
         result = self._call_api(text, max_tokens=max_tokens, system_prompt=sp)
@@ -254,8 +268,13 @@ Topics: {topics or '无'}
         # 显式区分 "未传入"(None) 和 "传入空字符串"
         sp = LLM_SYSTEM_PROMPT if system_prompt is None else system_prompt
 
-        # 兼容模式：部分国产兼容 API 不支持 system role，将 system prompt 合并到 user 中
-        no_system_role = LLM_CONFIG.get("no_system_role", False)
+        # system prompt 策略：优先从 profile 读取，回退到 config
+        no_system_role = False
+        if self.profile:
+            no_system_role = self.profile.no_system_role
+        else:
+            no_system_role = LLM_CONFIG.get("no_system_role", False)
+
         if no_system_role:
             messages = [{"role": "user", "content": f"{sp}\n\n{prompt}"}]
         else:
