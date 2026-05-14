@@ -1,5 +1,29 @@
 [
   {
+    "full_name": "ywmoyue/biliuwp-lite",
+    "name": "biliuwp-lite",
+    "owner": "ywmoyue",
+    "old_tag": "v4.8.15",
+    "new_tag": "v4.8.15.1701",
+    "published_at": "2026-05-14T02:31:15Z",
+    "html_url": "https://github.com/ywmoyue/biliuwp-lite/releases/tag/v4.8.15.1701",
+    "body": "## 预发布版本\r\n\r\n```sh\r\n# x64 版本\r\nchoco install bililite-uwp-x64 --version=4.8.15.1701-beta  --pre -y\r\n# x86 版本\r\nchoco install bililite-uwp-x86 --version=4.8.15.1701-beta --pre -y\r\n# ARM64 版本\r\nchoco install bililite-uwp-arm64 --version=4.8.15.1701-beta --pre -y\r\n```\r\n\r\n----\r\n\r\n#### CHANGED\r\n- 优化视频详情页启动到播放的时长\r\n- 添加视频详情页打开到播放计时日志\r\n- 添加日志用于页面残留问题定位",
+    "ai_digest": "",
+    "detected_at": "2026-05-14T02:36:23.006889+00:00"
+  },
+  {
+    "full_name": "jay3-yy/BiliPai",
+    "name": "BiliPai",
+    "owner": "jay3-yy",
+    "old_tag": "8.1.4",
+    "new_tag": "8.1.5",
+    "published_at": "2026-05-14T02:12:44Z",
+    "html_url": "https://github.com/jay3-yy/BiliPai/releases/tag/8.1.5",
+    "body": "正式版播放控件：补充播放器控件 Overlay 的 R8 保留规则，修复正式版中双击暂停、长按倍速等手势正常，但单击后 UI 控件不显示的问题。\r\n播放进度与控制条：接入高能进度（PBP）数据解析与归一化，播放器底部进度条可展示强度脊线；横屏/竖屏底部控制条、拖动预览、平板影院布局和进度显示策略继续收敛。\r\n字幕能力补强：播放器信息中的字幕轨道会映射为受信任字幕源，支持更稳定的一/双语字幕选择、AI 字幕识别、字幕位置偏移和大字号显示，并补充字幕解析、排序和去重策略。\r\nCDN 插件：保留并同步内置 CDN 区域插件修复，继续限制到 bilivideo.com 播放地址改写，并保留原始播放地址作为回退候选。\r\n动态同步：关注/取消关注操作会向动态页同步状态；取消关注后会从动态缓存列表、已关注用户侧栏和直播缓存中移除对应 UP。\r\n搜索与外观收敛：搜索视频卡片改为更扁平的列表视觉，减少重复卡片包裹；外观设置和主题组件分支继续收敛，降低维护成本。\r\n视频简介设置：播放设置新增“默认展开视频简介”开关，并接入设置搜索和设置分享；关闭后视频详情简介默认收起，默认行为仍保持展开。\r\n视频方向策略：保留大屏/分栏返回时的方向锁释放修复，避免返回后方向状态异常。\r\n底栏手感：底栏指示器拖拽时保持放大和跟手形变；点按切换不放大；松手停下时平滑回到原始大小，避免突然缩回。\r\n",
+    "ai_digest": "",
+    "detected_at": "2026-05-14T02:36:23.006876+00:00"
+  },
+  {
     "full_name": "v2fly/domain-list-community",
     "name": "domain-list-community",
     "owner": "v2fly",
