@@ -90,9 +90,13 @@ class AIDatabase:
         """从 LLM classify_batch 的结果更新记录"""
         if not llm_result:
             return
+        from datetime import datetime, timezone
+        analyzed_at = llm_result.get("analyzed_at")
+        if not analyzed_at:
+            analyzed_at = datetime.now(timezone.utc).isoformat()
         result = AIResult(
             full_name=full_name,
-            analyzed_at=llm_result.get("analyzed_at", ""),
+            analyzed_at=analyzed_at,
             llm_status=status,
             llm_confidence=llm_result.get("confidence"),
             llm_reason=llm_result.get("reason"),

@@ -192,10 +192,12 @@ Topics: {topics or '无'}
             headers["HTTP-Referer"] = "https://github.com"
             headers["X-Title"] = "GitHub Stars Classifier"
 
+        # 显式区分 "未传入"(None) 和 "传入空字符串"
+        sp = LLM_SYSTEM_PROMPT if system_prompt is None else system_prompt
         payload = {
             "model": self.model,
             "messages": [
-                {"role": "system", "content": system_prompt or LLM_SYSTEM_PROMPT},
+                {"role": "system", "content": sp},
                 {"role": "user", "content": prompt}
             ],
             "max_tokens": max_tokens or LLM_CONFIG.get("max_tokens", 256),

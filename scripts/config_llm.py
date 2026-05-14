@@ -56,8 +56,8 @@ LLM_CONFIG = {
     "model": "gpt-4o-mini",  # 或 "moonshot-v1-8k", "deepseek-chat"
     "max_tokens": 256,
     "temperature": 0.1,
-    "timeout": 15,
-    "batch_size": 10,  # 每批处理的项目数
+    "timeout": 30,  # batch 请求需要更长时间
+    "batch_size": 5,  # 每批处理的项目数（防止长描述项目触发 token 超限）
     "cache_results": True,  # 缓存 LLM 结果避免重复调用
 }
 
