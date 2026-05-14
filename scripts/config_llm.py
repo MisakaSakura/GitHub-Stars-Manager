@@ -58,6 +58,8 @@ LLM_CONFIG = {
     "temperature": 0.1,
     "timeout": 30,  # batch 请求需要更长时间
     "batch_size": 5,  # 每批处理的项目数（防止长描述项目触发 token 超限）
+    "max_consecutive_failures": 3,  # 连续 batch 失败 N 次后终止，避免无底洞式消耗
+    "batch_readme_max_length": 150,  # batch prompt 中每个项目的 README 截断长度（越小 prompt 越短，API 响应越快）
     "cache_results": True,  # 缓存 LLM 结果避免重复调用
 }
 

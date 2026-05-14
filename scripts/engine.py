@@ -71,6 +71,7 @@ class IncrementalEngine:
         log(f"处理模式: {'强制刷新' if force_refresh else '增量更新' if incremental else '标准更新'}", "STEP")
 
         self.llm_results: dict[str, dict] = {}
+        llm_requested_keys: set[str] = set()
         if use_llm and self.llm:
             llm_candidates = []
             for item in items:
@@ -78,11 +79,35 @@ class IncrementalEngine:
                 existing = self.db.get(key)
                 if self._needs_llm(key, existing, force_refresh, retry_failed, llm_interval_days):
                     llm_candidates.append(item)
+                    llm_requested_keys.add(key)
 
             if llm_candidates:
-                log(f"LLM 批量分类: {len(llm_candidates)} 个项目...", "STEP")
-                self.llm_results = self.llm.classify_batch(llm_candidates)
-                self.stats["llm_enhanced"] += len([r for r in self.llm_results.values() if r])
+                max_rounds = 3
+                for round_num in range(1, max_rounds + 1):
+                    remaining = [item for item in llm_candidates
+                                if f"{item['owner']['login']}/{item['name']}" not in self.llm_results]
+                    if not remaining:
+                        break
+
+                    round_label = f"第 {round_num}/{max_rounds} 轮" if round_num > 1 else "第 1/3 轮"
+                    round_results = self.llm.classify_batch(remaining, fallback=False, round_label=round_label)
+                    self.llm_results.update(round_results)
+
+                    # 记录本轮失败项到 AI DB
+                    if self.ai_db:
+                        for item in remaining:
+                            key = f"{item['owner']['login']}/{item['name']}"
+                            if key not in self.llm_results:
+                                self.ai_db.update_from_llm_result(key, None, status="failed")
+
+                # 最终统计
+                total_requested = len(llm_candidates)
+                total_success = len(self.llm_results)
+                total_failed = total_requested - total_success
+                if total_failed > 0:
+                    log(f"LLM 最终: {total_success}/{total_requested} 成功, {total_failed}/{total_requested} 失败（已记录到 AI DB）", "WARN")
+                else:
+                    log(f"LLM 最终: {total_success}/{total_requested} 全部成功", "OK")
 
         for item in items:
             try:
@@ -117,10 +142,10 @@ class IncrementalEngine:
             self.classification_changes[key] = changes
 
     @staticmethod
-    def _apply_llm_override(target, llm_result: dict | None, existing_eco: str | None) -> None:
-        """将 LLM 结果应用到目标对象的分类字段（消除重复逻辑）"""
+    def _apply_llm_override(target, llm_result: dict | None, existing_eco: str | None) -> bool:
+        """将 LLM 结果应用到目标对象的分类字段（消除重复逻辑），返回是否实际发生了覆盖"""
         if not llm_result or llm_result.get("confidence", 0) <= 0.7:
-            return
+            return False
         ecology_locked = existing_eco and _is_ecology_locked(existing_eco)
         target.platform = llm_result.get("platform", target.platform)
         target.type = llm_result.get("type", target.type)
@@ -129,6 +154,7 @@ class IncrementalEngine:
                 target.ecology = llm_result["ecology"]
             if llm_result.get("ecology_role"):
                 target.ecology_role = llm_result["ecology_role"]
+        return True
 
     def _process_single(self, item: dict, incremental: bool, force_refresh: bool, use_llm: bool, llm_result: dict | None = None, subscribe_all_releases: bool = False) -> None:
         key = f"{item['owner']['login']}/{item['name']}"
@@ -164,7 +190,9 @@ class IncrementalEngine:
                 existing.last_updated = datetime.now(timezone.utc).isoformat()
                 # 增量模式下规则分类跳过，但 LLM 覆盖仍然应用（修正已有项目分类）
                 old_fields = self._snapshot_classification(existing)
-                self._apply_llm_override(existing, llm_result, existing.get("ecology"))
+                applied = self._apply_llm_override(existing, llm_result, existing.get("ecology"))
+                if applied:
+                    self.stats["llm_enhanced"] += 1
                 self._record_classification_change(key, old_fields, existing)
                 self.stats["skipped"] += 1
                 return
@@ -219,6 +247,8 @@ class IncrementalEngine:
 
         # LLM 可以覆盖规则分类结果（分类决策本身是即时的，不依赖 AI DB）
         if use_llm and self.llm and llm_result:
-            self._apply_llm_override(result, llm_result, existing_eco)
+            applied = self._apply_llm_override(result, llm_result, existing_eco)
+            if applied:
+                self.stats["llm_enhanced"] += 1
 
         return result

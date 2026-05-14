@@ -88,25 +88,25 @@ class AIDatabase:
 
     def update_from_llm_result(self, full_name: str, llm_result: dict | None, status: str = "success") -> None:
         """从 LLM classify_batch 的结果更新记录"""
-        if not llm_result:
-            return
         from datetime import datetime, timezone
-        analyzed_at = llm_result.get("analyzed_at")
+        analyzed_at = None
+        if llm_result:
+            analyzed_at = llm_result.get("analyzed_at")
         if not analyzed_at:
             analyzed_at = datetime.now(timezone.utc).isoformat()
         result = AIResult(
             full_name=full_name,
             analyzed_at=analyzed_at,
             llm_status=status,
-            llm_confidence=llm_result.get("confidence"),
-            llm_reason=llm_result.get("reason"),
-            ai_summary=llm_result.get("ai_summary"),
-            ai_tags=llm_result.get("ai_tags"),
-            ai_platforms=llm_result.get("ai_platforms"),
-            ai_platform=llm_result.get("platform"),
-            ai_type=llm_result.get("type"),
-            ai_ecology=llm_result.get("ecology"),
-            ai_ecology_role=llm_result.get("ecology_role"),
+            llm_confidence=llm_result.get("confidence") if llm_result else None,
+            llm_reason=llm_result.get("reason") if llm_result else None,
+            ai_summary=llm_result.get("ai_summary") if llm_result else None,
+            ai_tags=llm_result.get("ai_tags") if llm_result else None,
+            ai_platforms=llm_result.get("ai_platforms") if llm_result else None,
+            ai_platform=llm_result.get("platform") if llm_result else None,
+            ai_type=llm_result.get("type") if llm_result else None,
+            ai_ecology=llm_result.get("ecology") if llm_result else None,
+            ai_ecology_role=llm_result.get("ecology_role") if llm_result else None,
         )
         self.data[full_name] = result
 

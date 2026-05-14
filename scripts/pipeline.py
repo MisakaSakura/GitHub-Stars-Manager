@@ -188,24 +188,7 @@ class Pipeline:
     def _setup_llm(self) -> None:
         if not self.args.llm_key:
             return
-        if not self.args.force_llm:
-            last = self.db.meta.get("last_llm_classify_at", "")
-            if last:
-                from datetime import datetime, timezone, timedelta
-                try:
-                    last_dt = datetime.fromisoformat(last)
-                    # 兼容无时区的旧时间戳（当作 UTC 处理）
-                    if last_dt.tzinfo is None:
-                        last_dt = last_dt.replace(tzinfo=timezone.utc)
-                    interval = timedelta(days=self.args.llm_interval_days)
-                    now = datetime.now(timezone.utc)
-                    if now - last_dt < interval:
-                        days_left = (last_dt + interval - now).days
-                        log(f"LLM 间隔保护：距上次分析还有 {days_left} 天，本次跳过（--force-llm 可强制启用）", "INFO")
-                        return
-                except Exception:
-                    # 时间戳异常，允许继续执行（后续会更新为正确时间戳）
-                    pass
+        # P0 fix: 移除全局间隔大闸——由 _needs_llm() 按项目级策略全权决定
         from config import LLM_CONFIG
         default_model = LLM_CONFIG.get("model", "gpt-4o-mini")
         model = self.args.llm_model or default_model
@@ -401,8 +384,11 @@ class Pipeline:
     def _sync_notion(self) -> None:
         if not (self.args.notion_key and self.args.notion_db) or self.args.dry_run:
             return
+        from report import ReportGenerator
+        report = ReportGenerator(self.db, ai_db=self.ai_db)
+        items = report._inject_ai_fields(list(self.db.values()))
         notion = NotionExporter(self.args.notion_key, self.args.notion_db)
-        notion.sync(list(self.db.values()), clear_existing=self.args.notion_clear)
+        notion.sync(items, clear_existing=self.args.notion_clear)
 
     def _track_releases(self) -> None:
         if self.args.dry_run:
