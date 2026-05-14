@@ -1,5 +1,41 @@
 [
   {
+    "full_name": "infiniflow/ragflow",
+    "name": "ragflow",
+    "owner": "infiniflow",
+    "old_tag": "v0.25.3",
+    "new_tag": "v0.25.4",
+    "published_at": "2026-05-14T03:26:04Z",
+    "html_url": "https://github.com/infiniflow/ragflow/releases/tag/v0.25.4",
+    "body": "\r\n## Summary\r\n\r\n### New features\r\n\r\n- Adds a generic, configuration-driven RESTful API data source connector.\r\n\r\n### Improvements\r\n\r\n- Agent tag management with filtering and sorting.\r\n- Widget customization and persistence.\r\n\r\n### Model support\r\n\r\n- Adds gpt-5.4-mini and gpt-5.4-nano to the OpenAI model list\r\n\r\n### Bug fixes\r\n\r\nFixed dataset document download route.\r\n\r\n## What's Changed\r\n* Feature/generic api connector by @ahmadintisar in https://github.com/infiniflow/ragflow/pull/13545\r\n* fix: use context manager for pdfplumber to prevent resource leak by @gambletan in https://github.com/infiniflow/ragflow/pull/13512\r\n* Add widget customization and persistence by @47NoahThompson in https://github.com/infiniflow/ragflow/pull/14603\r\n* Docs: Editorial updates to the v0.25.3 release notes draft. by @writinwaters in https://github.com/infiniflow/ragflow/pull/14903\r\n* feat: add tag management for Agents with filtering and sorting (#14774) by @plind-junior in https://github.com/infiniflow/ragflow/pull/14799\r\n* Go: implement provider: Voyage AI by @tmimmanuel in https://github.com/infiniflow/ragflow/pull/14811\r\n* Fix doc format by @yingfeng in https://github.com/infiniflow/ragflow/pull/14909\r\n* Adds gpt-5.4-mini and gpt-5.4-nano by @sirj0k3r in https://github.com/infiniflow/ragflow/pull/14908\r\n* Docs: Finalized v0.25.3 release notes by @writinwaters in https://github.com/infiniflow/ragflow/pull/14913\r\n* Fix: dataset document download route by @buua436 in https://github.com/infiniflow/ragflow/pull/14910\r\n* Docs: Update version references to v0.25.4 in READMEs and docs by @asiroliu in https://github.com/infiniflow/ragflow/pull/14912\r\n* Docs: Added v0.25.4 release notes draft. by @writinwaters in https://github.com/infiniflow/ragflow/pull/14914\r\n\r\n## New Contributors\r\n* @47NoahThompson made their first contribution in https://github.com/infiniflow/ragflow/pull/14603\r\n* @plind-junior made their first contribution in https://github.com/infiniflow/ragflow/pull/14799\r\n* @sirj0k3",
+    "ai_digest": "",
+    "detected_at": "2026-05-14T03:56:12.812207+00:00"
+  },
+  {
+    "full_name": "AlkaidLab/foundation-sunshine",
+    "name": "foundation-sunshine",
+    "owner": "AlkaidLab",
+    "old_tag": "v2026.513.84935.杂鱼",
+    "new_tag": "v2026.514.23833.杂鱼",
+    "published_at": "2026-05-14T03:15:52Z",
+    "html_url": "https://github.com/AlkaidLab/foundation-sunshine/releases/tag/v2026.514.23833.%E6%9D%82%E9%B1%BC",
+    "body": "## What's Changed\n* feat(vdd): use IOCTL transport with named-pipe fallback for ZakoVDD control by [@qiin2333](https://github.com/qiin2333) in [#625](https://github.com/AlkaidLab/foundation-sunshine/pull/625)\n* feat(config): PIN配对每分钟限制频率可配置 by [@Yundi339](https://github.com/Yundi339) in [#624](https://github.com/AlkaidLab/foundation-sunshine/pull/624)\n* feat(audio): AC3 / E-AC3 / PCM_S16 passthrough end-to-end by [@qiin2333](https://github.com/qiin2333) in [#621](https://github.com/AlkaidLab/foundation-sunshine/pull/621)\n* cherry-pick: 上游 bugfix 与 feature 同步 (#4340, #4407, #4261, #4890) by [@qiin2333](https://github.com/qiin2333) in [#551](https://github.com/AlkaidLab/foundation-sunshine/pull/551)\n* Update driver versions by [@github-actions](https://github.com/github-actions)[bot] in [#566](https://github.com/AlkaidLab/foundation-sunshine/pull/566)\n* fix(amf): preserve IDR baseline LTR slot for resilient RFI recovery by [@qiin2333](https://github.com/qiin2333) in [#630](https://github.com/AlkaidLab/foundation-sunshine/pull/630)\n* fix(amf): disable LTR by default to match FFmpeg amfenc behavior by [@qiin2333](https://github.com/qiin2333) in [#631](https://github.com/AlkaidLab/foundation-sunshine/pull/631)\n* feat(clipboard): out-of-band blob endpoints for large payloads by [@qiin2333](https://github.com/qiin2333) in [#633](https://github.com/AlkaidLab/foundation-sunshine/pull/633)\n* feat: 安装脚本优化 by [@Yundi339](https://github.com/Yundi339) in [#638](https://github.com/AlkaidLab/foundation-sunshine/pull/638)\n* feat(web): manage ViGEmBus driver from Sunshine web UI by [@qiin2333](https://github.com/qiin2333) in [#639](https://github.com/AlkaidLab/foundation-sunshine/pull/639)\n* fix: 修复退出程序后异常重启 by [@Yundi339](https://github.com/Yundi339) in [#640](https://github.com/AlkaidLab/foundation-sunshine/pull/640)\n* feat: 优化翻译 by [@Yundi339](https://github.com/Yundi339) in [#641](https://github.com/AlkaidLab/foundation-sunshine/pull/641)\n* feat: 优化翻译 by [@Yundi339](https://githu",
+    "ai_digest": "",
+    "detected_at": "2026-05-14T03:56:12.812222+00:00"
+  },
+  {
+    "full_name": "LizardByte/Sunshine",
+    "name": "Sunshine",
+    "owner": "LizardByte",
+    "old_tag": "v2026.508.45922",
+    "new_tag": "v2026.513.230134",
+    "published_at": "2026-05-14T02:55:34Z",
+    "html_url": "https://github.com/LizardByte/Sunshine/releases/tag/v2026.513.230134",
+    "body": "## What's Changed\n* ci(copr): Trigger release job only for non-prereleases by [@ReenigneArcher](https://github.com/ReenigneArcher) in [#4297](https://github.com/LizardByte/Sunshine/pull/4297)\n* build(Linux): Refactor Dockerfiles and build script for multi-stage, step-based builds by [@ReenigneArcher](https://github.com/ReenigneArcher) in [#4299](https://github.com/LizardByte/Sunshine/pull/4299)\n* build(deps): bump vue from 3.5.21 to 3.5.22 by [@dependabot[bot]](https://github.com/apps/dependabot) in [#4301](https://github.com/LizardByte/Sunshine/pull/4301)\n* build(linux): update pkg-config systemd variable names by [@PVermeer](https://github.com/PVermeer) in [#4303](https://github.com/LizardByte/Sunshine/pull/4303)\n* build(deps): bump third-party/build-deps from `c38829d` to `2840c8a` by [@dependabot[bot]](https://github.com/apps/dependabot) in [#4307](https://github.com/LizardByte/Sunshine/pull/4307)\n* build(packaging/homebrew): Rename class from @PROJECT_NAME@ to Sunshine by [@ReenigneArcher](https://github.com/ReenigneArcher) in [#4308](https://github.com/LizardByte/Sunshine/pull/4308)\n* build(deps): bump LizardByte/actions from 2025.917.25039 to 2025.927.193939 in the lizardbyte-actions group by [@dependabot[bot]](https://github.com/apps/dependabot) in [#4309](https://github.com/LizardByte/Sunshine/pull/4309)\n* build(deps): bump LizardByte/actions from 2025.927.193939 to 2025.929.125237 in the lizardbyte-actions group by [@dependabot[bot]](https://github.com/apps/dependabot) in [#4313](https://github.com/LizardByte/Sunshine/pull/4313)\n* fix(linux): service file for Trixie by [@ReenigneArcher](https://github.com/ReenigneArcher) in [#4319](https://github.com/LizardByte/Sunshine/pull/4319)\n* build(linux): static link std libraries by [@PVermeer](https://github.com/PVermeer) in [#4321](https://github.com/LizardByte/Sunshine/pull/4321)\n* build(linux): enable cpack auto dependencies by [@PVermeer](https://github.com/PVermeer) in [#4323](https://github.com/LizardByte/S",
+    "ai_digest": "",
+    "detected_at": "2026-05-14T03:56:12.812227+00:00"
+  },
+  {
     "full_name": "ywmoyue/biliuwp-lite",
     "name": "biliuwp-lite",
     "owner": "ywmoyue",
