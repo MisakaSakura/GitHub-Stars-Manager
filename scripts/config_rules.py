@@ -48,9 +48,10 @@ PLATFORM_RULES = {
     "游戏 / 图形": [
         "game", "graphics", "webgl", "3d", "unity", "unreal", "opengl",
         "vulkan", "blender", "godot", "raytracing", "bevy", "love2d", "cocos",
-        "game-bot", "game-assistant", "game-helper", "auto-play", "automation",
-        "脚本", "辅助", "机器人", "bot", "cheat", "mod", "plugin",
-        "genshin", "honkai", "starrail", "arknights", "maa", "impact"
+        "game-bot", "game-assistant", "game-helper", "auto-play",
+        "脚本", "辅助", "机器人", "cheat", "mod",
+        "genshin", "honkai", "starrail", "arknights", "maa", "impact",
+        "gacha", "rpg", "fps", "moba", "visual-novel", "启动器", "launcher"
     ],
     "CLI / 终端": [
         "cli", "terminal", "shell", "command-line", "bash", "zsh",
@@ -220,6 +221,20 @@ ECOLOGY_RULES = {
         "related_types": ["config", "theme", "widget"],
         "core_projects": ["awesome"],
     },
+    "OBS Studio": {
+        "name_patterns": ["obs", "obs-studio", "streamfx", "input-overlay"],
+        "desc_patterns": ["obs plugin", "obs studio", "streaming", "live streaming"],
+        "topic_patterns": ["obs", "obs-studio", "streaming"],
+        "related_types": ["plugin", "script", "theme"],
+        "core_projects": ["obs-studio"],
+    },
+    "Electron": {
+        "name_patterns": ["electron"],
+        "desc_patterns": ["electron app", "electron-based", "cross-platform desktop"],
+        "topic_patterns": ["electron"],
+        "related_types": ["app", "tool", "client"],
+        "core_projects": ["electron"],
+    },
 }
 
 # 已确认准确的生态，AI 批量分析时不会覆盖这些生态下的项目分类
@@ -292,6 +307,11 @@ ECOLOGY_ALIASES = {
     "airplay": "AirPlay",
     "hms": "HMS",
     "edk2": "EDK2",
+    # OBS / Electron
+    "obs": "OBS Studio", "obs studio": "OBS Studio", "obs-studio": "OBS Studio",
+    "obs 生态": "OBS Studio", "obsstudio": "OBS Studio",
+    "streamfx": "OBS Studio", "input-overlay": "OBS Studio",
+    "electron": "Electron", "electron 生态": "Electron",
 }
 
 # ==================== 全字段归一化映射 ====================
