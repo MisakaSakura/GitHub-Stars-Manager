@@ -36,7 +36,7 @@ class TestStarsDB(unittest.TestCase):
 
         db2 = StarsDB(self.db_path)
         self.assertEqual(len(db2), 1)
-        self.assertEqual(db2.get("owner/repo")["name"], "repo")
+        self.assertEqual(db2.get("owner/repo").name, "repo")
 
     def test_corrupted_file_rebuilds(self):
         with open(self.db_path, "w") as f:
@@ -60,7 +60,7 @@ class TestStarsDB(unittest.TestCase):
         db.save()
 
         db2 = StarsDB(self.db_path)
-        self.assertEqual(db2.get("x/y")["stars"], 20)
+        self.assertEqual(db2.get("x/y").stars, 20)
 
     def test_meta_save_and_load(self):
         db = StarsDB(self.db_path)

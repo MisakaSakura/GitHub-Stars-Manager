@@ -583,7 +583,7 @@ class Pipeline:
         now = datetime.now(timezone.utc)
         week_ago = (now - timedelta(days=7)).isoformat()
 
-        new_items = [r for r in self.db.values() if r.get("first_seen", "") >= week_ago]
+        new_items = [r for r in self.db.values() if r.first_seen >= week_ago]
         if new_items:
             lines.append(f"📦 本周新增项目: {len(new_items)} 个")
             for r in new_items[:5]:
@@ -623,12 +623,12 @@ class Pipeline:
             "",
             "生态分布 Top 5:",
         ])
-        eco_stats = Counter([r.get("ecology") for r in self.db.values()])
+        eco_stats = Counter([r.ecology for r in self.db.values()])
         for eco, count in eco_stats.most_common(5):
             lines.append(f"  {eco}: {count}")
 
-        protected = sum(1 for r in self.db.values() if r.get("manual_override"))
-        imported = sum(1 for r in self.db.values() if r.get("imported"))
+        protected = sum(1 for r in self.db.values() if r.manual_override)
+        imported = sum(1 for r in self.db.values() if r.imported)
         if protected:
             lines.append(f"\n🔒 手动保护项目: {protected} 个")
         if imported:

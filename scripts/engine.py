@@ -61,7 +61,7 @@ class IncrementalEngine:
         提取为静态方法，供 Pipeline._enrich() 复用，避免重复实现筛选逻辑。"""
         if not existing:
             return True  # 新项目必须分析
-        if existing.get("manual_override"):
+        if existing.manual_override:
             return False  # 手动保护跳过
         if force_refresh:
             return True  # 强制刷新全部重分析
@@ -147,12 +147,12 @@ class IncrementalEngine:
 
     @staticmethod
     def _snapshot_classification(item) -> dict:
-        """截取项目分类字段的快照，用于变更对比"""
+        """截取项目分类字段的快照，用于变更对比。item 必须为 StarItem（dict 直接传不入此方法）"""
         return {
-            "platform": item.get("platform", ""),
-            "type": item.get("type", ""),
-            "ecology": item.get("ecology", ""),
-            "ecology_role": item.get("ecology_role", ""),
+            "platform": item.platform,
+            "type": item.type,
+            "ecology": item.ecology,
+            "ecology_role": item.ecology_role,
         }
 
     def _record_classification_change(self, key: str, before, after) -> None:
@@ -251,7 +251,7 @@ class IncrementalEngine:
         language = item.get("language") or "文档 / 无代码"
 
         existing = self.db.get(f"{item['owner']['login']}/{item['name']}")
-        existing_eco = existing.get("ecology") if existing else None
+        existing_eco = existing.ecology if existing else None
 
         # 生态锁定：强制保留已有生态值
         if existing_eco and _is_ecology_locked(existing_eco):
@@ -274,8 +274,8 @@ class IncrementalEngine:
             last_updated=datetime.now(timezone.utc).isoformat(),
             manual_override=False,
             override_fields=[],
-            subscribe_releases=(existing.get("subscribe_releases") if existing else False) or subscribe_all_releases,
-            last_release_tag=existing.get("last_release_tag") if existing else None,
+            subscribe_releases=(existing.subscribe_releases if existing else False) or subscribe_all_releases,
+            last_release_tag=existing.last_release_tag if existing else None,
             is_fork=item.get("fork", False),
         )
 

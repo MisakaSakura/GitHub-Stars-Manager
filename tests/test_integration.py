@@ -171,10 +171,9 @@ class TestReleaseTrackerWithStarItem(unittest.TestCase):
 
         self.assertEqual(len(updates), 1)
         self.assertEqual(updates[0]["new_tag"], "v2.0.0")
-        # 验证 StarItem 被正确修改（通过 __setitem__）
-        self.assertEqual(item["last_release_tag"], "v2.0.0")
+        # 验证 StarItem 被正确修改（通过 setattr）
         self.assertEqual(item.last_release_tag, "v2.0.0")
-        self.assertIsNotNone(item.get("last_release_checked"))
+        self.assertIsNotNone(item.last_release_checked)
 
     def test_check_no_subscription_skips(self):
         """未订阅的 StarItem 应被跳过"""

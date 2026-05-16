@@ -37,7 +37,7 @@ class ConsistencyChecker:
         """按生态分组"""
         groups = defaultdict(list)
         for item in self.db.values():
-            d = item.to_dict() if hasattr(item, "to_dict") else dict(item)
+            d = item.to_dict()
             eco = d.get("ecology", "独立项目")
             groups[eco].append(d)
         return groups

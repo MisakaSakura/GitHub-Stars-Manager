@@ -114,23 +114,24 @@ class AIDatabase:
         """从主数据库迁移旧的 AI 字段到 AI 数据库，返回迁移数量"""
         migrated = 0
         for item in db_items:
-            key = item.get("full_name")
+            key = item.full_name if hasattr(item, "full_name") else item.get("full_name")
             if not key:
                 continue
             # 如果已有 AI 记录，跳过
             if key in self.data:
                 continue
             # 只有当项目有 AI 字段时才迁移
-            if item.get("llm_status") and item.get("llm_status") != "not_analyzed":
+            llm_status = item.llm_status if hasattr(item, "llm_status") else item.get("llm_status")
+            if llm_status and llm_status != "not_analyzed":
                 self.data[key] = AIResult(
                     full_name=key,
-                    analyzed_at=item.get("last_updated", ""),
-                    llm_status=item.get("llm_status", "not_analyzed"),
-                    llm_confidence=item.get("llm_confidence"),
-                    llm_reason=item.get("llm_reason"),
-                    ai_summary=item.get("ai_summary"),
-                    ai_tags=item.get("ai_tags"),
-                    ai_platforms=item.get("ai_platforms"),
+                    analyzed_at=item.last_updated if hasattr(item, "last_updated") else item.get("last_updated", ""),
+                    llm_status=llm_status,
+                    llm_confidence=item.llm_confidence if hasattr(item, "llm_confidence") else item.get("llm_confidence"),
+                    llm_reason=item.llm_reason if hasattr(item, "llm_reason") else item.get("llm_reason"),
+                    ai_summary=item.ai_summary if hasattr(item, "ai_summary") else item.get("ai_summary"),
+                    ai_tags=item.ai_tags if hasattr(item, "ai_tags") else item.get("ai_tags"),
+                    ai_platforms=item.ai_platforms if hasattr(item, "ai_platforms") else item.get("ai_platforms"),
                 )
                 migrated += 1
         if migrated:

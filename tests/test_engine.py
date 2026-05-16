@@ -75,7 +75,7 @@ class TestIncrementalEngine(unittest.TestCase):
         items = [_fake_item(name="react-starter", desc="A React starter kit", topics=["react"], lang="JavaScript")]
         stats = self.engine.process(items)
         self.assertEqual(stats["new"], 1)
-        self.assertEqual(self.db.data["user/react-starter"]["platform"], "Web 前端")
+        self.assertEqual(self.db.data["user/react-starter"].platform, "Web 前端")
 
     def test_process_existing_protected(self):
         self.db.set("user/repo", {
@@ -90,7 +90,7 @@ class TestIncrementalEngine(unittest.TestCase):
         items = [_fake_item(name="repo", stars=100)]
         stats = self.engine.process(items, incremental=True)
         self.assertEqual(stats["protected"], 1)
-        self.assertEqual(self.db.data["user/repo"]["stars"], 100)
+        self.assertEqual(self.db.data["user/repo"].stars, 100)
 
     def test_force_refresh_updates(self):
         self.db.set("user/repo", {
@@ -108,8 +108,8 @@ class TestIncrementalEngine(unittest.TestCase):
         items = [_fake_item(name="repo", desc="AI model training toolkit", topics=["pytorch", "machine-learning"], lang="Python")]
         stats = self.engine.process(items, force_refresh=True)
         self.assertEqual(stats["updated"], 1)
-        self.assertEqual(self.db.data["user/repo"]["platform"], "AI / 机器学习")
-        self.assertEqual(self.db.data["user/repo"]["type"], "工具 / Tool")
+        self.assertEqual(self.db.data["user/repo"].platform, "AI / 机器学习")
+        self.assertEqual(self.db.data["user/repo"].type, "工具 / Tool")
 
     def test_incremental_skip(self):
         self.db.set("user/repo", {
@@ -125,8 +125,8 @@ class TestIncrementalEngine(unittest.TestCase):
         items = [_fake_item(name="repo", stars=200, desc="new desc", topics=["new"])]
         stats = self.engine.process(items, incremental=True)
         self.assertEqual(stats["skipped"], 1)
-        self.assertEqual(self.db.data["user/repo"]["stars"], 200)
-        self.assertEqual(self.db.data["user/repo"]["platform"], "保留分类")
+        self.assertEqual(self.db.data["user/repo"].stars, 200)
+        self.assertEqual(self.db.data["user/repo"].platform, "保留分类")
 
     def test_llm_enhanced(self):
         llm = MagicMock()
@@ -144,7 +144,7 @@ class TestIncrementalEngine(unittest.TestCase):
         stats = engine.process(items, use_llm=True)
         self.assertEqual(stats["new"], 1)
         self.assertEqual(stats["llm_enhanced"], 1)
-        self.assertEqual(self.db.data["user/repo"]["platform"], "AI / 人工智能")
+        self.assertEqual(self.db.data["user/repo"].platform, "AI / 人工智能")
         # AI 字段已迁移到独立 AI 数据库，不再写入 StarItem
         self.assertIn("user/repo", engine.llm_results)
 
@@ -182,7 +182,7 @@ class TestIncrementalEngine(unittest.TestCase):
             })
             items = [_fake_item(name="repo")]
             stats = engine.process(items, force_refresh=True, use_llm=True)
-            self.assertEqual(self.db.data["user/repo"]["ecology"], "PyTorch")
+            self.assertEqual(self.db.data["user/repo"].ecology, "PyTorch")
         finally:
             config.LOCKED_ECOLOGIES[:] = original
 
@@ -230,7 +230,7 @@ class TestIncrementalEngine(unittest.TestCase):
         stats = engine.process(items, incremental=True, use_llm=True, llm_interval_days=30)
         # 增量模式下规则分类跳过，但 LLM 覆盖仍应用
         self.assertEqual(stats["skipped"], 1)
-        self.assertEqual(self.db.data["user/repo"]["platform"], "AI")
+        self.assertEqual(self.db.data["user/repo"].platform, "AI")
         llm.classify_batch.assert_called_once()
 
     def test_error_handling(self):

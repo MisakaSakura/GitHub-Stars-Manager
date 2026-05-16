@@ -10,12 +10,19 @@ from base_tracker import BaseTracker
 from utils import log
 
 
+def _get_field(obj, key: str, default=None):
+    """兼容 dict 和 dataclass 的字段读取"""
+    if isinstance(obj, dict):
+        return obj.get(key, default)
+    return getattr(obj, key, default)
+
+
 class ReleaseTracker(BaseTracker):
     """检查仓库新 Release，支持订阅制和全量检查两种模式"""
 
     def check(self, db_items: list[dict]) -> list[dict]:
         """订阅制检查：只检查 subscribe_releases=true 的项目（向后兼容）"""
-        candidates = [item for item in db_items if item.get("subscribe_releases")]
+        candidates = [item for item in db_items if _get_field(item, "subscribe_releases")]
         return self._check_candidates(candidates, baseline_mode=False)
 
     def check_all(self, db_items: list[dict]) -> list[dict]:
@@ -31,7 +38,7 @@ class ReleaseTracker(BaseTracker):
         def check_one(item: dict) -> tuple[dict | None, tuple[dict, dict] | None]:
             """返回 (update_dict, (item, fields_to_update))。不在并发中就地修改 item。"""
             try:
-                owner, repo = item["full_name"].split("/")
+                owner, repo = _get_field(item, "full_name", "").split("/")
                 releases = self.gh.list_releases(owner, repo, per_page=30)
                 # 防御：API 可能返回非列表或包含 None 的列表
                 if not isinstance(releases, list):
@@ -41,7 +48,7 @@ class ReleaseTracker(BaseTracker):
                 if not releases:
                     return None, None
 
-                current_tag = item.get("last_release_tag")
+                current_tag = _get_field(item, "last_release_tag")
                 now = datetime.now(timezone.utc).isoformat()
 
                 if baseline_mode and not current_tag:
@@ -73,8 +80,8 @@ class ReleaseTracker(BaseTracker):
                     latest = new_releases[0]
                     intermediate = [r.get("tag_name") for r in new_releases[1:]]
                     update = {
-                        "full_name": item["full_name"],
-                        "name": item["name"],
+                        "full_name": _get_field(item, "full_name"),
+                        "name": _get_field(item, "name"),
                         "owner": owner,
                         "old_tag": current_tag,
                         "new_tag": latest.get("tag_name"),
@@ -90,7 +97,7 @@ class ReleaseTracker(BaseTracker):
                     }
                     return update, (item, mutations)
             except Exception as e:
-                log(f"检查 {item.get('full_name', '?')} Release 失败: {e}", "WARN")
+                log(f"检查 {_get_field(item, 'full_name', '?')} Release 失败: {e}", "WARN")
             return None, None
 
         updates: list[dict] = []
@@ -113,7 +120,7 @@ class ReleaseTracker(BaseTracker):
         # 统一回写 mutations（兼容 dict 和 dataclass）
         for item, fields in mutations:
             for k, v in fields.items():
-                if hasattr(item, "__setitem__"):
+                if isinstance(item, dict):
                     item[k] = v
                 else:
                     setattr(item, k, v)

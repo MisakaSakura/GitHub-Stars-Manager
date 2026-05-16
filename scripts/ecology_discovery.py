@@ -54,7 +54,7 @@ class EcologyDiscovery:
         """获取所有未被归入已知生态的项目"""
         items = []
         for item in self.db.values():
-            eco = item.get("ecology", "")
+            eco = item.ecology
             if eco in ("独立项目", "独立项目 / Standalone", None, ""):
                 items.append(item.to_dict() if hasattr(item, "to_dict") else dict(item))
         return items

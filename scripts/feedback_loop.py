@@ -181,15 +181,15 @@ class FeedbackLoop:
         rule = RuleClassifier()
 
         for full_name, item in db.items():
-            if not item.get("manual_override"):
+            if not item.manual_override:
                 continue
 
             # 当前分类（用户手动修正后的结果）
             current = {
-                "platform": item.get("platform"),
-                "type": item.get("type"),
-                "ecology": item.get("ecology"),
-                "ecology_role": item.get("ecology_role"),
+                "platform": item.platform,
+                "type": item.type,
+                "ecology": item.ecology,
+                "ecology_role": item.ecology_role,
             }
 
             # 查询是否已有反馈记录
