@@ -1,5 +1,18 @@
 [
   {
+    "full_name": "sub-store-org/Sub-Store",
+    "name": "Sub-Store",
+    "owner": "sub-store-org",
+    "old_tag": "2.23.8",
+    "new_tag": "2.23.9",
+    "published_at": "2026-05-16T14:51:00Z",
+    "html_url": "https://github.com/sub-store-org/Sub-Store/releases/tag/2.23.9",
+    "body": "## <small>2.23.9 (2026-05-16)</small>\n\n* feat: mihomo 支持 GOST Relay ([0ed1fd3](https://github.com/sub-store-org/Sub-Store/commit/0ed1fd3))\n",
+    "ai_digest": "",
+    "is_new_repo": false,
+    "detected_at": "2026-05-16T14:59:14.422628+00:00"
+  },
+  {
     "full_name": "MetaCubeX/ClashMetaForAndroid",
     "name": "ClashMetaForAndroid",
     "owner": "MetaCubeX",
