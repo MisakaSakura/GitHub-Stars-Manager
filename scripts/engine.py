@@ -197,7 +197,7 @@ class IncrementalEngine:
         if existing:
             if existing.manual_override:
                 existing.stars = item.get("stargazers_count", 0)
-                existing.last_updated = datetime.now(timezone.utc).isoformat()
+                existing.last_updated = item.get("pushed_at") or existing.last_updated
                 self.stats["protected"] += 1
                 return
 
@@ -221,7 +221,7 @@ class IncrementalEngine:
                 existing.stars = new_stars
                 existing.description = item.get("description") or ""
                 existing.topics = item.get("topics", [])
-                existing.last_updated = datetime.now(timezone.utc).isoformat()
+                existing.last_updated = item.get("pushed_at") or existing.last_updated
                 # 增量模式下规则分类跳过，但 LLM 覆盖仍然应用（修正已有项目分类）
                 old_fields = self._snapshot_classification(existing)
                 applied = self._apply_llm_override(existing, llm_result, existing.ecology)
@@ -271,7 +271,7 @@ class IncrementalEngine:
             stars=item.get("stargazers_count", 0),
             url=item["html_url"],
             first_seen=datetime.now(timezone.utc).isoformat(),
-            last_updated=datetime.now(timezone.utc).isoformat(),
+            last_updated=item.get("pushed_at") or datetime.now(timezone.utc).isoformat(),
             manual_override=False,
             override_fields=[],
             subscribe_releases=(existing.subscribe_releases if existing else False) or subscribe_all_releases,

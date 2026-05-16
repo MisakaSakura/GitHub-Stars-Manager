@@ -57,7 +57,7 @@ class StarItem:
             stars=item.get("stargazers_count", 0),
             url=item.get("html_url", ""),
             first_seen=now,
-            last_updated=now,
+            last_updated=item.get("pushed_at") or now,
             is_fork=item.get("fork", False),
         )
 
