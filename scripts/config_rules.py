@@ -3,85 +3,63 @@
 """分类规则配置：平台、类型、生态归属、生态角色"""
 
 # ==================== 平台分类规则 ====================
+# 平台 = 操作系统 / 运行时环境，严格区别于应用形态
 PLATFORM_RULES = {
+    "Android": [
+        "android", "apk", "aar", "android-app"
+    ],
+    "iOS": [
+        "ios", "swift", "objective-c", "objc", "iphone", "ipad", "ipa"
+    ],
+    "Windows": [
+        "windows", "win32", "win64", "uwp", "wsl", "winforms", "wpf", "windows-app"
+    ],
+    "Linux": [
+        "linux", "ubuntu", "debian", "fedora", "arch", "gentoo", "redhat", "centos"
+    ],
+    "macOS": [
+        "macos", "mac-os", "osx", "darwin", "apple"
+    ],
+    "Web": [
+        "browser", "web", "html5", "pwa", "webapp"
+    ],
+    "跨平台": [
+        "cross-platform", "multi-platform", "electron", "tauri", "qt", "flutter", "react-native", "xamarin"
+    ],
+}
+
+# ==================== 类型分类规则 ====================
+# 类型 = 应用形态 + 功能角色
+TYPE_RULES = {
+    "框架 / Framework": ["framework", "library", "sdk", "runtime", "engine"],
+    "工具 / Tool": ["tool", "utility", "generator", "builder", "scaffold", "boilerplate", "helper"],
+    "应用 / App": ["app", "application", "client", "server", "service", "portal"],
     "Web 前端": [
         "frontend", "react", "vue", "angular", "svelte", "next.js", "nuxt",
-        "webpack", "vite", "spa", "ssr", "dom", "browser", "html", "css",
+        "webpack", "vite", "spa", "ssr", "dom", "browser-ui",
         "tailwind", "bootstrap", "preact", "solidjs", "astro", "remix", "gatsby"
     ],
     "Web 后端": [
         "backend", "api", "server", "rest", "graphql", "web-framework",
         "fastapi", "django", "express", "spring", "flask", "laravel", "nestjs", "gin", "fiber"
     ],
-    "移动端": [
-        "mobile", "ios", "android", "flutter", "react-native", "swift",
-        "kotlin", "cordova", "capacitor", "expo", "ionic",
-        "apk", "ipa", "ios-app", "android-app", "play-store", "app-store"
+    "移动端 App": [
+        "mobile", "ios-app", "android-app", "apk", "ipa",
+        "play-store", "app-store", "cordova", "capacitor", "expo", "ionic"
     ],
-    "桌面端": [
-        "desktop", "electron", "tauri", "qt", "gui", "cross-platform-gui",
-        "nw.js", "wxwidgets", "gtk", "winforms", "wpf",
-        "windows", "win32", "win64", "windows-app", "uwp", "native-app"
-    ],
-    "AI / 机器学习": [
-        "machine-learning", "deep-learning", "ai", "llm", "neural-network",
-        "stable-diffusion", "tensorflow", "pytorch", "langchain", "transformers",
-        "openai", "hugging-face", "ollama", "comfyui", "invokeai", "sd-webui",
-        "gpt", "claude", "gemini", "mistral", "llama"
-    ],
-    "DevOps / 运维": [
-        "devops", "containers", "docker", "kubernetes", "cicd", "deployment",
-        "infrastructure", "terraform", "ansible", "monitoring", "jenkins",
-        "github-actions", "argo", "helm", "pulumi", "vagrant", "packer"
-    ],
-    "数据库": [
-        "database", "sql", "nosql", "redis", "postgres", "mongodb", "cache",
-        "key-value", "orm", "sqlite", "elasticsearch", "clickhouse",
-        "timescaledb", "cassandra", "couchdb", "neo4j"
-    ],
-    "云原生": [
-        "cloud", "serverless", "aws", "gcp", "azure", "microservices",
-        "lambda", "faas", "knative", "istio", "linkerd", "envoy"
-    ],
-    "IoT / 嵌入式": [
-        "iot", "embedded", "arduino", "raspberry-pi", "smart-home",
-        "home-automation", "esp32", "firmware", "rtos", "zephyr", "platformio"
-    ],
-    "游戏 / 图形": [
-        "game", "graphics", "webgl", "3d", "unity", "unreal", "opengl",
-        "vulkan", "blender", "godot", "raytracing", "bevy", "love2d", "cocos",
-        "game-bot", "game-assistant", "game-helper", "auto-play",
-        "脚本", "辅助", "机器人", "cheat", "mod",
-        "genshin", "honkai", "starrail", "arknights", "maa", "impact",
-        "gacha", "rpg", "fps", "moba", "visual-novel", "启动器", "launcher",
-        "game-engine", "emulator", "retroarch", "rom", "save-editor", "trainer",
-        "steam", "epic-games", "gog", "itch.io"
+    "桌面 GUI": [
+        "desktop", "gui", "cross-platform-gui",
+        "nw.js", "wxwidgets", "gtk", "native-app"
     ],
     "CLI / 终端": [
         "cli", "terminal", "shell", "command-line", "bash", "zsh",
         "powershell", "tmux", "fish", "nushell", "starship"
     ],
-    "安全 / 渗透": [
-        "security", "pentest", "ctf", "vulnerability", "cryptography",
-        "reverse-engineering", "malware", "osint", "forensics", "burp"
+    "游戏": [
+        "game", "unity", "unreal", "godot", "bevy", "love2d", "cocos",
+        "rpg", "fps", "moba", "visual-novel", "launcher",
+        "game-engine", "emulator", "retroarch", "rom", "save-editor", "trainer"
     ],
-    "网络 / 代理": [
-        "proxy", "vpn", "network", "tunnel", "wireguard", "shadowsocks",
-        "v2ray", "trojan", "xray", "naiveproxy", "brook"
-    ],
-    "音视频 / 流媒体": [
-        "video", "audio", "streaming", "media", "ffmpeg", "obs", "vlc",
-        "webrtc", "rtmp", "hls", "dash", "pulseaudio", "pipewire",
-        "player", "music-player", "video-player", "media-player", "dlna", "upnp",
-        "airplay", "chromecast", "cast", "podcast", "subtitle"
-    ],
-}
-
-# ==================== 类型分类规则 ====================
-TYPE_RULES = {
-    "框架 / Framework": ["framework", "library", "sdk", "runtime", "engine"],
-    "工具 / Tool": ["tool", "cli", "utility", "generator", "builder", "scaffold", "boilerplate", "helper"],
-    "应用 / App": ["app", "application", "client", "server", "platform", "service", "portal"],
     "编辑器 / IDE": ["editor", "ide", "vscode", "vim", "neovim", "emacs", "jetbrains", "text-editor", "code-editor"],
     "资源合集 / Awesome": ["awesome", "list", "curated", "resources", "awesome-list", "cheatsheet", "roadmap"],
     "语言 / Compiler": ["language", "compiler", "interpreter", "transpiler", "bytecode"],
@@ -90,6 +68,7 @@ TYPE_RULES = {
     "笔记 / 知识管理": ["notes", "knowledge", "wiki", "markdown", "second-brain", "documentation", "zettelkasten"],
     "算法 / 学习": ["algorithm", "leetcode", "interview", "tutorial", "course", "book", "study"],
     "配置 / Dotfiles": ["dotfiles", "config", "configuration", "settings", "preset", "rc-file"],
+    "其他 / 未分类": [],
 }
 
 # ==================== 生态归属规则 ====================
@@ -771,26 +750,26 @@ TYPE_STANDARD_NAMES = list(TYPE_RULES.keys()) + ["其他 / 未分类"]
 ECOLOGY_ROLE_STANDARD_NAMES = list(ECOLOGY_ROLES.keys()) + ["其他 / Other"]
 
 PLATFORM_ALIASES = {
-    # 只处理空格/大小写/格式变体，不强制扩展为完整名称（保留简洁写法）
-    "web前端": "Web 前端", "web 前端": "Web 前端", "webfrontend": "Web 前端", "web前端/后端": "Web 前端",
-    "web后端": "Web 后端", "web 后端": "Web 后端", "webbackend": "Web 后端",
-    "ai/机器学习": "AI / 机器学习", "人工智能": "AI / 机器学习",
-    "devops/运维": "DevOps / 运维", "运维": "DevOps / 运维",
-    "iot/嵌入式": "IoT / 嵌入式", "嵌入式": "IoT / 嵌入式",
-    "游戏/图形": "游戏 / 图形", "graphics": "游戏 / 图形",
-    "cli/终端": "CLI / 终端", "终端": "CLI / 终端", "命令行": "CLI / 终端",
-    "安全/渗透": "安全 / 渗透", "渗透": "安全 / 渗透", "security": "安全 / 渗透",
-    "网络/代理": "网络 / 代理", "代理": "网络 / 代理", "proxy": "网络 / 代理",
-    "音视频/流媒体": "音视频 / 流媒体", "流媒体": "音视频 / 流媒体", "media": "音视频 / 流媒体",
+    "android": "Android", "安卓": "Android",
+    "ios": "iOS",
+    "windows": "Windows", "win32": "Windows", "win64": "Windows",
+    "linux": "Linux",
+    "macos": "macOS", "mac-os": "macOS", "osx": "macOS", "darwin": "macOS", "apple": "macOS",
+    "web": "Web", "browser": "Web",
+    "跨平台": "跨平台", "cross-platform": "跨平台", "multi-platform": "跨平台",
     "其他/未分类": "其他 / 未分类", "未分类": "其他 / 未分类", "other": "其他 / 未分类",
-    "linux": "Linux", "手机端": "移动端", "pc端": "桌面端", "pc": "桌面端",
 }
 
 TYPE_ALIASES = {
-    # 只处理空格/格式变体，保留 LLM 和测试使用的简洁写法
     "应用/app": "应用 / App", "app": "应用 / App", "application": "应用 / App",
     "framework": "框架 / Framework", "library": "框架 / Framework",
     "tool": "工具 / Tool", "utility": "工具 / Tool",
+    "web前端": "Web 前端", "web 前端": "Web 前端", "frontend": "Web 前端",
+    "web后端": "Web 后端", "web 后端": "Web 后端", "backend": "Web 后端",
+    "移动端app": "移动端 App", "移动端 app": "移动端 App", "mobile": "移动端 App",
+    "桌面gui": "桌面 GUI", "桌面 gui": "桌面 GUI", "desktop": "桌面 GUI",
+    "cli/终端": "CLI / 终端", "cli 终端": "CLI / 终端", "命令行": "CLI / 终端",
+    "游戏": "游戏", "game": "游戏",
     "ide": "编辑器 / IDE", "editor": "编辑器 / IDE",
     "awesome": "资源合集 / Awesome", "list": "资源合集 / Awesome", "合集": "资源合集 / Awesome",
     "compiler": "语言 / Compiler", "interpreter": "语言 / Compiler",

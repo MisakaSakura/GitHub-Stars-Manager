@@ -22,15 +22,23 @@ class TestRuleClassifier(unittest.TestCase):
             "language": language,
         }
 
-    def test_classify_platform_web_frontend(self):
+    def test_classify_platform_web(self):
+        # "Web 前端" 已移至 type，platform 现在只匹配操作系统/运行时
         item = self._make_item("react-hooks", "Awesome React hooks collection", ["react", "frontend", "hooks"])
         result = RuleClassifier.classify_platform(item)
-        self.assertEqual(result, "Web 前端")
+        self.assertEqual(result, "其他 / 未分类")
+        # 但 type 应该是 Web 前端
+        tresult = RuleClassifier.classify_type(item)
+        self.assertEqual(tresult, "Web 前端")
 
-    def test_classify_platform_ai(self):
+    def test_classify_platform_web_runtime(self):
+        # webui 项目，desc 中有 web → platform 为 Web
         item = self._make_item("stable-diffusion-webui", "A web interface for Stable Diffusion", ["stable-diffusion", "ai"])
         result = RuleClassifier.classify_platform(item)
-        self.assertEqual(result, "AI / 机器学习")
+        self.assertEqual(result, "Web")
+        # type 不再是 AI / 机器学习（已从 platform 移除）
+        tresult = RuleClassifier.classify_type(item)
+        self.assertNotEqual(tresult, "AI / 机器学习")
 
     def test_classify_type_framework(self):
         item = self._make_item("my-framework", "A web framework", ["framework", "web"])

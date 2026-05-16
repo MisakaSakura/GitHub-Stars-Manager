@@ -75,7 +75,9 @@ class TestIncrementalEngine(unittest.TestCase):
         items = [_fake_item(name="react-starter", desc="A React starter kit", topics=["react"], lang="JavaScript")]
         stats = self.engine.process(items)
         self.assertEqual(stats["new"], 1)
-        self.assertEqual(self.db.data["user/react-starter"].platform, "Web 前端")
+        # "Web 前端" 已移至 type，platform 现在只匹配操作系统/运行时
+        self.assertEqual(self.db.data["user/react-starter"].platform, "其他 / 未分类")
+        self.assertEqual(self.db.data["user/react-starter"].type, "Web 前端")
 
     def test_process_existing_protected(self):
         self.db.set("user/repo", {
@@ -108,7 +110,8 @@ class TestIncrementalEngine(unittest.TestCase):
         items = [_fake_item(name="repo", desc="AI model training toolkit", topics=["pytorch", "machine-learning"], lang="Python")]
         stats = self.engine.process(items, force_refresh=True)
         self.assertEqual(stats["updated"], 1)
-        self.assertEqual(self.db.data["user/repo"].platform, "AI / 机器学习")
+        # "AI / 机器学习" 已从 platform 移除，现 platform 只匹配操作系统/运行时
+        self.assertEqual(self.db.data["user/repo"].platform, "其他 / 未分类")
         self.assertEqual(self.db.data["user/repo"].type, "工具 / Tool")
 
     def test_incremental_skip(self):

@@ -92,18 +92,6 @@ class ReportGenerator:
         log(f"HTML 报告: {path}", "OK")
         return path
 
-    @staticmethod
-    def _activity_score(item: dict) -> int:
-        """计算项目活跃度分数 (0-100)
-        基于 stars 数量的平方对数，放大高分段差异：
-        - 100 stars ≈ 20, 1000 ≈ 45, 10000 ≈ 80, 100000 ≈ 100
-        """
-        import math
-        stars = item.get("stars", 0)
-        # 平方对数放大高分段差异，避免所有项目分数集中在同一区间
-        score = min(int((math.log10(stars + 1) ** 2) * 5), 100)
-        return score
-
     def generate_csv(self, output_dir: str) -> str:
         items = self._inject_ai_fields(list(self.db.values()))
         os.makedirs(output_dir, exist_ok=True)
@@ -111,7 +99,7 @@ class ReportGenerator:
         fieldnames = [
             "full_name", "name", "owner", "description", "language",
             "platform", "type", "ecology", "ecology_role",
-            "topics", "stars", "activity_score", "url", "manual_override"
+            "topics", "stars", "url", "manual_override"
         ]
         with open(path, "w", newline="", encoding="utf-8-sig") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
@@ -119,7 +107,6 @@ class ReportGenerator:
             for item in items:
                 row = item.to_dict() if hasattr(item, "to_dict") else dict(item)
                 row["topics"] = ", ".join(row.get("topics", []))
-                row["activity_score"] = self._activity_score(row)
                 writer.writerow(row)
         log(f"CSV 导出: {path}", "OK")
         return path
@@ -144,7 +131,7 @@ class ReportGenerator:
                     }.items()
                 },
                 "repos": [
-                    {**(item.to_dict() if hasattr(item, "to_dict") else dict(item)), "activity_score": self._activity_score(item)}
+                    item.to_dict() if hasattr(item, "to_dict") else dict(item)
                     for item in items
                 ]
             }, f, ensure_ascii=False, indent=2)
@@ -431,7 +418,6 @@ function toggleTheme(){{const html=document.documentElement;const btn=document.g
             fork_groups = '<div class="sn">暂无 Fork 仓库数据，使用 --check-forks 可检测上游更新。</div>'
 
         weekly_digest = self._build_weekly_digest(weekly_data)
-        active_top10 = self._build_active_top10(items)
 
         try:
             with open(self.template_path, "r", encoding="utf-8") as f:
@@ -453,7 +439,6 @@ function toggleTheme(){{const html=document.documentElement;const btn=document.g
             "{{ECOLOGY_GROUPS}}": eco_groups,
             "{{FORK_GROUPS}}": fork_groups,
             "{{WEEKLY_DIGEST}}": weekly_digest,
-            "{{ACTIVE_TOP10}}": active_top10,
             "{{PLATFORM_BARS}}": pb,
             "{{TYPE_BARS}}": tb,
             "{{LANGUAGE_BARS}}": lb,
@@ -642,33 +627,3 @@ function toggleTheme(){{const html=document.documentElement;const btn=document.g
         wd_parts.append('</div></div>')
         return "".join(wd_parts)
 
-    def _build_active_top10(self, items: list) -> str:
-        """构建活跃项目 Top 10 HTML 区块"""
-        active_items = sorted(
-            [(r, self._activity_score(r)) for r in items],
-            key=lambda x: x[1], reverse=True
-        )[:10]
-        if not active_items:
-            return ""
-
-        at_parts = [
-            '<div class="sc" style="margin-bottom:20px">',
-            '<h3>🔥 活跃项目 Top 10</h3>',
-            '<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">',
-        ]
-        max_score = max(score for _, score in active_items) if active_items else 100
-        for r, score in active_items:
-            # 相对缩放：以最高分为 100% 宽度，避免所有进度条看起来一样长
-            bar_w = int(score / max_score * 100) if max_score else 0
-            bar_color = "#3fb950" if score >= 70 else "#e3b341" if score >= 40 else "#f85149"
-            at_parts.append(
-                f'<div style="display:flex;align-items:center;gap:10px;font-size:13px">'
-                f'<a href="{escape(r["url"])}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:500;min-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{escape(r["owner"])}/{escape(r["name"])}</a>'
-                f'<span style="color:var(--text-secondary);font-size:11px;min-width:60px">⭐ {r["stars"]:,}</span>'
-                f'<div style="flex:1;background:var(--bg-inner);height:8px;border-radius:4px;overflow:hidden">'
-                f'<div style="width:{bar_w}%;height:100%;background:{bar_color};border-radius:4px"></div></div>'
-                f'<span style="font-size:11px;font-weight:600;color:{bar_color};min-width:32px;text-align:right">{score}</span>'
-                f'</div>'
-            )
-        at_parts.append('</div></div>')
-        return "".join(at_parts)
