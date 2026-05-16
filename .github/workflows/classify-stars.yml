@@ -277,6 +277,15 @@ jobs:
             git push
           fi
 
+      - name: Debug docs contents
+        run: |
+          echo "=== docs/ directory contents ==="
+          ls -la docs/ || echo "docs/ does not exist"
+          echo "=== docs/ file count ==="
+          find docs/ -type f | wc -l
+          echo "=== index.html exists? ==="
+          test -f docs/index.html && echo "YES" || echo "NO"
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
