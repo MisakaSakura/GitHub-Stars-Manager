@@ -561,19 +561,29 @@ function toggleTheme(){{const html=document.documentElement;const btn=document.g
         # 新 Release
         if release_updates:
             ru_parts: list[str] = []
-            ru_parts.append(f'<div class="wd-section"><h3>🚀 新 Release ({len(release_updates)})</h3>')
+            new_repo_count = sum(1 for ru in release_updates if ru.get("is_new_repo"))
+            regular_count = len(release_updates) - new_repo_count
+            title_parts = []
+            if new_repo_count:
+                title_parts.append(f"🆕 新收录动态 ({new_repo_count})")
+            if regular_count:
+                title_parts.append(f"🚀 新 Release ({regular_count})")
+            ru_parts.append(f'<div class="wd-section"><h3>{' | '.join(title_parts)}</h3>')
             for ru in release_updates:
                 owner = ru["full_name"].split("/")[0]
                 avatar_url = f"https://github.com/{owner}.png?size=48"
                 rel_time = self._relative_time(ru.get("published_at", ""))
                 version_url = ru["html_url"]
+                is_new_repo = ru.get("is_new_repo", False)
+                new_badge = '<span class="wd-new-badge">🆕 新收录</span>' if is_new_repo else ''
+                action_text = "收录于" if is_new_repo else "released"
                 ru_parts.append(
                     f'<div class="wd-release-card">'
                     f'  <div class="wd-release-header">'
                     f'    <img class="wd-release-avatar" src="{avatar_url}" alt="{owner}" loading="lazy" onerror="this.style.display=\'none\'">'
                     f'    <div class="wd-release-meta">'
-                    f'      <a href="https://github.com/{ru["full_name"]}" target="_blank">{ru["full_name"]}</a> released'
-                    f'      <span class="wd-release-time">{rel_time}</span>'
+                    f'      <a href="https://github.com/{ru["full_name"]}" target="_blank">{ru["full_name"]}</a> {action_text}'
+                    f'      <span class="wd-release-time">{rel_time}</span>{new_badge}'
                     f'    </div>'
                     f'  </div>'
                     f'  <div class="wd-release-version">'
@@ -595,7 +605,8 @@ function toggleTheme(){{const html=document.documentElement;const btn=document.g
                 ru_parts.append('</div>')
             ru_parts.append(f'<div style="margin-top:10px;text-align:right"><a href="releases.html" target="_blank" style="color:#58a6ff;font-size:12px;text-decoration:none">查看完整 Release 日志 →</a></div>')
             ru_parts.append('</div>')
-            add_tab("release", f"🚀 Release ({len(release_updates)})", "".join(ru_parts))
+            tab_label = f"🚀 Release ({len(release_updates)})" if not new_repo_count else f"🚀 Release ({regular_count}) + 🆕 ({new_repo_count})"
+            add_tab("release", tab_label, "".join(ru_parts))
 
         # Fork 上游更新
         if fork_updates:

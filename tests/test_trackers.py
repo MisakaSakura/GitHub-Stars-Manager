@@ -103,6 +103,7 @@ class TestReleaseTracker(unittest.TestCase):
         self.assertEqual(result[0]["new_tag"], "v2.0")
 
     def test_check_all_baseline_first_discovery(self):
+        """首次发现的项目，最新 release 在窗口内时，应作为新收录动态展示"""
         gh = MagicMock()
         gh.list_releases.return_value = [
             {"tag_name": "v1.0", "published_at": "2099-01-01T00:00:00Z", "html_url": "https://github.com/a/b/releases/v1.0"},
@@ -112,6 +113,27 @@ class TestReleaseTracker(unittest.TestCase):
             "full_name": "a/b",
             "name": "b",
             "subscribe_releases": False,
+        }]
+        result = tracker.check_all(items)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["new_tag"], "v1.0")
+        self.assertEqual(result[0]["old_tag"], None)
+        self.assertEqual(result[0]["is_new_repo"], True)
+        self.assertEqual(items[0]["last_release_tag"], "v1.0")
+
+    def test_check_all_baseline_old_release_not_in_window(self):
+        """首次发现的项目，最新 release 不在窗口内时，不产生 update"""
+        import datetime as dt
+        from datetime import timezone
+        old_date = (dt.datetime.now(timezone.utc) - dt.timedelta(days=30)).isoformat()
+        gh = MagicMock()
+        gh.list_releases.return_value = [
+            {"tag_name": "v1.0", "published_at": old_date, "html_url": "https://github.com/a/b/releases/v1.0"},
+        ]
+        tracker = ReleaseTracker(gh)
+        items = [{
+            "full_name": "a/b",
+            "name": "b",
         }]
         result = tracker.check_all(items)
         self.assertEqual(result, [])

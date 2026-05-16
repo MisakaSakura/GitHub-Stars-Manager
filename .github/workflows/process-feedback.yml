@@ -4,6 +4,10 @@ on:
   issues:
     types: [opened, labeled]
 
+concurrency:
+  group: "process-feedback"
+  cancel-in-progress: false
+
 jobs:
   apply-correction:
     if: |
@@ -177,6 +181,8 @@ jobs:
             echo "No changes"
           else
             git commit -m "feedback: apply classification correction from issue #${{ github.event.issue.number }}"
+            # 拉取远程最新变更后重试，防止与其他 workflow 并发冲突
+            git pull --rebase origin data || true
             git push origin data || git push -u origin data
           fi
 

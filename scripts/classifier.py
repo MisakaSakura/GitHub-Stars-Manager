@@ -199,6 +199,7 @@ def _apply_mode(args: argparse.Namespace) -> argparse.Namespace:
     mode_configs = {
         "incremental": {
             "incremental": True,
+            "check_all_releases": True,
         },
         "deep": {
             "incremental": True,

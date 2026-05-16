@@ -259,6 +259,8 @@ jobs:
             echo "No data changes to commit."
           else
             git commit -m "chore: auto-update stars database [$(date -u +%Y-%m-%d)]"
+            # 拉取远程最新变更后重试，防止与 feedback workflow 并发冲突
+            git pull --rebase origin data || true
             git push origin data || git push -u origin data
             echo "✅ 数据已推送到 data 分支"
           fi

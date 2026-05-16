@@ -38,7 +38,7 @@ class TestApplyMode(unittest.TestCase):
         result = _apply_mode(args)
         self.assertTrue(result.incremental)
         self.assertFalse(result.force_refresh)
-        self.assertFalse(result.check_all_releases)
+        self.assertTrue(result.check_all_releases)
         self.assertFalse(result.check_forks)
 
     def test_deep_mode(self):

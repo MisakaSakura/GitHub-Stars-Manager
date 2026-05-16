@@ -40,6 +40,7 @@ def _save_release_history(ctx: PipelineContext) -> None:
                 "html_url": ru.get("html_url", ""),
                 "body": ru.get("body", ""),
                 "ai_digest": ru.get("ai_digest", ""),
+                "is_new_repo": ru.get("is_new_repo", False),
                 "detected_at": datetime.now(timezone.utc).isoformat(),
             })
             seen.add(key)

@@ -33,7 +33,6 @@ class ReleaseTracker(BaseTracker):
         mode_label = "全量" if baseline_mode else "订阅"
         log(f"检查 Release 更新 ({mode_label}): {len(db_items)} 个仓库...", "STEP")
         from datetime import datetime, timezone, timedelta
-        week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
 
         def check_one(item: dict) -> tuple[dict | None, tuple[dict, dict] | None]:
             """返回 (update_dict, (item, fields_to_update))。不在并发中就地修改 item。"""
@@ -51,12 +50,36 @@ class ReleaseTracker(BaseTracker):
                 current_tag = _get_field(item, "last_release_tag")
                 now = datetime.now(timezone.utc).isoformat()
 
+                # 时间窗口：基于上次检查时间，而非固定 7 天，避免遗漏两次运行之间的 release
+                last_checked = _get_field(item, "last_release_checked")
+                if last_checked:
+                    window_start = last_checked
+                else:
+                    window_start = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+
                 if baseline_mode and not current_tag:
-                    # 首次发现：设为最新 baseline，不产生通知
-                    return None, (item, {
-                        "last_release_tag": releases[0].get("tag_name"),
+                    # 首次发现：设为最新 baseline
+                    latest_release = releases[0]
+                    baseline_mutations = {
+                        "last_release_tag": latest_release.get("tag_name"),
                         "last_release_checked": now,
-                    })
+                    }
+                    # 如果最新 release 在时间窗口内，作为"新收录动态"展示
+                    if latest_release.get("published_at", "") >= window_start:
+                        update = {
+                            "full_name": _get_field(item, "full_name"),
+                            "name": _get_field(item, "name"),
+                            "owner": owner,
+                            "old_tag": None,
+                            "new_tag": latest_release.get("tag_name"),
+                            "intermediate_tags": [],
+                            "published_at": latest_release.get("published_at", ""),
+                            "html_url": latest_release.get("html_url", ""),
+                            "body": (latest_release.get("body") or "")[:2000],
+                            "is_new_repo": True,
+                        }
+                        return update, (item, baseline_mutations)
+                    return None, (item, baseline_mutations)
 
                 # 定位 current_tag 在列表中的位置（list_releases 默认倒序：最新在前）
                 current_idx = None
@@ -70,10 +93,10 @@ class ReleaseTracker(BaseTracker):
                 else:
                     candidate_releases = releases
 
-                # 只保留一周内的 release
+                # 只保留时间窗口内的 release
                 new_releases = [
                     r for r in candidate_releases
-                    if r.get("published_at", "") >= week_ago
+                    if r.get("published_at", "") >= window_start
                 ]
 
                 if new_releases:
@@ -151,10 +174,19 @@ class ReleaseTracker(BaseTracker):
         return updates
 
     def format_report(self, updates: list[dict]) -> str:
-        return self._truncate(updates, limit=10, title="🚀 新 Release 提醒")
+        new_count = sum(1 for u in updates if u.get("is_new_repo"))
+        regular_count = len(updates) - new_count
+        parts = []
+        if new_count:
+            parts.append(f"🆕 新收录动态 ({new_count})")
+        if regular_count:
+            parts.append(f"🚀 新 Release ({regular_count})")
+        return self._truncate(updates, limit=10, title=" | ".join(parts) if parts else "Release 更新")
 
     def _format_item(self, item: dict) -> str:
-        line = f"  {item['owner']}/{item['name']}: {item['old_tag'] or '无'} → {item['new_tag']}"
+        is_new = item.get("is_new_repo", False)
+        prefix = "🆕 " if is_new else ""
+        line = f"  {prefix}{item['owner']}/{item['name']}: {item['old_tag'] or '首次发现'} → {item['new_tag']}"
         intermediate = item.get("intermediate_tags")
         if intermediate:
             line += f" (还有 {', '.join(intermediate)})"
