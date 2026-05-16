@@ -594,6 +594,28 @@ function toggleTheme(){{const html=document.documentElement;const btn=document.g
             tab_label = f"🚀 Release ({len(release_updates)})" if not new_repo_count else f"🚀 Release ({regular_count}) + 🆕 ({new_repo_count})"
             add_tab("release", tab_label, "".join(ru_parts))
 
+        # 生态候选池
+        ecology_candidates = weekly_data.get("ecology_candidates", [])
+        if ecology_candidates:
+            eco_parts: list[str] = []
+            eco_parts.append(f'<div class="wd-section"><h3>🌱 生态候选 ({len(ecology_candidates)})</h3><div class="wd-list">')
+            for c in ecology_candidates:
+                status_icon = {
+                    "candidate": "🔍",
+                    "watchlist": "👀",
+                    "ai_reviewed": "🤖",
+                    "trusted": "✅",
+                }.get(c["status"], "❓")
+                eco_parts.append(
+                    f'<div class="wd-item">'
+                    f'<span>{status_icon} {escape(c["name"])}</span>'
+                    f'<span class="wd-tag">{c["count"]} 个项目</span>'
+                    f'<span style="color:var(--text-muted);font-size:11px">{escape(c["progress"])}</span>'
+                    f'</div>'
+                )
+            eco_parts.append('</div></div>')
+            add_tab("eco", f"🌱 候选 ({len(ecology_candidates)})", "".join(eco_parts))
+
         # Fork 上游更新
         if fork_updates:
             fu_parts: list[str] = []

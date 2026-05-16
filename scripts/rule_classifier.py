@@ -19,6 +19,40 @@ class RuleClassifier:
 
     _learned_overrides: dict | None = None
     _auto_ecologies: dict | None = None
+    _watchlist_rules: dict | None = None
+
+    @classmethod
+    def _load_watchlist_rules(cls, db_path: str = "") -> dict:
+        """加载候选池中的 watchlist 规则（软应用）"""
+        if cls._watchlist_rules is not None:
+            return cls._watchlist_rules
+        import os
+        import json
+        pool_path = os.path.join(os.path.dirname(__file__), "..", "data", "ecology_candidates.json")
+        if db_path:
+            pool_path = os.path.join(os.path.dirname(db_path), "ecology_candidates.json")
+        pool_path = os.path.abspath(pool_path)
+        if os.path.exists(pool_path):
+            try:
+                with open(pool_path, "r", encoding="utf-8") as f:
+                    raw = json.load(f)
+                result = {}
+                for name, data in raw.get("candidates", {}).items():
+                    if data.get("status") == "watchlist":
+                        result[name] = data.get("suggested_patterns", {})
+                cls._watchlist_rules = result
+            except Exception:
+                cls._watchlist_rules = {}
+        else:
+            cls._watchlist_rules = {}
+        return cls._watchlist_rules or {}
+
+    @classmethod
+    def refresh_cache(cls) -> None:
+        """强制刷新所有规则缓存（在每次运行前调用）"""
+        cls._learned_overrides = None
+        cls._auto_ecologies = None
+        cls._watchlist_rules = None
 
     @classmethod
     def _load_auto_ecologies(cls, db_path: str = "") -> dict:
@@ -129,11 +163,16 @@ class RuleClassifier:
         best_ecology = None
         best_score = 0
 
-        # 合并代码内置规则和自动发现的生态规则
+        # 合并代码内置规则、auto_ecologies.json 和 watchlist 规则
         all_rules = dict(ECOLOGY_RULES)
         auto_rules = RuleClassifier._load_auto_ecologies()
         if auto_rules:
             for eco_name, rules in auto_rules.items():
+                if eco_name not in all_rules:
+                    all_rules[eco_name] = rules
+        watchlist_rules = RuleClassifier._load_watchlist_rules()
+        if watchlist_rules:
+            for eco_name, rules in watchlist_rules.items():
                 if eco_name not in all_rules:
                     all_rules[eco_name] = rules
 

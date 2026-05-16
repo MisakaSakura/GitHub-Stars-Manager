@@ -86,8 +86,10 @@ def reports_stage(ctx: PipelineContext) -> None:
         "fork_updates": ctx.fork_updates,
         "classification_changes": ctx.classification_changes,
         "ai_summary": ai_summary,
+        "ecology_candidates": getattr(ctx, "ecology_candidate_summary", []),
     } if (new_items or ctx.release_updates or ctx.star_changes or
-          ctx.fork_updates or ctx.classification_changes or ai_summary) else None
+          ctx.fork_updates or ctx.classification_changes or ai_summary
+          or getattr(ctx, "ecology_candidate_summary", [])) else None
 
     report.generate_html(ctx.args.output, weekly_data=weekly_data)
     report.generate_csv(ctx.args.output)

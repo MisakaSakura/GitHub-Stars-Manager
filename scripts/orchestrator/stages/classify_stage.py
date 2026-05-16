@@ -51,6 +51,10 @@ def enrich_stage(ctx: PipelineContext) -> None:
 
 
 def classify_stage(ctx: PipelineContext) -> None:
+    # 刷新规则缓存，确保每次运行都加载最新的自动规则和 watchlist 规则
+    from rule_classifier import RuleClassifier
+    RuleClassifier.refresh_cache()
+
     if ctx.is_first_run and ctx.args.subscribe_releases:
         log("已标记所有仓库订阅 Release", "OK")
 

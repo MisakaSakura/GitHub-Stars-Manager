@@ -34,6 +34,8 @@ class PipelineContext:
     release_tracker: Optional[Any] = None
     fork_tracker: Optional[Any] = None
 
+    ecology_candidate_summary: list[dict] = field(default_factory=list)
+
     output_dir: str = "./docs"
 
     def get(self, key: str, default=None):

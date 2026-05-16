@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Discover Ecologies 阶段：生态自动发现 + 自动应用高置信度规则"""
+"""Discover Ecologies 阶段：生态自动发现 + 备选清单状态机"""
 
 import json
 import os
 
 from orchestrator.context import PipelineContext
 from ecology_discovery import EcologyDiscovery
+from ecology_candidates import EcologyCandidatePool
 from config_rules import ECOLOGY_RULES
 from utils import log
 
@@ -20,7 +21,7 @@ def _get_auto_ecologies_path(ctx: PipelineContext) -> str:
 
 
 def _load_auto_ecologies(ctx: PipelineContext) -> dict:
-    """加载已保存的自动生态规则"""
+    """加载已保存的自动生态规则（trusted 状态）"""
     path = _get_auto_ecologies_path(ctx)
     if os.path.exists(path):
         try:
@@ -42,45 +43,106 @@ def _save_auto_ecologies(ctx: PipelineContext, rules: dict) -> None:
         log(f"自动生态规则保存失败: {e}", "WARN")
 
 
-def _apply_auto_ecologies(ctx: PipelineContext, candidates: list) -> list[str]:
-    """将高置信度候选生态添加到自动规则，返回已应用的生态名称列表"""
-    existing_rules = _load_auto_ecologies(ctx)
-    applied: list[str] = []
+def _sync_trusted_to_auto_ecologies(ctx: PipelineContext, pool: EcologyCandidatePool) -> None:
+    """将 trusted 状态的候选同步到 auto_ecologies.json（向后兼容）"""
+    trusted = pool.get_trusted_rules()
+    existing = _load_auto_ecologies(ctx)
+    updated = False
+    for name, rules in trusted.items():
+        if name not in existing:
+            existing[name] = rules
+            updated = True
+    if updated:
+        _save_auto_ecologies(ctx, existing)
 
-    for c in candidates:
-        # 阈值：>= 5 个项目且置信度 >= 50%
-        if c.project_count < 5 or c.confidence < 0.5:
-            continue
-        name = c.name
-        if name in existing_rules:
-            continue
-        # 避免与已有生态规则冲突
-        if name.lower() in {k.lower() for k in ECOLOGY_RULES.keys()}:
-            continue
 
-        existing_rules[name] = c.suggested_patterns
-        applied.append(name)
+def _llm_review_watchlist(ctx: PipelineContext, pool: EcologyCandidatePool) -> None:
+    """对 watchlist 状态的候选进行 LLM 审查"""
+    if not ctx.llm:
+        return
 
-    if applied:
-        _save_auto_ecologies(ctx, existing_rules)
+    watchlist = [
+        (name, state) for name, state in pool.candidates.items()
+        if state.status == "watchlist"
+    ]
+    if not watchlist:
+        return
 
-    return applied
+    log(f"LLM 审查 {len(watchlist)} 个 watchlist 候选...", "STEP")
+    system_prompt = (
+        "你是一个技术生态分类专家。判断给定项目列表是否属于同一个明确的技术生态。"
+        "只回复 JSON 格式: {\"is_valid\": bool, \"confidence\": 0.0-1.0, \"reason\": \"一句话理由\"}"
+    )
+
+    for name, state in watchlist:
+        # 收集示例项目信息
+        examples = state.suggested_patterns.get("core_projects", [])[:5]
+        if not examples:
+            # 从 name_patterns 推断示例
+            examples = state.suggested_patterns.get("name_patterns", [])[:3]
+
+        prompt = f"""生态候选名称: {name}
+匹配特征: name_patterns={state.suggested_patterns.get('name_patterns', [])}, topic_patterns={state.suggested_patterns.get('topic_patterns', [])}
+问题: 这个生态候选的边界是否清晰、稳定？是否适合作为正式生态规则？
+要求: 回复 JSON {{"is_valid": bool, "confidence": 0.0-1.0, "reason": "一句话理由"}}"""
+
+        try:
+            max_tokens = ctx.llm.profile.get_max_tokens("ecology_review") if getattr(ctx.llm, "profile", None) else 128
+            result = ctx.llm.summarize(prompt, system_prompt=system_prompt, max_tokens=max_tokens)
+            # 尝试解析 JSON
+            import re
+            json_match = re.search(r'\{[^}]+\}', result or "")
+            if json_match:
+                review = json.loads(json_match.group())
+                approved = review.get("is_valid", False)
+                conf = float(review.get("confidence", 0))
+                reason = review.get("reason", "")
+                pool.mark_ai_reviewed(name, approved, conf, reason)
+            else:
+                log(f"  [{name}] LLM 返回无法解析: {result}", "WARN")
+        except Exception as e:
+            log(f"  [{name}] LLM 审查失败: {e}", "WARN")
 
 
 def discover_ecologies_stage(ctx: PipelineContext) -> None:
     if ctx.args.dry_run or not ctx.db:
         return
+
+    pool_path = os.path.join(os.path.dirname(ctx.args.db), "ecology_candidates.json")
+    pool = EcologyCandidatePool(pool_path)
+
     discovery = EcologyDiscovery(ctx.db, ECOLOGY_RULES)
     candidates = discovery.discover(top_n=10)
 
-    # 自动应用高置信度候选
+    # 更新候选池状态
     if candidates:
-        auto_applied = _apply_auto_ecologies(ctx, candidates)
-        if auto_applied:
-            log(f"自动添加 {len(auto_applied)} 个生态规则: {', '.join(auto_applied)}", "OK")
+        changes = pool.update_from_discovery(candidates)
+        if changes:
+            log(f"候选池状态变更: {len(changes)} 个", "OK")
 
-    if candidates:
-        md = discovery.generate_report(candidates)
+    # LLM 审查 watchlist
+    _llm_review_watchlist(ctx, pool)
+
+    # 同步 trusted 到 auto_ecologies.json
+    _sync_trusted_to_auto_ecologies(ctx, pool)
+
+    # 生成报告
+    summary = pool.generate_summary()
+    if summary:
+        md = discovery.generate_report(candidates) if candidates else ""
+        # 追加候选池状态
+        md += "\n\n## 🌱 生态候选池状态\n\n"
+        md += "| 生态 | 状态 | 项目数 | 置信度 | 进度 |\n"
+        md += "|------|------|--------|--------|------|\n"
+        for s in summary:
+            status_icon = {
+                "candidate": "🔍",
+                "watchlist": "👀",
+                "ai_reviewed": "🤖",
+                "trusted": "✅",
+            }.get(s["status"], "❓")
+            md += f"| {s['name']} | {status_icon} {s['status']} | {s['count']} | {s['confidence']:.0%} | {s['progress']} |\n"
+
         out_path = os.path.join(ctx.args.output, "ecology_discovery.md")
         try:
             os.makedirs(ctx.args.output, exist_ok=True)
@@ -89,3 +151,6 @@ def discover_ecologies_stage(ctx: PipelineContext) -> None:
             log(f"生态发现报告已生成: {out_path}", "OK")
         except Exception as e:
             log(f"生态发现报告写入失败: {e}", "WARN")
+
+    # 把候选池摘要存入 ctx 供周报使用
+    ctx.ecology_candidate_summary = summary
