@@ -38,6 +38,38 @@ class ReportGenerator:
             result.append(d)
         return result
 
+    def _repo_slug(self) -> str:
+        """获取当前仓库的 owner/repo，用于生成反馈链接"""
+        repo = os.environ.get("GITHUB_REPOSITORY", "")
+        if repo and "/" in repo:
+            return repo
+        # 兜底：尝试从 git remote 推断
+        try:
+            import subprocess
+            result = subprocess.run(
+                ["git", "remote", "get-url", "origin"],
+                capture_output=True, text=True, timeout=5
+            )
+            url = result.stdout.strip()
+            if url:
+                # 处理 https://github.com/owner/repo.git 或 git@github.com:owner/repo.git
+                if "github.com" in url:
+                    parts = url.replace(":", "/").split("/")
+                    if len(parts) >= 2:
+                        return f"{parts[-2]}/{parts[-1].replace('.git', '')}"
+        except Exception:
+            pass
+        return ""
+
+    def _feedback_url(self, full_name: str, current_eco: str) -> str:
+        """生成预填充的 GitHub Issue 反馈链接"""
+        repo = self._repo_slug()
+        if not repo:
+            return ""
+        title = f"[分类修正] {full_name}"
+        body = f"**项目地址**: {full_name}\n\n**修正字段**: 生态归属 (ecology)\n\n**当前分类（错误）**: {current_eco}\n\n**建议分类（正确）**: \n\n**理由**: "
+        return f"https://github.com/{repo}/issues/new?template=classification-correction.yml&title={escape(title)}&body={escape(body)}"
+
     def generate_html(self, output_dir: str, weekly_data: dict | None = None) -> str:
         items = self._inject_ai_fields(list(self.db.values()))
         total = len(items)
@@ -361,7 +393,9 @@ function toggleTheme(){{const html=document.documentElement;const btn=document.g
             if isinstance(raw_plat, str):
                 raw_plat = [raw_plat]
             plat_html = "".join([f'<span class="bpl">{escape(str(p))}</span>' for p in raw_plat])
-            rows_parts.append(f'<tr data-p="{escape(r["platform"])}" data-t="{escape(r["type"])}" data-l="{escape(r["language"])}" data-e="{escape(r["ecology"])}" data-r="{escape(r["ecology_role"])}" data-s="{escape(llm_status)}"><td><a class="rn" href="{escape(r["url"])}" target="_blank">{escape(r["owner"])}/{escape(r["name"])}</a>{lock}{llm_icon}<div class="rd">{escape(display_desc)}</div><div class="tg">{tags_html}</div><div class="tc">{topics}</div></td><td>{eco_badge}</td><td>{role_badge}</td><td><span class="bp">{escape(r["platform"])}</span></td><td><span class="bt">{escape(r["type"])}</span></td><td><span class="bl">{escape(r["language"])}</span></td><td>{plat_html}</td><td class="st">{stars}</td></tr>')
+            fb_url = self._feedback_url(r["full_name"], r["ecology"])
+            fb_link = f'<a href="{fb_url}" target="_blank" style="color:#8b949e;font-size:11px;text-decoration:none;margin-left:6px" title="报告分类错误">📝</a>' if fb_url else ''
+            rows_parts.append(f'<tr data-p="{escape(r["platform"])}" data-t="{escape(r["type"])}" data-l="{escape(r["language"])}" data-e="{escape(r["ecology"])}" data-r="{escape(r["ecology_role"])}" data-s="{escape(llm_status)}"><td><a class="rn" href="{escape(r["url"])}" target="_blank">{escape(r["owner"])}/{escape(r["name"])}</a>{lock}{llm_icon}{fb_link}<div class="rd">{escape(display_desc)}</div><div class="tg">{tags_html}</div><div class="tc">{topics}</div></td><td>{eco_badge}</td><td>{role_badge}</td><td><span class="bp">{escape(r["platform"])}</span></td><td><span class="bt">{escape(r["type"])}</span></td><td><span class="bl">{escape(r["language"])}</span></td><td>{plat_html}</td><td class="st">{stars}</td></tr>')
         rows = "".join(rows_parts)
 
         eco_group_parts = []
@@ -377,7 +411,9 @@ function toggleTheme(){{const html=document.documentElement;const btn=document.g
                 for item in ri:
                     stars = f"⭐ {item['stars']:,}"
                     lock = ' 🔒' if item.get("manual_override") else ''
-                    ih_parts.append(f'<div class="ri"><div class="rii"><a class="rin" href="{escape(item["url"])}" target="_blank">{escape(item["owner"])}/{escape(item["name"])}</a>{lock}<div class="rid">{escape(item.get("ai_summary") or item["description"])}</div></div><div class="rim"><span class="bl">{escape(item["language"])}</span><span class="st">{stars}</span></div></div>')
+                    fb_url = self._feedback_url(item["full_name"], item["ecology"])
+                    fb_link = f'<a href="{fb_url}" target="_blank" style="color:#8b949e;font-size:11px;text-decoration:none;margin-left:4px" title="报告分类错误">📝</a>' if fb_url else ''
+                    ih_parts.append(f'<div class="ri"><div class="rii"><a class="rin" href="{escape(item["url"])}" target="_blank">{escape(item["owner"])}/{escape(item["name"])}</a>{lock}{fb_link}<div class="rid">{escape(item.get("ai_summary") or item["description"])}</div></div><div class="rim"><span class="bl">{escape(item["language"])}</span><span class="st">{stars}</span></div></div>')
                 rs_parts.append(f'<div class="rs"><div class="rh">🔸 {escape(role_name)} <span style="color:#8b949e;font-weight:400">({rc})</span></div><div class="rl">{"".join(ih_parts)}</div></div>')
             eco_group_parts.append(f'<div class="eg"><div class="eh" onclick="te(this)"><div class="et">🌿 {escape(eco_name)}</div><span class="ec">{count} 个项目</span></div><div class="eb">{"".join(rs_parts)}</div></div>')
 
@@ -387,7 +423,9 @@ function toggleTheme(){{const html=document.documentElement;const btn=document.g
             for item in standalone:
                 stars = f"⭐ {item['stars']:,}"
                 lock = ' 🔒' if item.get("manual_override") else ''
-                ih_parts.append(f'<div class="ri"><div class="rii"><a class="rin" href="{escape(item["url"])}" target="_blank">{escape(item["owner"])}/{escape(item["name"])}</a>{lock}<div class="rid">{escape(item.get("ai_summary") or item["description"])}</div></div><div class="rim"><span class="bp">{escape(item["platform"])}</span><span class="bt">{escape(item["type"])}</span><span class="bl">{escape(item["language"])}</span><span class="st">{stars}</span></div></div>')
+                fb_url = self._feedback_url(item["full_name"], item["ecology"])
+                fb_link = f'<a href="{fb_url}" target="_blank" style="color:#8b949e;font-size:11px;text-decoration:none;margin-left:4px" title="报告分类错误">📝</a>' if fb_url else ''
+                ih_parts.append(f'<div class="ri"><div class="rii"><a class="rin" href="{escape(item["url"])}" target="_blank">{escape(item["owner"])}/{escape(item["name"])}</a>{lock}{fb_link}<div class="rid">{escape(item.get("ai_summary") or item["description"])}</div></div><div class="rim"><span class="bp">{escape(item["platform"])}</span><span class="bt">{escape(item["type"])}</span><span class="bl">{escape(item["language"])}</span><span class="st">{stars}</span></div></div>')
             eco_group_parts.append(f'<div class="eg"><div class="eh" onclick="te(this)"><div class="et" style="color:#8b949e">📦 独立项目 / Standalone</div><span class="ec" style="background:#30363d;color:#8b949e">{len(standalone)} 个项目</span></div><div class="eb collapsed"><div class="rs"><div class="rl">{"".join(ih_parts)}</div></div></div></div>')
         eco_groups = "".join(eco_group_parts)
 

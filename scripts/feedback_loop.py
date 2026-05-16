@@ -161,6 +161,118 @@ class FeedbackLoop:
 
         return "\n".join(lines)
 
+    def generate_learned_overrides(self, min_count: int = 3) -> dict:
+        """分析反馈记录，生成自动规则补丁。
+
+        返回格式:
+        {
+            "negative": {  # 否定规则：匹配这些特征的项目，排除指定生态
+                "Docker": {
+                    "topic_blacklist": ["music", "pdf"],
+                    "desc_blacklist": ["privacy first", "小爱音箱"],
+                    "evidence": 5,
+                }
+            },
+            "positive": {  # 正向规则：匹配这些特征的项目，额外加分
+                "Bilibili": {
+                    "desc_boost": ["b 站体验"],
+                    "evidence": 3,
+                }
+            }
+        }
+        """
+        from collections import defaultdict
+        from config_rules import ECOLOGY_STANDARD_NAMES
+
+        result = {"negative": {}, "positive": {}}
+
+        # 1. 分析否定模式：原始生态 != 目标生态（且目标为 Standalone 或其他生态）
+        # 收集每个 (原始生态) 被否定项目的共同特征
+        neg_evidence = defaultdict(list)  # eco_name -> [item_dict, ...]
+        pos_evidence = defaultdict(list)  # eco_name -> [item_dict, ...]
+
+        for full_name, entry in self.entries.items():
+            corrected = entry.get("corrected", {})
+            original = entry.get("original", {})
+            for field in ("ecology",):
+                old = original.get(field)
+                new = corrected.get(field)
+                if old and new and old != new:
+                    # 否定模式：old 生态被用户否定，改为 new
+                    neg_evidence[old].append({
+                        "full_name": full_name,
+                        "corrected_ecology": new,
+                        "original_ecology": old,
+                    })
+                    # 正向模式：new 生态被用户确认（从其他生态改过来的）
+                    if new != "独立项目 / Standalone" and new != "独立项目":
+                        pos_evidence[new].append({
+                            "full_name": full_name,
+                            "original_ecology": old,
+                        })
+
+        # 2. 生成否定规则：需要 min_count 次相同"原始生态被否定"的反馈
+        for eco_name, items in neg_evidence.items():
+            if len(items) < min_count:
+                continue
+            # 提取共同特征（从反馈条目中寻找 topics/desc 关键词）
+            # 由于没有存储原始项目的 topics/desc，我们只能从 full_name 推断
+            # 或者依赖外部传入 db
+            result["negative"][eco_name] = {
+                "topic_blacklist": [],
+                "desc_blacklist": [],
+                "name_blacklist": [],
+                "evidence": len(items),
+                "examples": [i["full_name"] for i in items[:5]],
+            }
+
+        # 3. 生成正向规则
+        for eco_name, items in pos_evidence.items():
+            if len(items) < min_count:
+                continue
+            result["positive"][eco_name] = {
+                "desc_boost": [],
+                "topic_boost": [],
+                "evidence": len(items),
+                "examples": [i["full_name"] for i in items[:5]],
+            }
+
+        return result
+
+    @staticmethod
+    def write_learned_rules_file(path: str, learned: dict) -> None:
+        """将学习到的规则写入 Python 文件（便于 RuleClassifier 直接 import）"""
+        import os
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+
+        lines = [
+            '#!/usr/bin/env python3',
+            '# -*- coding: utf-8 -*-',
+            '"""自动生成的规则补丁 —— 由 feedback_loop.py 根据用户反馈自动维护',
+            '',
+            '生成时间: {}',
+            '数据来源: data/feedback.json',
+            '更新触发: 每次 --correct 修正或 scan_manual_overrides 检测到新差异时',
+            '',
+            '注意：此文件为机器生成，不建议手动编辑。需要调整时，',
+            '      直接在 stars_db.json 中修正分类并设置 manual_override=true，',
+            '      下次运行会自动重新生成。',
+            '"""',
+            '',
+            'LEARNED_OVERRIDES = {}',
+            '',
+        ]
+
+        import json, datetime
+        content = json.dumps(learned, ensure_ascii=False, indent=4)
+        # 将 JSON 转为 Python dict 字面量格式
+        content = content.replace('"', '"').replace('true', 'True').replace('false', 'False').replace('null', 'None')
+        lines[8] = lines[8].format(datetime.datetime.now(datetime.timezone.utc).isoformat())
+        lines[10] = f"LEARNED_OVERRIDES = {content}"
+
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines))
+
     def scan_manual_overrides(self, db) -> int:
         """扫描数据库中所有 manual_override=True 的项目，
         将其当前分类与规则分类结果对比，记录差异为人工修正。

@@ -62,10 +62,54 @@ class LLMClient:
         except (ValueError, TypeError):
             return 0.1
 
+    @staticmethod
+    def _build_feedback_context() -> str:
+        """从反馈系统读取高频修正模式，生成 LLM 上下文提示"""
+        import os
+        feedback_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "feedback.json")
+        feedback_path = os.path.abspath(feedback_path)
+        if not os.path.exists(feedback_path):
+            return ""
+
+        try:
+            import json
+            with open(feedback_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            entries = data.get("entries", {})
+            if not entries:
+                return ""
+
+            # 统计高频否定模式（原始生态 != 目标生态）
+            from collections import Counter
+            neg_patterns = Counter()
+            for entry in entries.values():
+                orig = entry.get("original", {})
+                corr = entry.get("corrected", {})
+                old_eco = orig.get("ecology", "")
+                new_eco = corr.get("ecology", "")
+                if old_eco and new_eco and old_eco != new_eco:
+                    neg_patterns[(old_eco, new_eco)] += 1
+
+            if not neg_patterns:
+                return ""
+
+            lines = ["\n【重要：用户已确认的分类修正案例，遇到类似项目时请优先参考】"]
+            for (old, new), count in neg_patterns.most_common(8):
+                if count >= 2:
+                    lines.append(f"- 曾被分到 '{old}' 但用户修正为 '{new}'（已确认 {count} 次）")
+            return "\n".join(lines)
+        except Exception:
+            return ""
+
     def call(self, prompt: str, system_prompt: str | None = None, max_tokens: int | None = None) -> str | None:
         """通用文本调用，返回原始响应文本"""
         from config import LLM_CONFIG, LLM_SYSTEM_PROMPT
         sp = LLM_SYSTEM_PROMPT if system_prompt is None else system_prompt
+
+        # 注入反馈上下文（用户已确认的修正案例）
+        fb_ctx = self._build_feedback_context()
+        if fb_ctx:
+            sp = sp + fb_ctx
 
         # no_thinking 模式追加指令
         if self.profile and self.profile.system_prompt_mode == "no_thinking":

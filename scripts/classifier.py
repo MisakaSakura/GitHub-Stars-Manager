@@ -120,6 +120,17 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--retry-failed", action="store_true",
                         help="重新对之前 AI 分析失败的项目进行分类")
 
+    # 快捷修正（双向反馈入口）
+    correct_group = parser.add_argument_group("快捷修正（不运行完整流水线）")
+    correct_group.add_argument("--correct", metavar="OWNER/REPO",
+                               help="修正指定项目的分类，格式: owner/repo")
+    correct_group.add_argument("--correct-ecology", help="设置生态归属")
+    correct_group.add_argument("--correct-ecology-role", help="设置生态角色")
+    correct_group.add_argument("--correct-platform", help="设置平台")
+    correct_group.add_argument("--correct-type", help="设置类型")
+    correct_group.add_argument("--correct-batch", metavar="PATH",
+                               help="批量修正文件，格式: full_name,ecology,ecology_role,platform,type（CSV）")
+
     return parser.parse_args(argv)
 
 
@@ -226,8 +237,116 @@ def _apply_mode(args: argparse.Namespace) -> argparse.Namespace:
     return args
 
 
+def _do_correct(args: argparse.Namespace) -> int:
+    """执行快捷修正：修改数据库中的项目分类并设置 manual_override"""
+    import os
+    from database import StarsDB
+    from feedback_loop import FeedbackLoop
+    from models import StarItem
+
+    db_path = args.db
+    db = StarsDB(db_path)
+    feedback_path = os.path.join(os.path.dirname(db_path), "feedback.json")
+    fb = FeedbackLoop(feedback_path)
+    changed = 0
+
+    def _correct_one(full_name: str, ecology: str | None, ecology_role: str | None,
+                     platform: str | None, type_: str | None) -> bool:
+        item = db.get(full_name)
+        if not item:
+            print(f"  [跳过] {full_name} 不在数据库中")
+            return False
+
+        original = {
+            "platform": item.platform,
+            "type": item.type,
+            "ecology": item.ecology,
+            "ecology_role": item.ecology_role,
+        }
+
+        updated = False
+        if ecology is not None:
+            item.ecology = ecology
+            updated = True
+        if ecology_role is not None:
+            item.ecology_role = ecology_role
+            updated = True
+        if platform is not None:
+            item.platform = platform
+            updated = True
+        if type_ is not None:
+            item.type = type_
+            updated = True
+
+        if not updated:
+            print(f"  [跳过] {full_name} 未提供任何修正字段")
+            return False
+
+        item.manual_override = True
+        item.override_fields = [f for f, v in {
+            "platform": platform, "type": type_,
+            "ecology": ecology, "ecology_role": ecology_role,
+        }.items() if v is not None]
+
+        corrected = {
+            "platform": item.platform,
+            "type": item.type,
+            "ecology": item.ecology,
+            "ecology_role": item.ecology_role,
+        }
+        fb.record(full_name, original, corrected, source="cli")
+        db.set(full_name, item)
+        print(f"  [修正] {full_name}: " + ", ".join(
+            f"{k}: {original[k]} → {v}" for k, v in corrected.items() if original[k] != v
+        ))
+        return True
+
+    # 单条修正
+    if args.correct:
+        if _correct_one(args.correct, args.correct_ecology, args.correct_ecology_role,
+                        args.correct_platform, args.correct_type):
+            changed += 1
+
+    # 批量修正
+    if args.correct_batch:
+        import csv
+        with open(args.correct_batch, "r", encoding="utf-8") as f:
+            reader = csv.reader(f)
+            for row in reader:
+                if len(row) < 2 or row[0].startswith("#"):
+                    continue
+                full_name = row[0].strip()
+                ecology = row[1].strip() if len(row) > 1 and row[1].strip() else None
+                ecology_role = row[2].strip() if len(row) > 2 and row[2].strip() else None
+                platform = row[3].strip() if len(row) > 3 and row[3].strip() else None
+                type_ = row[4].strip() if len(row) > 4 and row[4].strip() else None
+                if _correct_one(full_name, ecology, ecology_role, platform, type_):
+                    changed += 1
+
+    if changed > 0:
+        db.save()
+        fb.save()
+        # 自动重新生成 learned rules
+        learned = fb.generate_learned_overrides(min_count=2)
+        if learned:
+            fb.write_learned_rules_file(
+                os.path.join(os.path.dirname(db_path), "learned_rules.py"),
+                learned
+            )
+            print(f"[反馈] 已生成 learned_rules.py（{len(learned)} 条规则）")
+        print(f"\n[OK] 共修正 {changed} 个项目，数据库已保存")
+    else:
+        print("\n[WARN] 没有任何项目被修正")
+    return 0 if changed > 0 else 1
+
+
 def main() -> None:
     args = parse_args()
+
+    # 快捷修正模式：不运行完整流水线
+    if args.correct or args.correct_batch:
+        sys.exit(_do_correct(args))
+
     args = _apply_preset(args)
     args = _ensure_defaults(args)
     args = _apply_mode(args)

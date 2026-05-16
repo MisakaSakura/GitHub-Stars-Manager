@@ -1,0 +1,185 @@
+name: Process Classification Feedback
+
+on:
+  issues:
+    types: [opened, labeled]
+
+jobs:
+  apply-correction:
+    if: contains(github.event.issue.labels.*.name, '分类修正')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+
+    steps:
+      - name: Checkout code (main)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Checkout data branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
+          rm -rf data
+          if git ls-remote --heads "${REPO_URL}" data | grep -q data; then
+            git clone --branch data --single-branch "${REPO_URL}" data
+          else
+            mkdir data && cd data && git init && git remote add origin "${REPO_URL}" && git checkout -b data
+          fi
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Parse issue and apply correction
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          python3 << 'PYEOF'
+          import json, os, re, sys
+
+          body = os.environ.get("ISSUE_BODY", "")
+          issue_num = os.environ.get("ISSUE_NUMBER", "")
+
+          # 解析 Issue 正文（YAML front matter 格式）
+          def parse_field(label):
+              m = re.search(rf"{re.escape(label)}\s*\n\s*([^\n]+)", body)
+              return m.group(1).strip() if m else ""
+
+          full_name = parse_field("项目地址")
+          field_type = parse_field("修正字段")
+          current = parse_field("当前分类（错误）")
+          expected = parse_field("建议分类（正确）")
+
+          if not full_name or not expected:
+              print("无法解析 Issue 内容，跳过")
+              sys.exit(1)
+
+          # 检查数据库中是否存在
+          db_path = "data/stars_db.json"
+          if not os.path.exists(db_path):
+              print("数据库不存在")
+              sys.exit(1)
+
+          with open(db_path, "r", encoding="utf-8") as f:
+              items = json.load(f)
+
+          target = None
+          for item in items:
+              if item.get("full_name") == full_name:
+                  target = item
+                  break
+
+          if not target:
+              print(f"项目 {full_name} 不在数据库中")
+              sys.exit(1)
+
+          original = {
+              "platform": target.get("platform", ""),
+              "type": target.get("type", ""),
+              "ecology": target.get("ecology", ""),
+              "ecology_role": target.get("ecology_role", ""),
+          }
+
+          # 应用修正
+          updated = False
+          if "生态归属" in field_type or "多个字段" in field_type:
+              if expected:
+                  target["ecology"] = expected
+                  updated = True
+          if "平台" in field_type or "多个字段" in field_type:
+              if expected:
+                  target["platform"] = expected
+                  updated = True
+          if "类型" in field_type or "多个字段" in field_type:
+              if expected:
+                  target["type"] = expected
+                  updated = True
+
+          if not updated:
+              print("没有需要应用的修正")
+              sys.exit(1)
+
+          target["manual_override"] = True
+          target["override_fields"] = ["ecology"] if "生态归属" in field_type else ["platform", "type", "ecology"]
+
+          # 保存数据库
+          with open(db_path, "w", encoding="utf-8") as f:
+              json.dump(items, f, ensure_ascii=False, indent=2)
+
+          # 记录反馈到 feedback.json
+          fb_path = "data/feedback.json"
+          fb = {"version": 1, "entries": {}, "patterns": {}}
+          if os.path.exists(fb_path):
+              try:
+                  with open(fb_path, "r", encoding="utf-8") as f:
+                      fb = json.load(f)
+              except Exception:
+                  pass
+
+          from datetime import datetime, timezone
+          fb["entries"][full_name] = {
+              "timestamp": datetime.now(timezone.utc).isoformat(),
+              "original": original,
+              "corrected": {
+                  "platform": target["platform"],
+                  "type": target["type"],
+                  "ecology": target["ecology"],
+                  "ecology_role": target["ecology_role"],
+              },
+              "source": f"issue#{issue_num}",
+          }
+
+          with open(fb_path, "w", encoding="utf-8") as f:
+              json.dump(fb, f, ensure_ascii=False, indent=2)
+
+          print(f"已修正 {full_name}: {original['ecology']} -> {target['ecology']}")
+          print("::set-output name=full_name::" + full_name)
+          print("::set-output name=original::" + original.get("ecology", ""))
+          print("::set-output name=corrected::" + target["ecology"])
+          PYEOF
+
+      - name: Regenerate learned rules
+        run: |
+          python3 -c "
+          import json, os, sys
+          sys.path.insert(0, 'scripts')
+          from feedback_loop import FeedbackLoop
+          fb_path = 'data/feedback.json'
+          lr_path = 'data/learned_rules.py'
+          if os.path.exists(fb_path):
+              fb = FeedbackLoop(fb_path)
+              learned = fb.generate_learned_overrides(min_count=2)
+              if learned and (learned.get('negative') or learned.get('positive')):
+                  fb.write_learned_rules_file(lr_path, learned)
+                  print(f'已生成 learned_rules.py')
+              else:
+                  print('反馈数量不足，未生成规则补丁')
+          "
+
+      - name: Commit data changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd data
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "feedback: apply classification correction from issue #${{ github.event.issue.number }}"
+            git push origin data || git push -u origin data
+          fi
+
+      - name: Close issue with comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue close ${{ github.event.issue.number }} --comment "✅ 已自动应用修正并提交到 data 分支。下次分类运行时会生效。"

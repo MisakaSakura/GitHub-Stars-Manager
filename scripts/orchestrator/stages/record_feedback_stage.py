@@ -18,6 +18,14 @@ def record_feedback_stage(ctx: PipelineContext) -> None:
     if count > 0:
         fb.save()
         log(f"反馈数据已保存: {feedback_path}", "OK")
+
+    # 自动生成 learned rules（即使本次没有新修正，也重新生成以捕获模式变化）
+    learned = fb.generate_learned_overrides(min_count=3)
+    if learned:
+        rules_path = os.path.join(os.path.dirname(ctx.args.db), "learned_rules.py")
+        fb.write_learned_rules_file(rules_path, learned)
+        log(f"已生成 learned_rules.py（{len(learned.get('negative', {}))} 条否定 + {len(learned.get('positive', {}))} 条正向）", "OK")
+
     md = fb.generate_report()
     out_path = os.path.join(ctx.args.output, "feedback_report.md")
     try:

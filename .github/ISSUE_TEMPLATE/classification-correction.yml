@@ -1,0 +1,56 @@
+name: "📝 分类修正"
+description: "报告某个项目的自动分类错误，帮助改进分类规则"
+title: "[分类修正] "
+labels: ["分类修正"]
+body:
+  - type: input
+    id: full_name
+    attributes:
+      label: "项目地址"
+      description: "格式: owner/repo，如 alam00000/bentopdf"
+      placeholder: "owner/repo"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: field
+    attributes:
+      label: "修正字段"
+      description: "哪个字段分类不正确？"
+      options:
+        - "生态归属 (ecology)"
+        - "平台 (platform)"
+        - "类型 (type)"
+        - "生态角色 (ecology_role)"
+        - "多个字段"
+    validations:
+      required: true
+
+  - type: input
+    id: current
+    attributes:
+      label: "当前分类（错误）"
+      description: "系统当前的分类是什么？"
+      placeholder: "如: Docker"
+
+  - type: input
+    id: expected
+    attributes:
+      label: "建议分类（正确）"
+      description: "你认为应该是什么分类？"
+      placeholder: "如: 独立项目 / Standalone"
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: "理由"
+      description: "为什么当前分类是错误的？"
+      placeholder: "如: 这只是支持 Docker 部署的 PDF 工具，核心功能与 Docker 无关"
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: "确认"
+      options:
+        - label: "我已确认该项目的实际内容，当前分类确实不正确"
+          required: true
