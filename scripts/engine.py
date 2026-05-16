@@ -177,7 +177,7 @@ class IncrementalEngine:
             confidence = float(raw_conf) if raw_conf is not None else 0.0
         except (ValueError, TypeError):
             confidence = 0.0
-        if confidence <= 0.7:
+        if confidence < 0.8:
             return False
         ecology_locked = existing_eco and _is_ecology_locked(existing_eco)
         # P1 fix: dict.get 值为 None 时返回 None，用 or 保证回退到原值

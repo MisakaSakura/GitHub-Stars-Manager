@@ -17,6 +17,65 @@ class RuleClassifier:
     # P1: name 前缀/后缀匹配的额外权重倍率
     NAME_PREFIX_WEIGHT = 3
 
+    _learned_overrides: dict | None = None
+
+    @staticmethod
+    def _load_learned_overrides() -> dict:
+        """延迟加载用户反馈生成的规则补丁"""
+        import os
+        import sys
+        if RuleClassifier._learned_overrides is not None:
+            return RuleClassifier._learned_overrides
+
+        # 尝试从 data/learned_rules.py 加载
+        learned_path = os.path.join(os.path.dirname(__file__), "..", "data", "learned_rules.py")
+        learned_path = os.path.abspath(learned_path)
+        if os.path.exists(learned_path):
+            try:
+                # 使用 import 机制加载
+                import importlib.util
+                spec = importlib.util.spec_from_file_location("learned_rules", learned_path)
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
+                RuleClassifier._learned_overrides = getattr(mod, "LEARNED_OVERRIDES", {})
+            except Exception:
+                RuleClassifier._learned_overrides = {}
+        else:
+            RuleClassifier._learned_overrides = {}
+        return RuleClassifier._learned_overrides
+
+    @staticmethod
+    def _apply_learned_overrides(eco_name: str, score: int, name: str, desc: str, topics: list[str]) -> int:
+        """应用学习到的规则补丁（否定/正向规则）"""
+        learned = RuleClassifier._load_learned_overrides()
+        if not learned:
+            return score
+
+        # 否定规则：匹配黑名单特征的项目，直接排除该生态
+        neg = learned.get("negative", {}).get(eco_name, {})
+        if neg:
+            for t in topics:
+                if t in [p.lower() for p in neg.get("topic_blacklist", [])]:
+                    return 0
+            for p in neg.get("desc_blacklist", []):
+                if p.lower() in desc:
+                    return 0
+            for p in neg.get("name_blacklist", []):
+                if p.lower() in name:
+                    return 0
+
+        # 正向规则：匹配 boost 特征的项目，额外加分
+        pos = learned.get("positive", {}).get(eco_name, {})
+        if pos:
+            for p in pos.get("desc_boost", []):
+                if p.lower() in desc:
+                    score += 5
+            for t in topics:
+                if t in [p.lower() for p in pos.get("topic_boost", [])]:
+                    score += 5
+
+        return score
+
     @staticmethod
     def classify_platform(item: dict) -> str:
         return RuleClassifier._classify(item, "platform")
@@ -24,6 +83,16 @@ class RuleClassifier:
     @staticmethod
     def classify_type(item: dict) -> str:
         return RuleClassifier._classify(item, "type")
+
+    @staticmethod
+    def _has_word_boundary(text: str, pattern: str) -> bool:
+        """检查 pattern 在 text 中是否以词边界形式出现（前后非字母数字或字符串边界）"""
+        idx = text.find(pattern)
+        if idx == -1:
+            return False
+        before_ok = idx == 0 or not text[idx - 1].isalnum()
+        after_ok = idx + len(pattern) == len(text) or not text[idx + len(pattern)].isalnum()
+        return before_ok and after_ok
 
     @staticmethod
     def classify_ecology(item: dict) -> tuple[str | None, str | None]:
@@ -42,13 +111,19 @@ class RuleClassifier:
             # name 匹配：前缀/子串/核心项目
             for pattern in rules.get("name_patterns", []):
                 pattern_lower = pattern.lower()
-                if pattern_lower in name:
-                    cores = rules.get("core_projects", [])
-                    if any(name == c.lower() or name.endswith(f"-{c.lower()}") or name.startswith(f"{c.lower()}-") for c in cores):
-                        score += 10
-                    elif name.startswith(pattern_lower) or name.endswith(pattern_lower):
-                        # P1: 前缀/后缀匹配给予更高权重
-                        score += RuleClassifier.NAME_PREFIX_WEIGHT
+                if pattern_lower not in name:
+                    continue
+                cores = rules.get("core_projects", [])
+                if any(name == c.lower() or name.endswith(f"-{c.lower()}") or name.startswith(f"{c.lower()}-") for c in cores):
+                    score += 10
+                elif name.startswith(pattern_lower) or name.endswith(pattern_lower):
+                    # P1: 前缀/后缀匹配给予更高权重
+                    score += RuleClassifier.NAME_PREFIX_WEIGHT
+                else:
+                    # 纯子串匹配：短 pattern（<=4字符）需要词边界，避免误匹配
+                    if len(pattern_lower) <= 4:
+                        if RuleClassifier._has_word_boundary(name, pattern_lower):
+                            score += 5
                     else:
                         score += 5
 
@@ -57,19 +132,33 @@ class RuleClassifier:
                 if pattern.lower() in desc:
                     score += 3
 
-            # topic 匹配：完全匹配给予更高权重
+            # topic 匹配：完全匹配给予更高权重；短 pattern 子串匹配需词边界
             for pattern in rules.get("topic_patterns", []):
                 pattern_lower = pattern.lower()
                 if any(pattern_lower == t for t in topics):
                     # P1: topics 完全匹配权重更高
                     score += 4 * RuleClassifier.TOPIC_WEIGHT_MULTIPLIER
-                elif any(pattern_lower in t for t in topics):
-                    score += 4
+                else:
+                    # 子串匹配：短 pattern（<=4字符）需要词边界，避免 "i3" 匹配 "winui3"
+                    for t in topics:
+                        if pattern_lower in t:
+                            if len(pattern_lower) <= 4:
+                                idx = t.find(pattern_lower)
+                                before_ok = idx == 0 or not t[idx - 1].isalnum()
+                                after_ok = idx + len(pattern_lower) == len(t) or not t[idx + len(pattern_lower)].isalnum()
+                                if before_ok and after_ok:
+                                    score += 4
+                            else:
+                                score += 4
+                            break
 
             # related_types 在 name 中的匹配
             for rt in rules.get("related_types", []):
                 if rt.lower() in name:
                     score += 2
+
+            # 应用学习到的规则补丁（用户反馈自动生成的否定/正向规则）
+            score = RuleClassifier._apply_learned_overrides(eco_name, score, name, desc, topics)
 
             if score > best_score:
                 best_score = score
