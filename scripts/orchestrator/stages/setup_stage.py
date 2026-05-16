@@ -8,15 +8,7 @@ from orchestrator.context import PipelineContext
 from database import StarsDB
 from ai_database import AIDatabase
 from import_helper import FirstRunHelper
-from utils import log
-
-
-def _safe_print(msg: str) -> None:
-    try:
-        print(msg, flush=True)
-    except UnicodeEncodeError:
-        ascii_msg = msg.encode("ascii", "replace").decode("ascii")
-        print(ascii_msg, flush=True)
+from utils import log, _safe_print
 
 
 def setup_stage(ctx: PipelineContext) -> None:

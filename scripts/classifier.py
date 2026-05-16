@@ -16,7 +16,7 @@ GitHub Stars 自动分类工具 v4 — CLI 入口
 import argparse
 import sys
 
-from pipeline import Pipeline
+from orchestrator import Pipeline
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:

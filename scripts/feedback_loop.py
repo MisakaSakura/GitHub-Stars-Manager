@@ -48,24 +48,17 @@ class FeedbackLoop:
             self.patterns = {}
 
     def save(self) -> None:
-        os.makedirs(os.path.dirname(self.path) or ".", exist_ok=True)
-        tmp_path = self.path + ".tmp"
-        try:
-            with open(tmp_path, "w", encoding="utf-8") as f:
-                json.dump({
-                    "version": self.FEEDBACK_VERSION,
-                    "updated_at": datetime.now(timezone.utc).isoformat(),
-                    "entries": self.entries,
-                    "patterns": self.patterns,
-                }, f, ensure_ascii=False, indent=2)
-            os.replace(tmp_path, self.path)
-        except Exception:
-            if os.path.exists(tmp_path):
-                try:
-                    os.remove(tmp_path)
-                except Exception:
-                    pass
-            raise
+        from utils import atomic_write
+
+        def _write(f):
+            json.dump({
+                "version": self.FEEDBACK_VERSION,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "entries": self.entries,
+                "patterns": self.patterns,
+            }, f, ensure_ascii=False, indent=2)
+
+        atomic_write(self.path, _write)
 
     def record(self, full_name: str, original: dict, corrected: dict, source: str = "manual") -> bool:
         """记录一次人工修正"""

@@ -98,7 +98,9 @@ class GitHubAPI:
         import time
 
         cache_key = f"{owner}/{repo}"
-        cache_file = ".readme_cache.json"
+        # 缓存文件放在数据库所在目录，避免随工作目录变化
+        cache_dir = os.path.dirname(os.path.abspath(__file__))
+        cache_file = os.path.join(cache_dir, ".readme_cache.json")
         cache_ttl = 7 * 86400  # 7 天
 
         # 尝试读取缓存
@@ -168,7 +170,11 @@ class GitHubAPI:
             code, body = self.client.request(url, headers=self.headers)
             if code != 200:
                 break
-            data = json.loads(body)
+            try:
+                data = json.loads(body)
+            except json.JSONDecodeError:
+                log(f"GitHub API 返回无效 JSON: {body[:200]}", "WARN")
+                break
             if not data:
                 break
             all_repos.extend(data)

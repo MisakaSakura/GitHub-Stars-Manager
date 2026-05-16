@@ -35,6 +35,15 @@ class StarsDB:
         with open(self.meta_path, "w", encoding="utf-8") as f:
             json.dump(self.meta, f, ensure_ascii=False, indent=2)
 
+    def meta_get(self, key: str, default=None):
+        return self.meta.get(key, default)
+
+    def meta_set(self, key: str, value) -> None:
+        self.meta[key] = value
+
+    def meta_save(self) -> None:
+        self.save_meta()
+
     def load(self) -> None:
         if os.path.exists(self.db_path):
             try:
@@ -61,19 +70,12 @@ class StarsDB:
             self.data = {}
 
     def save(self) -> None:
-        os.makedirs(os.path.dirname(self.db_path) or ".", exist_ok=True)
-        tmp_path = self.db_path + ".tmp"
-        try:
-            with open(tmp_path, "w", encoding="utf-8") as f:
-                json.dump([self._serialize(item) for item in self.data.values()], f, ensure_ascii=False, indent=2)
-            os.replace(tmp_path, self.db_path)
-        except Exception:
-            if os.path.exists(tmp_path):
-                try:
-                    os.remove(tmp_path)
-                except Exception:
-                    pass
-            raise
+        from utils import atomic_write
+
+        def _write(f):
+            json.dump([self._serialize(item) for item in self.data.values()], f, ensure_ascii=False, indent=2)
+
+        atomic_write(self.db_path, _write)
 
     def get(self, key: str) -> StarItem | dict | None:
         return self.data.get(key)

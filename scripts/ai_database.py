@@ -63,22 +63,15 @@ class AIDatabase:
             self.data = {}
 
     def save(self) -> None:
-        os.makedirs(os.path.dirname(self.path) or ".", exist_ok=True)
-        tmp_path = self.path + ".tmp"
-        try:
-            with open(tmp_path, "w", encoding="utf-8") as f:
-                json.dump(
-                    {k: v.to_dict() for k, v in self.data.items()},
-                    f, ensure_ascii=False, indent=2
-                )
-            os.replace(tmp_path, self.path)
-        except Exception:
-            if os.path.exists(tmp_path):
-                try:
-                    os.remove(tmp_path)
-                except Exception:
-                    pass
-            raise
+        from utils import atomic_write
+
+        def _write(f):
+            json.dump(
+                {k: v.to_dict() for k, v in self.data.items()},
+                f, ensure_ascii=False, indent=2
+            )
+
+        atomic_write(self.path, _write)
 
     def get(self, full_name: str) -> AIResult | None:
         return self.data.get(full_name)

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """通用工具函数"""
 
+import os
 import sys
 from datetime import datetime, timezone
 
@@ -15,3 +16,34 @@ def log(msg: str, level: str = "INFO") -> None:
     except UnicodeEncodeError:
         prefix_ascii = {"INFO": "[I]", "OK": "[OK]", "WARN": "[W]", "ERROR": "[E]", "STEP": "[>"}.get(level, "[*]")
         print(f"[{ts}] {prefix_ascii} {msg}", flush=True)
+
+
+def _safe_print(msg: str) -> None:
+    """安全打印，在编码不支持时回退 ASCII，强制 flush 保证 Actions 中实时可见"""
+    try:
+        print(msg, flush=True)
+    except UnicodeEncodeError:
+        ascii_msg = msg.encode("ascii", "replace").decode("ascii")
+        print(ascii_msg, flush=True)
+
+
+def atomic_write(path: str, write_fn) -> None:
+    """原子写入：先写临时文件再替换，失败时清理临时文件
+
+    Args:
+        path: 目标文件路径
+        write_fn: 接收已打开文件对象的回调函数，负责实际写入
+    """
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    tmp_path = path + ".tmp"
+    try:
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            write_fn(f)
+        os.replace(tmp_path, path)
+    except Exception:
+        if os.path.exists(tmp_path):
+            try:
+                os.remove(tmp_path)
+            except Exception:
+                pass
+        raise

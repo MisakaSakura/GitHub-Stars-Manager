@@ -6,4 +6,6 @@ from .context import PipelineContext
 from .registry import StageRegistry
 from .new_pipeline import NewPipeline
 
-__all__ = ["PipelineContext", "StageRegistry", "NewPipeline"]
+Pipeline = NewPipeline
+
+__all__ = ["PipelineContext", "StageRegistry", "NewPipeline", "Pipeline"]

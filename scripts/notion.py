@@ -86,7 +86,12 @@ class NotionExporter:
         log("清空 Notion 数据库...", "STEP")
         url = f"{self.base}/databases/{self.database_id}/query"
         code, body = self.client.post_json(url, {}, headers=self.headers)
-        pages = json.loads(body).get("results", []) if code == 200 else []
+        pages = []
+        if code == 200:
+            try:
+                pages = json.loads(body).get("results", [])
+            except json.JSONDecodeError:
+                log(f"Notion 查询返回非 JSON 响应: {body[:200]}", "WARN")
 
         for page in pages:
             page_id = page["id"]

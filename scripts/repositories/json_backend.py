@@ -24,7 +24,7 @@ class JSONStarsRepository(Repository):
         self._backend.set(key, value)
 
     def delete(self, key: str) -> bool:
-        if key in self._backend.data:
+        if self._backend.get(key) is not None:
             del self._backend.data[key]
             return True
         return False
@@ -73,7 +73,7 @@ class JSONAIRepository(Repository):
         self._backend.set(key, value)
 
     def delete(self, key: str) -> bool:
-        if key in self._backend.data:
+        if self._backend.get(key) is not None:
             del self._backend.data[key]
             return True
         return False

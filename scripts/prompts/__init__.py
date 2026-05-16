@@ -19,8 +19,11 @@ class PromptLoader:
 
         base_dir = os.path.dirname(os.path.abspath(__file__))
         path = os.path.join(base_dir, f"{name}.txt")
-        with open(path, "r", encoding="utf-8") as f:
-            template = f.read()
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                template = f.read()
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Prompt 模板不存在: {path} (name='{name}')") from None
         cls._cache[name] = template
         return template
 
@@ -28,7 +31,10 @@ class PromptLoader:
     def render(cls, name: str, **kwargs) -> str:
         """加载模板并替换变量"""
         template = cls.load(name)
-        return template.format(**kwargs)
+        try:
+            return template.format(**kwargs)
+        except KeyError as e:
+            raise KeyError(f"Prompt '{name}' 缺少模板变量: {e}. 可用变量: {kwargs.keys()}") from e
 
     @classmethod
     def clear_cache(cls) -> None:

@@ -94,7 +94,7 @@ class EcologyDiscovery:
             all_desc_words = []
             for p in projects:
                 desc = p.get("description", "") or ""
-                words = re.findall(r'\b[a-z]{3,}\b', desc.lower())
+                words = re.findall(r'\b[a-z]{3,}\b|[一-鿿]{2,}', desc.lower())
                 all_desc_words.extend(words)
             common_words = [w for w, c in Counter(all_desc_words).most_common(5) if c >= 2]
 

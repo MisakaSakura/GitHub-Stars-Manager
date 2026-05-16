@@ -61,6 +61,8 @@ class EmailNotifier:
             server.login(cfg["smtp_user"], cfg["smtp_password"])
             server.sendmail(msg["From"], cfg["to_addrs"], msg.as_string())
             log("邮件通知已发送", "OK")
+        except Exception as e:
+            log(f"邮件发送失败: {e}", "WARN")
         finally:
             if server:
                 try:

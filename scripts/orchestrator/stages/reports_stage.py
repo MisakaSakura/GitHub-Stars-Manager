@@ -77,7 +77,7 @@ def reports_stage(ctx: PipelineContext) -> None:
         return
 
     report = ReportGenerator(ctx.db, ai_db=ctx.ai_db)
-    new_items = [ctx.db.get(k) for k in ctx.new_keys if ctx.db.get(k)]
+    new_items = [ctx.db.get(k).to_dict() for k in ctx.new_keys if ctx.db.get(k)]
     ai_summary = _generate_ai_summary(ctx)
     weekly_data = {
         "new_items": new_items,

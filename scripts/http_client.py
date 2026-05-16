@@ -68,7 +68,11 @@ class HTTPClient:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 return resp.status, resp.read().decode("utf-8")
         except urllib.error.HTTPError as e:
-            return e.code, e.read().decode("utf-8")
+            try:
+                body = e.read().decode("utf-8", errors="replace")
+            except Exception:
+                body = ""
+            return e.code, body
         except Exception as e:
             return -1, str(e)
 
