@@ -1,5 +1,44 @@
 [
   {
+    "full_name": "czy0729/Bangumi",
+    "name": "Bangumi",
+    "owner": "czy0729",
+    "old_tag": "8.33.0",
+    "new_tag": "8.33.2",
+    "published_at": "2026-05-16T15:41:20Z",
+    "html_url": "https://github.com/czy0729/Bangumi/releases/tag/8.33.2",
+    "body": "[图文说明](https://www.yuque.com/chenzhenyu-k0epm/znygb4/ngolrxwixlixlsv1?singleDoc)\r\n\r\n[蓝奏云 v8a APK](https://czy0729.lanzoub.com/iJc3x3pm6vgj) (只能电脑UA访问) | [123pan v8a APK](https://1819463884.share.123865.com/123pan/K0fQjv-2GNT3) | [v8a APK] 手动点击下方 Assets\r\n\r\n[IPA] 留意 github 自动打包\r\n\r\n## 8.33.3 - 2026/05/16\r\n\r\n### 优化\r\n- [条目] 支持订阅游戏类型条目发售日期到日历\r\n- [空间] 优化历史帖子逻辑\r\n- [帖子] 支持显示相似帖子功能\r\n- [帖子聚合] 优化页面数据加载表现\r\n- [UI] 优化平板设备样式\r\n- [iOS] 优化时光机 中 Tab + Scroll 列表的布局表现\r\n\r\n### 修复\r\n- [设置] 修复「隐藏评分」设置打开时部分页面表现与预期不一致的问题\r\n- [帖子] 修复章节类帖子顶部缩略图不正确的问题\r\n- [iOS] 修复 iOS26 时光机、空间顶部锁定高度不符合预期、部分样式错误等问题",
+    "ai_digest": "",
+    "is_new_repo": false,
+    "detected_at": "2026-05-16T15:43:23.568988+00:00"
+  },
+  {
+    "full_name": "MetaCubeX/mihomo",
+    "name": "mihomo",
+    "owner": "MetaCubeX",
+    "old_tag": "Prerelease-Alpha",
+    "new_tag": "v1.19.25",
+    "published_at": "2026-05-16T15:26:51Z",
+    "html_url": "https://github.com/MetaCubeX/mihomo/releases/tag/v1.19.25",
+    "body": "## What's Changed\r\n* 571925d2 feat: add Tailscale outbound support (#2786) by @汐殇\r\n* 7af9eeb3 feat: add OpenVPN outbound support (#2785) by @Romanov Caesar\r\n* 6ea4373e feat: support auth-user-pass and AES-256-GCM for OpenVPN (#2787) by @Ekko\r\n* 5e220351 feat: add GOST relay outbound proxy type (#2795) by @ztywyj\r\n* 98aa7e63 feat: support `realm-opts` for hysteria2 outbound and listener by @wwqgtxx\r\n* 787dbfc5 feat: support setting `realm-opts.proxy` for hysteria2 listener by @wwqgtxx\r\n* 2ffd9628 feat: support hysteria2-realm listener by @wwqgtxx\r\n* 8b8eae56 feat: support simple-obfs for shadowsocks listener by @wwqgtxx\r\n\r\n## BUG & Fix\r\n* 0003e143 fix: trusttunnel listener panic by @wwqgtxx\r\n* 17bed79b fix: tsnet panic for tailscale by @wwqgtxx\r\n* 2f51cb03 fix: conn maybe not closed in error handling by @wwqgtxx\r\n* 2f6ce20f fix: tailscale not use configured dialer for captive detection by @wwqgtxx\r\n* 35d5d4e4 fix: CVE-2026-39825 for net/http by @wwqgtxx\r\n* 388d958a fix: remove unstable warning for tailscale by @wwqgtxx\r\n* 5df45b25 fix: typo in default alpn by @wwqgtxx\r\n* 7a646e8d fix: correctly configure the HTTP/2 scheduled ping parameters in masque h2 mode by @wwqgtxx\r\n* 802b0b24 fix: netlink permission denied on android for tailscale by @wwqgtxx\r\n* 8a28dce5 fix: validate Linux process netlink matches by @xream\r\n* 95946a5f fix: net/http.Transport's UnencryptedHTTP2 does not work TLS without ALPN by @wwqgtxx\r\n* 98aa42ed fix: convert place disguise host in h2-opts.host for legacy base64-JSON VMess (#2739) by @wangwei354\r\n* 9e97dc05 fix: tailscale not use configured dialer for netstack forwardTCP by @wwqgtxx\r\n* aae58120 fix: net/http.Server's UnencryptedHTTP2 does not work TLS without ALPN by @wwqgtxx\r\n* b3104a52 fix: panic in vless xhttp h3 mode when quic dial fails (#2736) by @beck\r\n* cc376acc fix: skip TTL update for OPT records by @wwqgtxx\r\n* d2acf450 fix: hysteria2 realm server reaper loop by @wwqgtxx\r\n* e933ca82 fix: netlink permission denied on android for tail",
+    "ai_digest": "",
+    "is_new_repo": false,
+    "detected_at": "2026-05-16T15:43:23.568984+00:00"
+  },
+  {
+    "full_name": "MetaCubeX/ClashMetaForAndroid",
+    "name": "ClashMetaForAndroid",
+    "owner": "MetaCubeX",
+    "old_tag": "Prerelease-alpha",
+    "new_tag": "v2.11.28",
+    "published_at": "2026-05-16T15:20:24Z",
+    "html_url": "https://github.com/MetaCubeX/ClashMetaForAndroid/releases/tag/v2.11.28",
+    "body": "## What's Changed\n* Defer shortcut setup to MainActivity by @Goooler in https://github.com/MetaCubeX/ClashMetaForAndroid/pull/728\n* Replace shortcut icons by @Goooler in https://github.com/MetaCubeX/ClashMetaForAndroid/pull/729\n* Fix parse profile-update-interval http header by @AlexFozor in https://github.com/MetaCubeX/ClashMetaForAndroid/pull/732\n* Add supported languages to system settings by @Goooler in https://github.com/MetaCubeX/ClashMetaForAndroid/pull/733\n* Fix clash:// deep link not opening app due to premature Activity finish by @xiwangly2 in https://github.com/MetaCubeX/ClashMetaForAndroid/pull/718\n* Update Dependencies by @clash-meta-maintainer[bot] in https://github.com/MetaCubeX/ClashMetaForAndroid/pull/710\n* Update Dependencies by @clash-meta-maintainer[bot] in https://github.com/MetaCubeX/ClashMetaForAndroid/pull/737\n* Update Dependencies by @clash-meta-maintainer[bot] in https://github.com/MetaCubeX/ClashMetaForAndroid/pull/738\n\n## New Contributors\n* @AlexFozor made their first contribution in https://github.com/MetaCubeX/ClashMetaForAndroid/pull/732\n* @xiwangly2 made their first contribution in https://github.com/MetaCubeX/ClashMetaForAndroid/pull/718\n\n**Full Changelog**: https://github.com/MetaCubeX/ClashMetaForAndroid/compare/v2.11.27...v2.11.28",
+    "ai_digest": "",
+    "is_new_repo": false,
+    "detected_at": "2026-05-16T15:43:23.568974+00:00"
+  },
+  {
     "full_name": "sub-store-org/Sub-Store",
     "name": "Sub-Store",
     "owner": "sub-store-org",

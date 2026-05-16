@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "updated_at": "2026-05-16T15:43:23.608680+00:00",
   "entries": {
     "obra/superpowers": {
       "timestamp": "2026-05-16T14:11:01.027751+00:00",
@@ -16,7 +17,735 @@
         "ecology_role": "-"
       },
       "source": "issue#3"
+    },
+    "xishang0128/sparkle": {
+      "timestamp": "2026-05-16T15:43:23.608245+00:00",
+      "original": {
+        "platform": "桌面端",
+        "type": "工具 / Tool",
+        "ecology": "Clash / Mihomo",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "网络 / 代理",
+        "type": "工具 / Tool",
+        "ecology": "Clash / Mihomo",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "source": "auto_fix"
+    },
+    "MetaCubeX/ClashMetaForAndroid": {
+      "timestamp": "2026-05-16T15:43:23.608271+00:00",
+      "original": {
+        "platform": "移动端",
+        "type": "工具 / Tool",
+        "ecology": "Clash / Mihomo",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "网络 / 代理",
+        "type": "工具 / Tool",
+        "ecology": "Clash / Mihomo",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "source": "auto_fix"
+    },
+    "clash-verge-rev/clash-verge-rev": {
+      "timestamp": "2026-05-16T15:43:23.608289+00:00",
+      "original": {
+        "platform": "桌面端",
+        "type": "工具 / Tool",
+        "ecology": "Clash / Mihomo",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "网络 / 代理",
+        "type": "工具 / Tool",
+        "ecology": "Clash / Mihomo",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "source": "auto_fix"
+    },
+    "keiyoushi/extensions": {
+      "timestamp": "2026-05-16T15:43:23.608302+00:00",
+      "original": {
+        "platform": "移动端",
+        "type": "资源合集 / Awesome",
+        "ecology": "Clash / Mihomo",
+        "ecology_role": "插件 / Plugin"
+      },
+      "corrected": {
+        "platform": "网络 / 代理",
+        "type": "资源合集 / Awesome",
+        "ecology": "Clash / Mihomo",
+        "ecology_role": "插件 / Plugin"
+      },
+      "source": "auto_fix"
+    },
+    "Genymobile/gnirehtet": {
+      "timestamp": "2026-05-16T15:43:23.608313+00:00",
+      "original": {
+        "platform": "移动端",
+        "type": "工具 / Tool",
+        "ecology": "Clash / Mihomo",
+        "ecology_role": "其他 / Other"
+      },
+      "corrected": {
+        "platform": "网络 / 代理",
+        "type": "工具 / Tool",
+        "ecology": "Clash / Mihomo",
+        "ecology_role": "其他 / Other"
+      },
+      "source": "auto_fix"
+    },
+    "zen-browser/desktop": {
+      "timestamp": "2026-05-16T15:43:23.608323+00:00",
+      "original": {
+        "platform": "Web 前端",
+        "type": "应用 / App",
+        "ecology": "Firefox",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "Web 前端",
+        "type": "工具 / Tool",
+        "ecology": "Firefox",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "source": "auto_fix"
+    },
+    "chawyehsu/dorado": {
+      "timestamp": "2026-05-16T15:43:23.608358+00:00",
+      "original": {
+        "platform": "桌面端",
+        "type": "资源合集 / Awesome",
+        "ecology": "Docker",
+        "ecology_role": "配置 / Config"
+      },
+      "corrected": {
+        "platform": "桌面端",
+        "type": "工具 / Tool",
+        "ecology": "Docker",
+        "ecology_role": "配置 / Config"
+      },
+      "source": "auto_fix"
+    },
+    "sansan0/TrendRadar": {
+      "timestamp": "2026-05-16T15:43:23.608375+00:00",
+      "original": {
+        "platform": "AI / 机器学习",
+        "type": "应用 / App",
+        "ecology": "Docker",
+        "ecology_role": "其他 / Other"
+      },
+      "corrected": {
+        "platform": "AI / 机器学习",
+        "type": "工具 / Tool",
+        "ecology": "Docker",
+        "ecology_role": "其他 / Other"
+      },
+      "source": "auto_fix"
+    },
+    "LibreSpark/LibreTV": {
+      "timestamp": "2026-05-16T15:43:23.608387+00:00",
+      "original": {
+        "platform": "Web 前端",
+        "type": "应用 / App",
+        "ecology": "Docker",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "Web 前端",
+        "type": "工具 / Tool",
+        "ecology": "Docker",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "source": "auto_fix"
+    },
+    "tonyantony300/alt-sendme": {
+      "timestamp": "2026-05-16T15:43:23.608396+00:00",
+      "original": {
+        "platform": "CLI / 终端",
+        "type": "工具 / Tool",
+        "ecology": "React",
+        "ecology_role": "其他 / Other"
+      },
+      "corrected": {
+        "platform": "CLI / 终端",
+        "type": "应用 / App",
+        "ecology": "React",
+        "ecology_role": "其他 / Other"
+      },
+      "source": "auto_fix"
+    },
+    "xanderfrangos/twinkle-tray": {
+      "timestamp": "2026-05-16T15:43:23.608404+00:00",
+      "original": {
+        "platform": "桌面端",
+        "type": "工具 / Tool",
+        "ecology": "Electron",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "桌面端",
+        "type": "应用 / App",
+        "ecology": "Electron",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "source": "auto_fix"
+    },
+    "obgnail/typora_plugin": {
+      "timestamp": "2026-05-16T15:43:23.608412+00:00",
+      "original": {
+        "platform": "桌面端",
+        "type": "插件 / Plugin",
+        "ecology": "Electron",
+        "ecology_role": "插件 / Plugin"
+      },
+      "corrected": {
+        "platform": "桌面端",
+        "type": "应用 / App",
+        "ecology": "Electron",
+        "ecology_role": "插件 / Plugin"
+      },
+      "source": "auto_fix"
+    },
+    "toeverything/AFFiNE": {
+      "timestamp": "2026-05-16T15:43:23.608420+00:00",
+      "original": {
+        "platform": "Web 前端",
+        "type": "应用 / App",
+        "ecology": "Electron",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "桌面端",
+        "type": "应用 / App",
+        "ecology": "Electron",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "source": "auto_fix"
+    },
+    "anilbeesetti/nextplayer": {
+      "timestamp": "2026-05-16T15:43:23.608428+00:00",
+      "original": {
+        "platform": "移动端",
+        "type": "应用 / App",
+        "ecology": "FFmpeg",
+        "ecology_role": "其他 / Other"
+      },
+      "corrected": {
+        "platform": "移动端",
+        "type": "工具 / Tool",
+        "ecology": "FFmpeg",
+        "ecology_role": "其他 / Other"
+      },
+      "source": "auto_fix"
+    },
+    "1265578519/ShanaEncoder": {
+      "timestamp": "2026-05-16T15:43:23.608435+00:00",
+      "original": {
+        "platform": "音视频 / 流媒体",
+        "type": "应用 / App",
+        "ecology": "FFmpeg",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "音视频 / 流媒体",
+        "type": "工具 / Tool",
+        "ecology": "FFmpeg",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "source": "auto_fix"
+    },
+    "sorayuki/obs-multi-rtmp": {
+      "timestamp": "2026-05-16T15:43:23.608443+00:00",
+      "original": {
+        "platform": "音视频 / 流媒体",
+        "type": "插件 / Plugin",
+        "ecology": "OBS Studio",
+        "ecology_role": "插件 / Plugin"
+      },
+      "corrected": {
+        "platform": "音视频 / 流媒体",
+        "type": "工具 / Tool",
+        "ecology": "OBS Studio",
+        "ecology_role": "插件 / Plugin"
+      },
+      "source": "auto_fix"
+    },
+    "Vhonowslend/StreamFX-Public": {
+      "timestamp": "2026-05-16T15:43:23.608450+00:00",
+      "original": {
+        "platform": "音视频 / 流媒体",
+        "type": "插件 / Plugin",
+        "ecology": "OBS Studio",
+        "ecology_role": "插件 / Plugin"
+      },
+      "corrected": {
+        "platform": "音视频 / 流媒体",
+        "type": "工具 / Tool",
+        "ecology": "OBS Studio",
+        "ecology_role": "插件 / Plugin"
+      },
+      "source": "auto_fix"
+    },
+    "univrsal/tuna": {
+      "timestamp": "2026-05-16T15:43:23.608458+00:00",
+      "original": {
+        "platform": "音视频 / 流媒体",
+        "type": "插件 / Plugin",
+        "ecology": "OBS Studio",
+        "ecology_role": "插件 / Plugin"
+      },
+      "corrected": {
+        "platform": "音视频 / 流媒体",
+        "type": "工具 / Tool",
+        "ecology": "OBS Studio",
+        "ecology_role": "插件 / Plugin"
+      },
+      "source": "auto_fix"
+    },
+    "bozbez/win-capture-audio": {
+      "timestamp": "2026-05-16T15:43:23.608464+00:00",
+      "original": {
+        "platform": "音视频 / 流媒体",
+        "type": "插件 / Plugin",
+        "ecology": "OBS Studio",
+        "ecology_role": "插件 / Plugin"
+      },
+      "corrected": {
+        "platform": "音视频 / 流媒体",
+        "type": "工具 / Tool",
+        "ecology": "OBS Studio",
+        "ecology_role": "插件 / Plugin"
+      },
+      "source": "auto_fix"
+    },
+    "JingMatrix/Vector": {
+      "timestamp": "2026-05-16T15:43:23.608472+00:00",
+      "original": {
+        "platform": "移动端",
+        "type": "框架 / Framework",
+        "ecology": "Magisk",
+        "ecology_role": "插件 / Plugin"
+      },
+      "corrected": {
+        "platform": "移动端",
+        "type": "工具 / Tool",
+        "ecology": "Magisk",
+        "ecology_role": "插件 / Plugin"
+      },
+      "source": "auto_fix"
+    },
+    "XayahSuSuSu/Android-DataBackup": {
+      "timestamp": "2026-05-16T15:43:23.608481+00:00",
+      "original": {
+        "platform": "移动端",
+        "type": "应用 / App",
+        "ecology": "Magisk",
+        "ecology_role": "脚本 / Script"
+      },
+      "corrected": {
+        "platform": "移动端",
+        "type": "工具 / Tool",
+        "ecology": "Magisk",
+        "ecology_role": "脚本 / Script"
+      },
+      "source": "auto_fix"
+    },
+    "reiryuki/Hi-Res-Audio-Enabler-Magisk-Module": {
+      "timestamp": "2026-05-16T15:43:23.608490+00:00",
+      "original": {
+        "platform": "IoT / 嵌入式",
+        "type": "工具 / Tool",
+        "ecology": "Magisk",
+        "ecology_role": "插件 / Plugin"
+      },
+      "corrected": {
+        "platform": "移动端",
+        "type": "工具 / Tool",
+        "ecology": "Magisk",
+        "ecology_role": "插件 / Plugin"
+      },
+      "source": "auto_fix"
+    },
+    "wuhgit/CustomPinyinDictionary": {
+      "timestamp": "2026-05-16T15:43:23.608495+00:00",
+      "original": {
+        "platform": "移动端",
+        "type": "资源合集 / Awesome",
+        "ecology": "Magisk",
+        "ecology_role": "插件 / Plugin"
+      },
+      "corrected": {
+        "platform": "移动端",
+        "type": "工具 / Tool",
+        "ecology": "Magisk",
+        "ecology_role": "插件 / Plugin"
+      },
+      "source": "auto_fix"
+    },
+    "Devolutions/UniGetUI": {
+      "timestamp": "2026-05-16T15:43:23.608500+00:00",
+      "original": {
+        "platform": "桌面端",
+        "type": "应用 / App",
+        "ecology": "Windows",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "桌面端",
+        "type": "工具 / Tool",
+        "ecology": "Windows",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "source": "auto_fix"
+    },
+    "MadMaxChow/VLOOK": {
+      "timestamp": "2026-05-16T15:43:23.608505+00:00",
+      "original": {
+        "platform": "Web 前端",
+        "type": "工具 / Tool",
+        "ecology": "Typora",
+        "ecology_role": "主题 / Theme"
+      },
+      "corrected": {
+        "platform": "Web 前端",
+        "type": "主题 / Theme",
+        "ecology": "Typora",
+        "ecology_role": "主题 / Theme"
+      },
+      "source": "auto_fix"
+    },
+    "starship/starship": {
+      "timestamp": "2026-05-16T15:43:23.608511+00:00",
+      "original": {
+        "platform": "CLI / 终端",
+        "type": "配置 / Dotfiles",
+        "ecology": "Starship",
+        "ecology_role": "核心 / Core"
+      },
+      "corrected": {
+        "platform": "CLI / 终端",
+        "type": "配置 / Dotfiles",
+        "ecology": "独立项目 / Standalone",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix"
+    },
+    "nickustinov/itsyhome-macos": {
+      "timestamp": "2026-05-16T15:43:23.608518+00:00",
+      "original": {
+        "platform": "桌面端",
+        "type": "应用 / App",
+        "ecology": "Home Assistant",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "桌面端",
+        "type": "应用 / App",
+        "ecology": "独立项目 / Standalone",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix"
+    },
+    "SteamClientHomebrew/Millennium": {
+      "timestamp": "2026-05-16T15:43:23.608523+00:00",
+      "original": {
+        "platform": "桌面端",
+        "type": "框架 / Framework",
+        "ecology": "Steam",
+        "ecology_role": "插件 / Plugin"
+      },
+      "corrected": {
+        "platform": "桌面端",
+        "type": "框架 / Framework",
+        "ecology": "独立项目 / Standalone",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix"
+    },
+    "jesseduffield/lazygit": {
+      "timestamp": "2026-05-16T15:43:23.608529+00:00",
+      "original": {
+        "platform": "CLI / 终端",
+        "type": "工具 / Tool",
+        "ecology": "Git",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "CLI / 终端",
+        "type": "工具 / Tool",
+        "ecology": "独立项目 / Standalone",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix"
+    },
+    "AUTOMATIC1111/stable-diffusion-webui": {
+      "timestamp": "2026-05-16T15:43:23.608536+00:00",
+      "original": {
+        "platform": "AI / 机器学习",
+        "type": "应用 / App",
+        "ecology": "Stable Diffusion",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "AI / 机器学习",
+        "type": "应用 / App",
+        "ecology": "独立项目 / Standalone",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix"
+    },
+    "91270/MeiamSubtitles": {
+      "timestamp": "2026-05-16T15:43:23.608541+00:00",
+      "original": {
+        "platform": "Web 后端",
+        "type": "插件 / Plugin",
+        "ecology": "其他 / 未分类",
+        "ecology_role": "插件 / Plugin"
+      },
+      "corrected": {
+        "platform": "Web 后端",
+        "type": "插件 / Plugin",
+        "ecology": "独立项目 / Standalone",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix"
+    },
+    "AlkaidLab/foundation-sunshine": {
+      "timestamp": "2026-05-16T15:43:23.608547+00:00",
+      "original": {
+        "platform": "桌面端",
+        "type": "工具 / Tool",
+        "ecology": "Moonlight",
+        "ecology_role": "核心 / Core"
+      },
+      "corrected": {
+        "platform": "桌面端",
+        "type": "工具 / Tool",
+        "ecology": "独立项目 / Standalone",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix"
+    },
+    "sumruler/typora-theme-phycat": {
+      "timestamp": "2026-05-16T15:43:23.608553+00:00",
+      "original": {
+        "platform": "其他 / 未分类",
+        "type": "主题 / Theme",
+        "ecology": "VS Code",
+        "ecology_role": "主题 / Theme"
+      },
+      "corrected": {
+        "platform": "其他 / 未分类",
+        "type": "主题 / Theme",
+        "ecology": "独立项目 / Standalone",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix"
+    },
+    "dubinc/dub": {
+      "timestamp": "2026-05-16T15:43:23.608559+00:00",
+      "original": {
+        "platform": "Web 后端",
+        "type": "应用 / App",
+        "ecology": "Tailwind CSS",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "Web 后端",
+        "type": "应用 / App",
+        "ecology": "独立项目 / Standalone",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix"
+    },
+    "doitsujin/dxvk": {
+      "timestamp": "2026-05-16T15:43:23.608564+00:00",
+      "original": {
+        "platform": "游戏 / 图形",
+        "type": "工具 / Tool",
+        "ecology": "Wine",
+        "ecology_role": "API 封装 / Wrapper"
+      },
+      "corrected": {
+        "platform": "游戏 / 图形",
+        "type": "工具 / Tool",
+        "ecology": "独立项目 / Standalone",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix"
+    },
+    "CollapseLauncher/Collapse": {
+      "timestamp": "2026-05-16T15:43:23.608569+00:00",
+      "original": {
+        "platform": "桌面端",
+        "type": "应用 / App",
+        "ecology": "i3 / Sway",
+        "ecology_role": "其他 / Other"
+      },
+      "corrected": {
+        "platform": "桌面端",
+        "type": "应用 / App",
+        "ecology": "独立项目 / Standalone",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix"
+    },
+    "the1812/Bilibili-Evolved": {
+      "timestamp": "2026-05-16T15:43:23.608575+00:00",
+      "original": {
+        "platform": "Web 前端",
+        "type": "工具 / Tool",
+        "ecology": "Tampermonkey",
+        "ecology_role": "脚本 / Script"
+      },
+      "corrected": {
+        "platform": "Web 前端",
+        "type": "工具 / Tool",
+        "ecology": "独立项目 / Standalone",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix"
+    },
+    "rustdesk/rustdesk": {
+      "timestamp": "2026-05-16T15:43:23.608580+00:00",
+      "original": {
+        "platform": "桌面端",
+        "type": "应用 / App",
+        "ecology": "Hyprland",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "桌面端",
+        "type": "应用 / App",
+        "ecology": "独立项目 / Standalone",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix"
+    },
+    "yangyangwithgnu/use_vim_as_ide": {
+      "timestamp": "2026-05-16T15:43:23.608585+00:00",
+      "original": {
+        "platform": "CLI / 终端",
+        "type": "编辑器 / IDE",
+        "ecology": "Neovim",
+        "ecology_role": "教程 / Guide"
+      },
+      "corrected": {
+        "platform": "CLI / 终端",
+        "type": "编辑器 / IDE",
+        "ecology": "独立项目 / Standalone",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix"
     }
   },
-  "patterns": {}
+  "patterns": {
+    "platform": {
+      "桌面端": {
+        "网络 / 代理": 2
+      },
+      "移动端": {
+        "网络 / 代理": 3
+      },
+      "Web 前端": {
+        "桌面端": 1
+      },
+      "IoT / 嵌入式": {
+        "移动端": 1
+      }
+    },
+    "type": {
+      "应用 / App": {
+        "工具 / Tool": 7
+      },
+      "资源合集 / Awesome": {
+        "工具 / Tool": 2
+      },
+      "工具 / Tool": {
+        "应用 / App": 2,
+        "主题 / Theme": 1
+      },
+      "插件 / Plugin": {
+        "应用 / App": 1,
+        "工具 / Tool": 4
+      },
+      "框架 / Framework": {
+        "工具 / Tool": 1
+      }
+    },
+    "ecology": {
+      "Starship": {
+        "独立项目 / Standalone": 1
+      },
+      "Home Assistant": {
+        "独立项目 / Standalone": 1
+      },
+      "Steam": {
+        "独立项目 / Standalone": 1
+      },
+      "Git": {
+        "独立项目 / Standalone": 1
+      },
+      "Stable Diffusion": {
+        "独立项目 / Standalone": 1
+      },
+      "其他 / 未分类": {
+        "独立项目 / Standalone": 1
+      },
+      "Moonlight": {
+        "独立项目 / Standalone": 1
+      },
+      "VS Code": {
+        "独立项目 / Standalone": 1
+      },
+      "Tailwind CSS": {
+        "独立项目 / Standalone": 1
+      },
+      "Wine": {
+        "独立项目 / Standalone": 1
+      },
+      "i3 / Sway": {
+        "独立项目 / Standalone": 1
+      },
+      "Tampermonkey": {
+        "独立项目 / Standalone": 1
+      },
+      "Hyprland": {
+        "独立项目 / Standalone": 1
+      },
+      "Neovim": {
+        "独立项目 / Standalone": 1
+      }
+    },
+    "ecology_role": {
+      "核心 / Core": {
+        "-": 2
+      },
+      "GUI 前端 / Client": {
+        "-": 5
+      },
+      "插件 / Plugin": {
+        "-": 2
+      },
+      "主题 / Theme": {
+        "-": 1
+      },
+      "API 封装 / Wrapper": {
+        "-": 1
+      },
+      "其他 / Other": {
+        "-": 1
+      },
+      "脚本 / Script": {
+        "-": 1
+      },
+      "教程 / Guide": {
+        "-": 1
+      }
+    }
+  }
 }

@@ -1,0 +1,287 @@
+{
+  "version": 1,
+  "updated_at": "2026-05-16T15:43:23.582353+00:00",
+  "candidates": {
+    "Android": {
+      "status": "candidate",
+      "first_seen": "2026-05-16T15:43:23.582131+00:00",
+      "last_seen": "2026-05-16T15:43:23.582131+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        1.0
+      ],
+      "project_count_history": [
+        40
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "android"
+        ],
+        "topic_patterns": [
+          "android"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Ai": {
+      "status": "candidate",
+      "first_seen": "2026-05-16T15:43:23.582131+00:00",
+      "last_seen": "2026-05-16T15:43:23.582131+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        1.0
+      ],
+      "project_count_history": [
+        12
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "ai"
+        ],
+        "topic_patterns": [
+          "ai"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Dart": {
+      "status": "candidate",
+      "first_seen": "2026-05-16T15:43:23.582131+00:00",
+      "last_seen": "2026-05-16T15:43:23.582131+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.7
+      ],
+      "project_count_history": [
+        7
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "dart"
+        ],
+        "topic_patterns": [
+          "dart"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Acg": {
+      "status": "candidate",
+      "first_seen": "2026-05-16T15:43:23.582131+00:00",
+      "last_seen": "2026-05-16T15:43:23.582131+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.4
+      ],
+      "project_count_history": [
+        4
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "acg"
+        ],
+        "topic_patterns": [
+          "acg"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Apk": {
+      "status": "candidate",
+      "first_seen": "2026-05-16T15:43:23.582131+00:00",
+      "last_seen": "2026-05-16T15:43:23.582131+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.4
+      ],
+      "project_count_history": [
+        4
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "apk"
+        ],
+        "topic_patterns": [
+          "apk"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Payload": {
+      "status": "candidate",
+      "first_seen": "2026-05-16T15:43:23.582131+00:00",
+      "last_seen": "2026-05-16T15:43:23.582131+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [
+          "payload",
+          "payload-",
+          "payload_"
+        ],
+        "desc_patterns": [
+          "payload",
+          "android",
+          "from"
+        ],
+        "topic_patterns": [],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Moonlight": {
+      "status": "candidate",
+      "first_seen": "2026-05-16T15:43:23.582131+00:00",
+      "last_seen": "2026-05-16T15:43:23.582131+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [
+          "moonlight",
+          "moonlight-",
+          "moonlight_"
+        ],
+        "desc_patterns": [
+          "gamestream",
+          "client",
+          "for"
+        ],
+        "topic_patterns": [
+          "gamestream",
+          "moonlight"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Anime": {
+      "status": "candidate",
+      "first_seen": "2026-05-16T15:43:23.582131+00:00",
+      "last_seen": "2026-05-16T15:43:23.582131+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "anime"
+        ],
+        "topic_patterns": [
+          "anime"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Audio": {
+      "status": "candidate",
+      "first_seen": "2026-05-16T15:43:23.582131+00:00",
+      "last_seen": "2026-05-16T15:43:23.582131+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "audio"
+        ],
+        "topic_patterns": [
+          "audio"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Android-application": {
+      "status": "candidate",
+      "first_seen": "2026-05-16T15:43:23.582131+00:00",
+      "last_seen": "2026-05-16T15:43:23.582131+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "android-application"
+        ],
+        "topic_patterns": [
+          "android-application"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    }
+  }
+}
