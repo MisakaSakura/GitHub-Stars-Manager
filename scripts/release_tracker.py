@@ -17,6 +17,37 @@ def _get_field(obj, key: str, default=None):
     return getattr(obj, key, default)
 
 
+def _parse_iso(s: str) -> datetime | None:
+    """解析 ISO 8601 时间字符串为 datetime 对象，统一处理 Z 和 +00:00"""
+    if not s:
+        return None
+    try:
+        return datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except Exception:
+        return None
+
+
+def _is_within_window(published_at: str, window_start: str) -> bool:
+    """判断 published_at 是否在 window_start 之后（使用 datetime 比较，避免字符串比较误差）"""
+    pub_dt = _parse_iso(published_at)
+    win_dt = _parse_iso(window_start)
+    if not pub_dt or not win_dt:
+        return False
+    return pub_dt >= win_dt
+
+
+def _is_newly_starred(item) -> bool:
+    """判断项目是否是在最近 7 天内新 star 的（用于区分真正的新收录 vs 老项目首次检查 release）"""
+    first_seen = _get_field(item, "first_seen", "")
+    if not first_seen:
+        return False
+    fs_dt = _parse_iso(first_seen)
+    if not fs_dt:
+        return False
+    from datetime import timedelta
+    return (datetime.now(timezone.utc) - fs_dt) <= timedelta(days=7)
+
+
 class ReleaseTracker(BaseTracker):
     """检查仓库新 Release，支持订阅制和全量检查两种模式"""
 
@@ -64,8 +95,11 @@ class ReleaseTracker(BaseTracker):
                         "last_release_tag": latest_release.get("tag_name"),
                         "last_release_checked": now,
                     }
-                    # 如果最新 release 在时间窗口内，作为"新收录动态"展示
-                    if latest_release.get("published_at", "") >= window_start:
+                    # 只有真正最近新 star 的项目才标记为 is_new_repo
+                    # 老项目首次检查 release 时只设 baseline，不产生 update
+                    if _is_newly_starred(item) and _is_within_window(
+                        latest_release.get("published_at", ""), window_start
+                    ):
                         update = {
                             "full_name": _get_field(item, "full_name"),
                             "name": _get_field(item, "name"),
@@ -93,10 +127,10 @@ class ReleaseTracker(BaseTracker):
                 else:
                     candidate_releases = releases
 
-                # 只保留时间窗口内的 release
+                # 只保留时间窗口内的 release（使用 datetime 比较）
                 new_releases = [
                     r for r in candidate_releases
-                    if r.get("published_at", "") >= window_start
+                    if _is_within_window(r.get("published_at", ""), window_start)
                 ]
 
                 if new_releases:

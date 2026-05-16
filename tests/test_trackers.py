@@ -108,11 +108,13 @@ class TestReleaseTracker(unittest.TestCase):
         gh.list_releases.return_value = [
             {"tag_name": "v1.0", "published_at": "2099-01-01T00:00:00Z", "html_url": "https://github.com/a/b/releases/v1.0"},
         ]
+        from datetime import datetime, timezone
         tracker = ReleaseTracker(gh)
         items = [{
             "full_name": "a/b",
             "name": "b",
             "subscribe_releases": False,
+            "first_seen": datetime.now(timezone.utc).isoformat(),
         }]
         result = tracker.check_all(items)
         self.assertEqual(len(result), 1)

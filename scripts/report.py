@@ -649,8 +649,10 @@ function toggleTheme(){{const html=document.documentElement;const btn=document.g
             '<h3>🔥 活跃项目 Top 10</h3>',
             '<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">',
         ]
+        max_score = max(score for _, score in active_items) if active_items else 100
         for r, score in active_items:
-            bar_w = score
+            # 相对缩放：以最高分为 100% 宽度，避免所有进度条看起来一样长
+            bar_w = int(score / max_score * 100) if max_score else 0
             bar_color = "#3fb950" if score >= 70 else "#e3b341" if score >= 40 else "#f85149"
             at_parts.append(
                 f'<div style="display:flex;align-items:center;gap:10px;font-size:13px">'
