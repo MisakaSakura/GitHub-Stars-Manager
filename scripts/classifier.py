@@ -22,8 +22,9 @@ from correct_command import _do_correct
 from orchestrator import Pipeline
 
 
-def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
+def _create_parser() -> argparse.ArgumentParser:
+    """创建 ArgumentParser 实例。"""
+    return argparse.ArgumentParser(
         description="GitHub Stars 自动分类工具 v4",
         epilog="""
 首次运行说明:
@@ -45,7 +46,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
 
-    # 基础参数
+
+def _add_basic_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--token", required=True, help="GitHub Personal Access Token")
     parser.add_argument("--user", required=True, help="GitHub 用户名")
     parser.add_argument("--db", default="./data/stars_db.json", help="数据库路径")
@@ -53,7 +55,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="存储后端: json (默认) / sqlite (实验性)")
     parser.add_argument("--output", default="./docs", help="输出目录")
 
-    # 运行模式
+
+def _add_mode_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--mode", default="incremental",
                         choices=["incremental", "deep", "full", "custom"],
                         help="""运行模式：
@@ -69,18 +72,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--auto-refresh-days", type=int, default=90,
                         help="自动全量刷新间隔天数（默认 90，增量模式下到期自动升级）")
 
-    # 首次运行/导入
+
+def _add_import_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--import-json", metavar="PATH", help="从 JSON 文件导入已有分类")
     parser.add_argument("--import-csv", metavar="PATH", help="从 CSV 文件导入已有分类")
     parser.add_argument("--no-auto-classify", action="store_true",
                         help="导入已有分类后，不对新项目自动分类")
-
-    # GitHub Lists 处理策略
     parser.add_argument("--lists-strategy", default="ignore",
                         choices=["auto", "prompt", "migrate", "replace", "ignore"],
                         help="GitHub Lists 处理策略（默认 ignore，避免误操作）")
 
-    # LLM
+
+def _add_llm_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--llm-key", help="LLM API Key（启用智能分类增强）")
     parser.add_argument("--llm-preset",
                         help="LLM 预设（同时设置 provider+base+model）：openai/moonshot/deepseek/openrouter/xiaomimimo")
@@ -93,13 +96,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--force-llm", action="store_true",
                         help="无视间隔强制启用 LLM 分类")
 
-    # Notion
+
+def _add_notion_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--notion-key", help="Notion API Key")
     parser.add_argument("--notion-db", help="Notion Database ID")
     parser.add_argument("--notion-clear", action="store_true",
                         help="导出前清空 Notion 数据库")
 
-    # Release / Fork 追踪
+
+def _add_tracker_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--check-releases", action="store_true",
                         help="检查已订阅仓库是否有新 Release")
     parser.add_argument("--check-all-releases", action="store_true",
@@ -111,19 +116,22 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--llm-release-digest", action="store_true",
                         help="对 Release Notes 生成 AI 摘要（需要配置 LLM）")
 
-    # 通知
+
+def _add_notify_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--notify", action="store_true", help="启用通知")
     parser.add_argument("--notify-channels", default="email",
                         help="通知通道，逗号分隔: email,telegram,wecom,qq")
 
-    # 其他
+
+def _add_other_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--no-report", action="store_true", help="不生成 HTML 报告")
     parser.add_argument("--dry-run", action="store_true",
                         help="试运行：显示将要执行的操作但不保存数据库和报告")
     parser.add_argument("--retry-failed", action="store_true",
                         help="重新对之前 AI 分析失败的项目进行分类")
 
-    # 快捷修正（双向反馈入口）
+
+def _add_correct_args(parser: argparse.ArgumentParser) -> None:
     correct_group = parser.add_argument_group("快捷修正（不运行完整流水线）")
     correct_group.add_argument("--correct", metavar="OWNER/REPO",
                                help="修正指定项目的分类，格式: owner/repo")
@@ -134,6 +142,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     correct_group.add_argument("--correct-batch", metavar="PATH",
                                help="批量修正文件，格式: full_name,ecology,ecology_role,platform,type（CSV）")
 
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """解析 CLI 参数。参数按功能分组注册，保持单一职责。"""
+    parser = _create_parser()
+    _add_basic_args(parser)
+    _add_mode_args(parser)
+    _add_import_args(parser)
+    _add_llm_args(parser)
+    _add_notion_args(parser)
+    _add_tracker_args(parser)
+    _add_notify_args(parser)
+    _add_other_args(parser)
+    _add_correct_args(parser)
     return parser.parse_args(argv)
 
 
