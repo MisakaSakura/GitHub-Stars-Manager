@@ -8,8 +8,16 @@ from engine import IncrementalEngine
 from utils import log
 
 
+def _should_setup_llm(args) -> bool:
+    """根据 llm_mode 判断是否应该创建 LLM 客户端（P1-51: 单一来源）。"""
+    if args.llm_mode == "off" or not args.llm_key:
+        return False
+    # auto: 保持向后兼容，只要有 llm_key 就启用
+    return True
+
+
 def setup_llm_stage(ctx: PipelineContext) -> None:
-    if not ctx.args.llm_key:
+    if not _should_setup_llm(ctx.args):
         return
     from model_profiles import get_preset_default_model
     default_model = get_preset_default_model(ctx.args.llm_preset or "")
@@ -60,23 +68,15 @@ def classify_stage(ctx: PipelineContext) -> None:
     if ctx.is_first_run and ctx.args.subscribe_releases:
         log("已标记所有仓库订阅 Release", "OK")
 
-    force_refresh = ctx.args.force_refresh
-    if not force_refresh:
-        last = ctx.db.meta_get("last_full_refresh_at", "")
-        if last:
-            from datetime import datetime, timezone, timedelta
-            try:
-                last_dt = datetime.fromisoformat(last)
-                interval = timedelta(days=ctx.args.auto_refresh_days)
-                if datetime.now(timezone.utc) - last_dt >= interval:
-                    log(f"自动全量刷新：距离上次已超过 {ctx.args.auto_refresh_days} 天", "STEP")
-                    force_refresh = True
-            except ValueError:
-                force_refresh = True
-        else:
-            force_refresh = True
+    from engine import EngineConfig, should_auto_refresh
+    force_refresh = should_auto_refresh(
+        ctx.args.force_refresh,
+        ctx.db.meta_get("last_full_refresh_at", ""),
+        ctx.args.auto_refresh_days,
+    )
+    if force_refresh and not ctx.args.force_refresh:
+        log(f"自动全量刷新：距离上次已超过 {ctx.args.auto_refresh_days} 天", "STEP")
 
-    from engine import EngineConfig
     ctx.engine = IncrementalEngine(ctx.db, ctx.rule, ctx.llm, ctx.ai_db)
     ctx.stats = ctx.engine.process(EngineConfig(
         items=ctx.items,

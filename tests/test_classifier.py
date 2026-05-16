@@ -29,6 +29,7 @@ class FakeArgs:
         self.llm_provider = kwargs.get("llm_provider", None)
         self.llm_model = kwargs.get("llm_model", None)
         self.llm_base = kwargs.get("llm_base", None)
+        self.llm_mode = kwargs.get("llm_mode", "auto")
 
 
 class TestApplyMode(unittest.TestCase):
@@ -92,8 +93,8 @@ class TestApplyMode(unittest.TestCase):
         self.assertTrue(result.subscribe_releases)
 
     def test_full_mode_auto_force_llm(self):
-        """full 模式下配置了 llm_key 应自动启用 force_llm"""
-        args = FakeArgs(mode="full", llm_key="sk-test", force_llm=False)
+        """llm_mode=force 时自动启用 force_llm"""
+        args = FakeArgs(mode="full", llm_key="sk-test", force_llm=False, llm_mode="force")
         result = _apply_mode(args)
         self.assertTrue(result.force_llm)
 

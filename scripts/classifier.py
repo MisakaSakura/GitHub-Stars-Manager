@@ -84,6 +84,8 @@ def _add_import_args(parser: argparse.ArgumentParser) -> None:
 
 
 def _add_llm_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--llm-mode", default="auto", choices=["auto", "off", "force"],
+                        help="LLM 启用策略: auto=有 llm-key 时自动启用(默认), off=显式关闭, force=无视间隔")
     parser.add_argument("--llm-key", help="LLM API Key（启用智能分类增强）")
     parser.add_argument("--llm-preset",
                         help="LLM 预设（同时设置 provider+base+model）：openai/moonshot/deepseek/openrouter/xiaomimimo")
@@ -240,10 +242,10 @@ def _apply_mode(args: argparse.Namespace) -> argparse.Namespace:
     for key, value in config.items():
         setattr(args, key, value)
 
-    # 全量模式：如果配置了 llm_key，自动 force_llm（彻底梳理）
-    if args.mode == "full" and args.llm_key and not args.force_llm:
+    # llm_mode=force 时自动设置 force_llm（单一来源：P1-51）
+    if args.llm_mode == "force" and args.llm_key and not args.force_llm:
         args.force_llm = True
-        print("[自动启用] --force-llm（全量模式默认全库 LLM 分析）")
+        print("[自动启用] --force-llm（llm_mode=force 无视间隔）")
 
     # 日志输出模式说明
     mode_desc = {

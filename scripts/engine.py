@@ -4,10 +4,34 @@
 
 from collections import Counter
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from models import StarItem
 from utils import log
+
+
+def should_auto_refresh(force_refresh: bool, last_refresh_at: str, auto_refresh_days: int) -> bool:
+    """判断是否需要自动全量刷新（P1-29: 提取为单一来源函数）。
+
+    Returns:
+        True 如果满足以下任一条件：
+        - 用户显式要求 force_refresh
+        - 从未全量刷新过（last_refresh_at 为空）
+        - 距离上次全量刷新已超过 auto_refresh_days 天
+        - last_refresh_at 时间戳格式无效
+    """
+    if force_refresh:
+        return True
+    if not last_refresh_at:
+        return True
+    try:
+        last_dt = datetime.fromisoformat(last_refresh_at)
+        interval = timedelta(days=auto_refresh_days)
+        if datetime.now(timezone.utc) - last_dt >= interval:
+            return True
+    except ValueError:
+        return True
+    return False
 
 
 @dataclass

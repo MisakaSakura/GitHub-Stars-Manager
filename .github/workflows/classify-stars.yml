@@ -175,29 +175,10 @@ jobs:
             ARGS+=("--check-all-releases")
           fi
 
-          # ===== LLM 模式映射 =====
-          # auto: 按 mode 联动（full/deep 模式自动启用）；off = 明确关闭；force = 无视间隔
+          # ===== LLM 配置（P1-51: 模式映射逻辑统一在代码中处理） =====
           LLM_MODE="${{ github.event.inputs.llm_mode }}"
-          USE_LLM="false"
-          FORCE_LLM="false"
-
-          if [ "$LLM_MODE" = "force" ]; then
-            USE_LLM="true"
-            FORCE_LLM="true"
-          elif [ "$LLM_MODE" = "off" ]; then
-            USE_LLM="false"
-          else
-            # auto: full/deep 模式自动启用（配置了 LLM_KEY 时）
-            if [ -n "$LLM_KEY" ]; then
-              if [ "$MODE" = "full" ] || [ "$MODE" = "deep" ]; then
-                USE_LLM="true"
-                echo "[模式联动] $MODE 模式自动启用 LLM"
-              fi
-            fi
-          fi
-
-          if [ "$USE_LLM" = "true" ] && [ -n "$LLM_KEY" ]; then
-            ARGS+=("--llm-key" "$LLM_KEY")
+          if [ -n "$LLM_KEY" ]; then
+            ARGS+=("--llm-key" "$LLM_KEY" "--llm-mode" "${LLM_MODE:-auto}")
             if [ -n "$LLM_PRESET" ]; then
               ARGS+=("--llm-preset" "$LLM_PRESET")
             fi
@@ -207,9 +188,6 @@ jobs:
             fi
             if [ -n "$LLM_MODEL" ] && [ "$LLM_MODEL" != "default" ]; then
               ARGS+=("--llm-model" "$LLM_MODEL")
-            fi
-            if [ "$FORCE_LLM" = "true" ]; then
-              ARGS+=("--force-llm")
             fi
           fi
 
