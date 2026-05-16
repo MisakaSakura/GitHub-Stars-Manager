@@ -568,7 +568,8 @@ function toggleTheme(){{const html=document.documentElement;const btn=document.g
                 title_parts.append(f"🆕 新收录动态 ({new_repo_count})")
             if regular_count:
                 title_parts.append(f"🚀 新 Release ({regular_count})")
-            ru_parts.append(f'<div class="wd-section"><h3>{' | '.join(title_parts)}</h3>')
+            title_html = ' | '.join(title_parts)
+            ru_parts.append(f'<div class="wd-section"><h3>{title_html}</h3>')
             for ru in release_updates:
                 owner = ru["full_name"].split("/")[0]
                 avatar_url = f"https://github.com/{owner}.png?size=48"
