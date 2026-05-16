@@ -114,7 +114,10 @@ class TestNewPipelineStructure(unittest.TestCase):
             np = NewPipeline(args)
             np.run()
 
-            mock_instance._setup.assert_called_once()
-            mock_instance._auth.assert_called_once()
-            mock_instance._fetch.assert_called_once()
-            mock_instance._classify.assert_called_once()
+            # setup/auth/fetch/setup_llm/enrich/classify 已内联，不委托旧 Pipeline
+            mock_instance._setup.assert_not_called()
+            mock_instance._auth.assert_not_called()
+            mock_instance._fetch.assert_not_called()
+            mock_instance._classify.assert_not_called()
+            # 其余阶段仍委托旧 Pipeline
+            mock_instance._save.assert_called_once()

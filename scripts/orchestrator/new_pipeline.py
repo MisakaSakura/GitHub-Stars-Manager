@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""新 Pipeline：基于阶段注册器的插件化实现（过渡期）"""
+"""新 Pipeline：基于阶段注册器的插件化实现
+
+架构：
+  - 核心阶段（setup/auth/fetch/classify）已内联为独立模块
+  - 剩余阶段仍委托旧 Pipeline，逐步迁移中
+"""
 
 import argparse
 
@@ -10,6 +15,7 @@ from utils import log
 
 
 def _make_stage_fn(method_name: str):
+    """工厂：创建委托到旧 Pipeline 方法的阶段函数"""
     def stage_fn(ctx):
         old_pipeline = getattr(ctx, '_old_pipeline', None)
         if old_pipeline is None:
@@ -38,6 +44,9 @@ def _sync_to_old(ctx, old):
     old.fork_updates = ctx.fork_updates
     old.release_tracker = ctx.release_tracker
     old.fork_tracker = ctx.fork_tracker
+    old.new_keys = ctx.new_keys
+    old.star_changes = ctx.star_changes
+    old.classification_changes = ctx.classification_changes
 
 
 def _sync_from_old(ctx, old):
@@ -72,28 +81,31 @@ class NewPipeline:
         self._old_pipeline = OldPipeline(self.args)
         self.context._old_pipeline = self._old_pipeline
 
-        stages = [
-            ("setup", "_setup", []),
-            ("import_and_early_exit", "_import_and_early_exit", ["setup"]),
-            ("auth", "_auth", ["setup"]),
-            ("handle_lists", "_handle_lists", ["auth"]),
-            ("setup_llm", "_setup_llm", ["auth"]),
-            ("fetch", "_fetch", ["auth", "setup_llm"]),
-            ("enrich", "_enrich", ["fetch", "setup_llm"]),
-            ("classify", "_classify", ["fetch", "enrich"]),
-            ("save", "_save", ["classify"]),
-            ("sync_notion", "_sync_notion", ["save"]),
-            ("track_releases", "_track_releases", ["save"]),
-            ("track_forks", "_track_forks", ["save"]),
-            ("discover_ecologies", "_discover_ecologies", ["save"]),
-            ("check_consistency", "_check_consistency", ["save"]),
-            ("record_feedback", "_record_feedback", ["save"]),
-            ("generate_reports", "_generate_reports", ["track_releases", "track_forks"]),
-            ("notify", "_notify", ["generate_reports"]),
-            ("print_summary", "_print_summary", ["notify", "generate_reports"]),
-        ]
-        for name, method, deps in stages:
-            self.registry.register(name, _make_stage_fn(method), deps)
+        # 已内联的独立阶段
+        from .stages.setup_stage import setup_stage
+        from .stages.auth_stage import auth_stage
+        from .stages.fetch_stage import fetch_stage
+        from .stages.classify_stage import setup_llm_stage, enrich_stage, classify_stage
+
+        # 注册阶段：独立阶段优先，其余委托旧 Pipeline
+        self.registry.register("setup", setup_stage, [])
+        self.registry.register("import_and_early_exit", _make_stage_fn("_import_and_early_exit"), ["setup"])
+        self.registry.register("auth", auth_stage, ["setup"])
+        self.registry.register("handle_lists", _make_stage_fn("_handle_lists"), ["auth"])
+        self.registry.register("setup_llm", setup_llm_stage, ["auth"])
+        self.registry.register("fetch", fetch_stage, ["auth", "setup_llm"])
+        self.registry.register("enrich", enrich_stage, ["fetch", "setup_llm"])
+        self.registry.register("classify", classify_stage, ["fetch", "enrich"])
+        self.registry.register("save", _make_stage_fn("_save"), ["classify"])
+        self.registry.register("sync_notion", _make_stage_fn("_sync_notion"), ["save"])
+        self.registry.register("track_releases", _make_stage_fn("_track_releases"), ["save"])
+        self.registry.register("track_forks", _make_stage_fn("_track_forks"), ["save"])
+        self.registry.register("discover_ecologies", _make_stage_fn("_discover_ecologies"), ["save"])
+        self.registry.register("check_consistency", _make_stage_fn("_check_consistency"), ["save"])
+        self.registry.register("record_feedback", _make_stage_fn("_record_feedback"), ["save"])
+        self.registry.register("generate_reports", _make_stage_fn("_generate_reports"), ["track_releases", "track_forks"])
+        self.registry.register("notify", _make_stage_fn("_notify"), ["generate_reports"])
+        self.registry.register("print_summary", _make_stage_fn("_print_summary"), ["notify", "generate_reports"])
 
     def run(self) -> None:
         log("[NewPipeline] 启动插件化流水线", "STEP")
