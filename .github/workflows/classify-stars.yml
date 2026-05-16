@@ -226,12 +226,6 @@ jobs:
           LIST_STRATEGY="${{ github.event.inputs.lists_strategy }}"
           ARGS+=("--lists-strategy" "${LIST_STRATEGY:-ignore}")
 
-          # ===== custom 模式默认值 =====
-          # custom 默认启用 force_refresh + check_all_releases，不启用 check_forks / subscribe_releases
-          if [ "$MODE" = "custom" ]; then
-            ARGS+=("--force-refresh" "--check-all-releases")
-          fi
-
           # ===== 重试失败 =====
           if [ "${{ github.event.inputs.retry_failed }}" = "true" ]; then
             ARGS+=("--retry-failed")
@@ -243,7 +237,9 @@ jobs:
             ARGS+=("--notify" "--notify-channels" "$NOTIFY")
           fi
 
-          echo "执行命令: python scripts/classifier.py ${ARGS[@]}"
+          printf '%s ' "执行命令: python scripts/classifier.py"
+          printf '%q ' "${ARGS[@]}"
+          printf '\n'
           python scripts/classifier.py "${ARGS[@]}"
 
       # ========== 提交数据到 data 分支 ==========
@@ -260,7 +256,11 @@ jobs:
           else
             git commit -m "chore: auto-update stars database [$(date -u +%Y-%m-%d)]"
             # 拉取远程最新变更后重试，防止与 feedback workflow 并发冲突
-            git pull --rebase origin data || true
+            if ! git pull --rebase origin data; then
+              echo "::warning::Rebase 冲突，尝试 merge 策略"
+              git rebase --abort 2>/dev/null || true
+              git pull origin data --no-rebase || true
+            fi
             git push origin data || git push -u origin data
             echo "✅ 数据已推送到 data 分支"
           fi

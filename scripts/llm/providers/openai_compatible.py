@@ -3,7 +3,6 @@
 """OpenAI 兼容格式 Provider（覆盖 openai / moonshot / deepseek / openrouter / xiaomimimo）"""
 
 import json
-import time
 
 from .base import LLMProvider
 from http_client import HTTPClient
@@ -24,6 +23,7 @@ class OpenAICompatibleProvider(LLMProvider):
         return self.provider_name
 
     def call(self, messages: list[dict], max_tokens: int, temperature: float) -> str | None:
+        """单次 API 调用，无重试逻辑（重试由 LLMClient.call 统一处理）。"""
         url = f"{self.api_base}/chat/completions"
         headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -40,32 +40,14 @@ class OpenAICompatibleProvider(LLMProvider):
             "temperature": temperature,
         }
 
-        max_retries = 3
-        retry_codes = {429, 500, 502, 503, 504}
-        for attempt in range(max_retries):
-            try:
-                code, body = self.client.post_json(url, payload, headers=headers, timeout=60)
-                body_preview = body[:500] if body else "<空响应>"
-                log(f"  ↳ API 响应: HTTP {code} | 体长 {len(body)} | 摘要: {body_preview}", "INFO")
+        code, body = self.client.post_json(url, payload, headers=headers, timeout=60)
+        body_preview = body[:500] if body else "<空响应>"
+        log(f"  ↳ API 响应: HTTP {code} | 体长 {len(body)} | 摘要: {body_preview}", "INFO")
 
-                if code == 200:
-                    return self._extract_content(body)
-                elif code in retry_codes and attempt < max_retries - 1:
-                    wait = 2 ** attempt
-                    log(f"  ↳ HTTP {code}，{wait}s 后重试 ({attempt + 1}/{max_retries})", "WARN")
-                    time.sleep(wait)
-                    continue
-                else:
-                    log(f"  ↳ HTTP {code} 错误: {body[:200]}", "WARN")
-                    return None
-            except Exception as e:
-                if attempt < max_retries - 1:
-                    wait = 2 ** attempt
-                    log(f"  ↳ 调用异常: {e}，{wait}s 后重试 ({attempt + 1}/{max_retries})", "WARN")
-                    time.sleep(wait)
-                    continue
-                log(f"  ↳ 调用异常: {e}", "WARN")
-                return None
+        if code == 200:
+            return self._extract_content(body)
+        log(f"  ↳ HTTP {code} 错误: {body[:200]}", "WARN")
+        return None
 
     @staticmethod
     def _extract_content(body: str) -> str | None:

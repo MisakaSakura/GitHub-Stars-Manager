@@ -39,8 +39,10 @@ def enrich_stage(ctx: PipelineContext) -> None:
         existing = ctx.db.get(key)
         if IncrementalEngine.needs_llm(key, existing, ctx.ai_db, force_llm, retry_failed, llm_interval):
             candidates.append(item)
-    log(f"获取 README 摘要用于 AI 分析... (共 {len(candidates)} 个候选项目)", "STEP")
-    for item in candidates[:50]:
+    from config import LLM_CONFIG
+    readme_max_candidates = LLM_CONFIG.get("enrich_readme_max_candidates", 50)
+    log(f"获取 README 摘要用于 AI 分析... (共 {len(candidates)} 个候选项目，最多处理 {readme_max_candidates} 个)", "STEP")
+    for item in candidates[:readme_max_candidates]:
         try:
             readme = ctx.gh.get_readme(item["owner"]["login"], item["name"], max_length=1500)
             if readme:
@@ -74,16 +76,17 @@ def classify_stage(ctx: PipelineContext) -> None:
         else:
             force_refresh = True
 
+    from engine import EngineConfig
     ctx.engine = IncrementalEngine(ctx.db, ctx.rule, ctx.llm, ctx.ai_db)
-    ctx.stats = ctx.engine.process(
-        ctx.items,
+    ctx.stats = ctx.engine.process(EngineConfig(
+        items=ctx.items,
         incremental=ctx.args.incremental,
         force_refresh=force_refresh,
         use_llm=bool(ctx.llm),
         retry_failed=ctx.args.retry_failed,
         subscribe_all_releases=ctx.args.subscribe_releases,
         llm_interval_days=ctx.args.llm_interval_days
-    )
+    ))
 
     ctx.did_full_refresh = force_refresh
     ctx.new_keys = ctx.engine.new_keys

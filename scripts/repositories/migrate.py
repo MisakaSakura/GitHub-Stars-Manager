@@ -34,7 +34,7 @@ def main():
         print(f"错误: 源文件不存在: {args.source}")
         sys.exit(1)
 
-    log(f"开始迁移: {args.source} → {args.sqlite}", "STEP")
+    log(f"开始迁移: {args.source} → {args.target}", "STEP")
     count = migrate_stars_db(args.source, args.target)
     log(f"迁移完成: {count} 条记录", "OK")
 

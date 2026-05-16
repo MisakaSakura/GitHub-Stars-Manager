@@ -3,10 +3,23 @@
 """增量更新引擎"""
 
 from collections import Counter
+from dataclasses import dataclass
 from datetime import datetime, timezone
 
 from models import StarItem
 from utils import log
+
+
+@dataclass
+class EngineConfig:
+    """增量更新引擎的配置参数（P1-14: 替代过长的 process() 参数列表）。"""
+    items: list[dict]
+    incremental: bool = False
+    force_refresh: bool = False
+    use_llm: bool = False
+    retry_failed: bool = False
+    subscribe_all_releases: bool = False
+    llm_interval_days: int = 30
 
 
 def _is_ecology_locked(ecology_name: str | None) -> bool:
@@ -88,21 +101,17 @@ class IncrementalEngine:
 
         return False  # 已有成功分析且在间隔内，跳过
 
-    def _needs_llm(self, key: str, existing, force_refresh: bool, retry_failed: bool, llm_interval_days: int) -> bool:
-        """实例方法包装，保持向后兼容"""
-        return self.needs_llm(key, existing, self.ai_db, force_refresh, retry_failed, llm_interval_days)
-
-    def process(self, items: list[dict], incremental: bool = False, force_refresh: bool = False, use_llm: bool = False, retry_failed: bool = False, subscribe_all_releases: bool = False, llm_interval_days: int = 30) -> dict:
-        log(f"处理模式: {'强制刷新' if force_refresh else '增量更新' if incremental else '标准更新'}", "STEP")
+    def process(self, config: EngineConfig) -> dict:
+        log(f"处理模式: {'强制刷新' if config.force_refresh else '增量更新' if config.incremental else '标准更新'}", "STEP")
 
         self.llm_results: dict[str, dict] = {}
         llm_requested_keys: set[str] = set()
-        if use_llm and self.llm:
+        if config.use_llm and self.llm:
             llm_candidates = []
-            for item in items:
+            for item in config.items:
                 key = f"{item['owner']['login']}/{item['name']}"
                 existing = self.db.get(key)
-                if self._needs_llm(key, existing, force_refresh, retry_failed, llm_interval_days):
+                if self.needs_llm(key, existing, self.ai_db, config.force_refresh, config.retry_failed, config.llm_interval_days):
                     llm_candidates.append(item)
                     llm_requested_keys.add(key)
 
@@ -134,11 +143,11 @@ class IncrementalEngine:
                 else:
                     log(f"LLM 最终: {total_success}/{total_requested} 全部成功", "OK")
 
-        for item in items:
+        for item in config.items:
             try:
                 key = f"{item['owner']['login']}/{item['name']}"
                 llm_result = self.llm_results.get(key)
-                self._process_single(item, incremental, force_refresh, use_llm, llm_result, subscribe_all_releases)
+                self._process_single(item, config.incremental, config.force_refresh, config.use_llm, llm_result, config.subscribe_all_releases)
             except Exception as e:
                 log(f"处理 {item.get('full_name', item.get('name'))} 失败: {e}", "ERROR")
                 self.stats["error"] += 1
@@ -167,10 +176,12 @@ class IncrementalEngine:
             self.classification_changes[key] = changes
 
     @staticmethod
-    def _apply_llm_override(target, llm_result: dict | None, existing_eco: str | None) -> bool:
-        """将 LLM 结果应用到目标对象的分类字段（消除重复逻辑），返回是否实际发生了覆盖"""
+    def _apply_llm_override(target, llm_result: dict | None, existing_eco: str | None) -> dict:
+        """根据 LLM 结果生成分类字段变更字典，不修改目标对象。
+        返回: {"platform": ..., "type": ..., ...} 或空 dict（无变更时）"""
+        changes: dict[str, str] = {}
         if not llm_result:
-            return False
+            return changes
         # P0 fix: confidence 可能为字符串，强制转换为 float
         raw_conf = llm_result.get("confidence", 0)
         try:
@@ -178,17 +189,35 @@ class IncrementalEngine:
         except (ValueError, TypeError):
             confidence = 0.0
         if confidence < 0.8:
-            return False
+            return changes
         ecology_locked = existing_eco and _is_ecology_locked(existing_eco)
         # P1 fix: dict.get 值为 None 时返回 None，用 or 保证回退到原值
-        target.platform = _normalize_field(llm_result.get("platform"), "platform") or target.platform
-        target.type = _normalize_field(llm_result.get("type"), "type") or target.type
+        new_platform = _normalize_field(llm_result.get("platform"), "platform")
+        if new_platform and new_platform != target.platform:
+            changes["platform"] = new_platform
+        new_type = _normalize_field(llm_result.get("type"), "type")
+        if new_type and new_type != target.type:
+            changes["type"] = new_type
         if not ecology_locked:
-            if llm_result.get("ecology"):
-                target.ecology = _normalize_field(llm_result["ecology"], "ecology")
-            if llm_result.get("ecology_role"):
-                target.ecology_role = _normalize_field(llm_result["ecology_role"], "ecology_role")
-        return True
+            new_eco = _normalize_field(llm_result.get("ecology"), "ecology")
+            if new_eco and new_eco != target.ecology:
+                changes["ecology"] = new_eco
+            new_role = _normalize_field(llm_result.get("ecology_role"), "ecology_role")
+            if new_role and new_role != target.ecology_role:
+                changes["ecology_role"] = new_role
+        return changes
+
+    def _replace_classification(self, key: str, item: dict, existing, use_llm: bool, llm_result: dict | None, subscribe_all_releases: bool, clear_override: bool = False) -> None:
+        """重新分类已有项目并替换数据库中的记录。"""
+        classification = self._classify_item(item, use_llm, llm_result, subscribe_all_releases, existing)
+        classification.first_seen = existing.first_seen
+        if clear_override:
+            classification.manual_override = False
+            classification.override_fields = []
+            classification.override_rules_version = ""
+        self._record_classification_change(key, existing, classification)
+        self.db.set(key, classification)
+        self.stats["updated"] += 1
 
     def _process_single(self, item: dict, incremental: bool, force_refresh: bool, use_llm: bool, llm_result: dict | None = None, subscribe_all_releases: bool = False) -> None:
         key = f"{item['owner']['login']}/{item['name']}"
@@ -208,13 +237,7 @@ class IncrementalEngine:
                 self.star_changes[key] = new_stars - old_stars
 
             if force_refresh:
-                classification = self._classify_item(item, use_llm, llm_result, subscribe_all_releases)
-                classification.first_seen = existing.first_seen
-                classification.manual_override = False
-                classification.override_fields = []
-                self._record_classification_change(key, existing, classification)
-                self.db.set(key, classification)
-                self.stats["updated"] += 1
+                self._replace_classification(key, item, existing, use_llm, llm_result, subscribe_all_releases, clear_override=True)
                 return
 
             if incremental:
@@ -224,33 +247,37 @@ class IncrementalEngine:
                 existing.last_updated = item.get("pushed_at") or existing.last_updated
                 # 增量模式下规则分类跳过，但 LLM 覆盖仍然应用（修正已有项目分类）
                 old_fields = self._snapshot_classification(existing)
-                applied = self._apply_llm_override(existing, llm_result, existing.ecology)
-                if applied:
+                changes = self._apply_llm_override(existing, llm_result, existing.ecology)
+                if changes:
                     self.stats["llm_enhanced"] += 1
+                    for field, new_val in changes.items():
+                        setattr(existing, field, new_val)
                 self._record_classification_change(key, old_fields, existing)
                 self.stats["skipped"] += 1
                 return
 
-            classification = self._classify_item(item, use_llm, llm_result, subscribe_all_releases)
-            classification.first_seen = existing.first_seen
-            self._record_classification_change(key, existing, classification)
-            self.db.set(key, classification)
-            self.stats["updated"] += 1
+            self._replace_classification(key, item, existing, use_llm, llm_result, subscribe_all_releases)
             return
 
-        classification = self._classify_item(item, use_llm, llm_result, subscribe_all_releases)
+        classification = self._classify_item(item, use_llm, llm_result, subscribe_all_releases, existing)
         self.db.set(key, classification)
         self.new_keys.add(key)
         self.stats["new"] += 1
 
-    def _classify_item(self, item: dict, use_llm: bool, llm_result: dict | None = None, subscribe_all_releases: bool = False) -> StarItem:
-        """对单个项目执行分类并返回 StarItem（AI 元数据不再写入 StarItem）"""
+    def _classify_item(self, item: dict, use_llm: bool, llm_result: dict | None = None, subscribe_all_releases: bool = False, existing=None) -> StarItem:
+        """对单个项目执行分类并返回 StarItem（AI 元数据不再写入 StarItem）。
+
+        Args:
+            existing: 已存在的 StarItem（避免重复查询数据库）
+        """
         platform = self.rule.classify_platform(item)
         ptype = self.rule.classify_type(item)
         eco, role = self.rule.classify_ecology(item)
         language = item.get("language") or "文档 / 无代码"
 
-        existing = self.db.get(f"{item['owner']['login']}/{item['name']}")
+        key = f"{item['owner']['login']}/{item['name']}"
+        if existing is None:
+            existing = self.db.get(key)
         existing_eco = existing.ecology if existing else None
 
         # 生态锁定：强制保留已有生态值
@@ -258,7 +285,7 @@ class IncrementalEngine:
             eco = existing_eco
 
         result = StarItem(
-            full_name=f"{item['owner']['login']}/{item['name']}",
+            full_name=key,
             name=item["name"],
             owner=item["owner"]["login"],
             description=item.get("description") or "",
@@ -281,8 +308,10 @@ class IncrementalEngine:
 
         # LLM 可以覆盖规则分类结果（分类决策本身是即时的，不依赖 AI DB）
         if use_llm and self.llm and llm_result:
-            applied = self._apply_llm_override(result, llm_result, existing_eco)
-            if applied:
+            changes = self._apply_llm_override(result, llm_result, existing_eco)
+            if changes:
                 self.stats["llm_enhanced"] += 1
+                for field, new_val in changes.items():
+                    setattr(result, field, new_val)
 
         return result

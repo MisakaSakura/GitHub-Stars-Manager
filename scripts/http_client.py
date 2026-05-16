@@ -35,11 +35,16 @@ class HTTPClient:
             cls._session = None
 
     @staticmethod
-    def request(url: str, headers: dict | None = None, method: str = "GET", data=None, timeout: int = 30, retries: int = 3) -> tuple[int, str]:
-        """发送 HTTP 请求，返回 (status_code, body_text)。支持指数退避重试。"""
+    def request(url: str, headers: dict | None = None, method: str = "GET", data=None, timeout: int = 30, retries: int = 0) -> tuple[int, str]:
+        """发送 HTTP 请求，返回 (status_code, body_text)。
+
+        Args:
+            retries: 重试次数，0 表示不重试（由上层调用方统一处理重试逻辑）。
+                     GitHub API 等无上层重试的调用方应传入 >0。
+        """
         import time
         last_error = ""
-        for attempt in range(retries):
+        for attempt in range(retries + 1):
             if HAS_REQUESTS:
                 code, body = HTTPClient._request_requests(url, headers, method, data, timeout)
             else:
@@ -49,7 +54,7 @@ class HTTPClient:
                 return code, body
             last_error = body
             # 指数退避：0.5s, 1s, 2s...
-            if attempt < retries - 1:
+            if attempt < retries:
                 time.sleep(0.5 * (2 ** attempt))
         return -1 if last_error else 0, last_error
 

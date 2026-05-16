@@ -3,8 +3,17 @@
 """数据模型：统一的数据结构和 Schema 定义"""
 
 from dataclasses import dataclass, field, asdict
-from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
+from enum import Enum
+from typing import Optional, List, Dict, Any
+
+
+class LLMStatus(str, Enum):
+    """LLM 分析状态枚举（向后兼容字符串比较）"""
+    NOT_ANALYZED = "not_analyzed"
+    SUCCESS = "success"
+    FAILED = "failed"
+    SKIPPED = "skipped"
 
 
 @dataclass
@@ -26,9 +35,10 @@ class StarItem:
     last_updated: str = ""
     manual_override: bool = False
     override_fields: List[str] = field(default_factory=list)
+    override_rules_version: str = ""  # 设置 manual_override 时的规则版本
     # 注意：AI 相关字段已迁移到独立的 AI 数据库 (stars_ai.json)
     # 保留以下字段仅用于向后兼容加载旧数据，新代码不再写入
-    llm_status: str = "not_analyzed"
+    llm_status: str = LLMStatus.NOT_ANALYZED
     llm_confidence: Optional[float] = None
     llm_reason: Optional[str] = None
     ai_summary: Optional[str] = None

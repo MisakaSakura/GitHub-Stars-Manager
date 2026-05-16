@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS stars (
     last_updated TEXT DEFAULT '',
     manual_override INTEGER DEFAULT 0,
     override_fields TEXT DEFAULT '[]',
+    override_rules_version TEXT DEFAULT '',
     subscribe_releases INTEGER DEFAULT 0,
     last_release_tag TEXT,
     is_fork INTEGER DEFAULT 0,
@@ -103,6 +104,12 @@ class SQLiteStarsRepository(Repository):
 
     def _ensure_schema(self) -> None:
         self._conn.executescript(SCHEMA)
+        # Schema 迁移：为旧数据库添加 override_rules_version 列
+        try:
+            self._conn.execute("ALTER TABLE stars ADD COLUMN override_rules_version TEXT DEFAULT ''")
+            self._conn.commit()
+        except sqlite3.OperationalError:
+            pass  # 列已存在
         self._conn.commit()
 
     def _load_meta(self) -> None:
@@ -127,6 +134,7 @@ class SQLiteStarsRepository(Repository):
             last_updated=row["last_updated"] or "",
             manual_override=bool(row["manual_override"]),
             override_fields=_json_loads(row["override_fields"]),
+            override_rules_version=row["override_rules_version"] or "",
             subscribe_releases=bool(row["subscribe_releases"]),
             last_release_tag=row["last_release_tag"],
             is_fork=bool(row["is_fork"]),
@@ -144,6 +152,7 @@ class SQLiteStarsRepository(Repository):
             _json_dumps(item.topics), item.stars, item.url,
             item.first_seen, item.last_updated,
             int(item.manual_override), _json_dumps(item.override_fields),
+            item.override_rules_version,
             int(item.subscribe_releases), item.last_release_tag,
             int(item.is_fork), item.parent_full_name, item.parent_pushed_at,
             int(item.imported), item.github_list_source,
@@ -160,7 +169,7 @@ class SQLiteStarsRepository(Repository):
             value = StarItem.from_dict(value)
         t = self._item_to_tuple(value)
         self._conn.execute("""
-            INSERT INTO stars VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            INSERT INTO stars VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             ON CONFLICT(full_name) DO UPDATE SET
                 name=excluded.name, owner=excluded.owner,
                 description=excluded.description, language=excluded.language,
@@ -169,6 +178,7 @@ class SQLiteStarsRepository(Repository):
                 topics=excluded.topics, stars=excluded.stars, url=excluded.url,
                 first_seen=excluded.first_seen, last_updated=excluded.last_updated,
                 manual_override=excluded.manual_override, override_fields=excluded.override_fields,
+                override_rules_version=excluded.override_rules_version,
                 subscribe_releases=excluded.subscribe_releases, last_release_tag=excluded.last_release_tag,
                 is_fork=excluded.is_fork, parent_full_name=excluded.parent_full_name,
                 parent_pushed_at=excluded.parent_pushed_at, imported=excluded.imported,

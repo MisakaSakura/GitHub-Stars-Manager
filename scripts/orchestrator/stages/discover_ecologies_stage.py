@@ -56,6 +56,25 @@ def _sync_trusted_to_auto_ecologies(ctx: PipelineContext, pool: EcologyCandidate
         _save_auto_ecologies(ctx, existing)
 
 
+def _generate_discovery_report(ctx: PipelineContext, candidates: list, summary: list) -> str:
+    """生成生态发现 Markdown 报告。"""
+    from ecology_discovery import EcologyDiscovery
+    discovery = EcologyDiscovery(ctx.db, ECOLOGY_RULES)
+    md = discovery.generate_report(candidates) if candidates else ""
+    md += "\n\n## 🌱 生态候选池状态\n\n"
+    md += "| 生态 | 状态 | 项目数 | 置信度 | 进度 |\n"
+    md += "|------|------|--------|--------|------|\n"
+    for s in summary:
+        status_icon = {
+            "candidate": "🔍",
+            "watchlist": "👀",
+            "ai_reviewed": "🤖",
+            "trusted": "✅",
+        }.get(s["status"], "❓")
+        md += f"| {s['name']} | {status_icon} {s['status']} | {s['count']} | {s['confidence']:.0%} | {s['progress']} |\n"
+    return md
+
+
 def _llm_review_watchlist(ctx: PipelineContext, pool: EcologyCandidatePool) -> None:
     """对 watchlist 状态的候选进行 LLM 审查"""
     if not ctx.llm:
@@ -129,20 +148,7 @@ def discover_ecologies_stage(ctx: PipelineContext) -> None:
     # 生成报告
     summary = pool.generate_summary()
     if summary:
-        md = discovery.generate_report(candidates) if candidates else ""
-        # 追加候选池状态
-        md += "\n\n## 🌱 生态候选池状态\n\n"
-        md += "| 生态 | 状态 | 项目数 | 置信度 | 进度 |\n"
-        md += "|------|------|--------|--------|------|\n"
-        for s in summary:
-            status_icon = {
-                "candidate": "🔍",
-                "watchlist": "👀",
-                "ai_reviewed": "🤖",
-                "trusted": "✅",
-            }.get(s["status"], "❓")
-            md += f"| {s['name']} | {status_icon} {s['status']} | {s['count']} | {s['confidence']:.0%} | {s['progress']} |\n"
-
+        md = _generate_discovery_report(ctx, candidates, summary)
         out_path = os.path.join(ctx.args.output, "ecology_discovery.md")
         try:
             os.makedirs(ctx.args.output, exist_ok=True)

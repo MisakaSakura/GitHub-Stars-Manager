@@ -13,10 +13,11 @@ def notify_stage(ctx: PipelineContext) -> None:
         return
 
     from config import NOTIFY_CONFIG
-    NOTIFY_CONFIG["enabled"] = True
+    notify_cfg = dict(NOTIFY_CONFIG)
+    notify_cfg["enabled"] = True
     raw_channels = ctx.args.notify_channels.split(",") if ctx.args.notify_channels else []
-    NOTIFY_CONFIG["channels"] = [c.strip() for c in raw_channels if c.strip()]
-    notifier = Notifier(NOTIFY_CONFIG)
+    notify_cfg["channels"] = [c.strip() for c in raw_channels if c.strip()]
+    notifier = Notifier(notify_cfg)
 
     summary = build_summary(ctx)
     weekly_digest = build_weekly_digest_text(ctx)

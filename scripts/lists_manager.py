@@ -77,6 +77,7 @@ class ListsManager:
                     "last_updated": datetime.now(timezone.utc).isoformat(),
                     "manual_override": True,
                     "override_fields": ["ecology", "platform", "type"],
+                    "override_rules_version": "",  # 将在保存前由 StarsDB 自动填充当前版本
                     "imported": True,
                     "github_list_source": list_name,
                 }

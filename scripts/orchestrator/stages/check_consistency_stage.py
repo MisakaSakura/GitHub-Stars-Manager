@@ -4,6 +4,7 @@
 
 import os
 
+from config_rules import RULES_VERSION
 from orchestrator.context import PipelineContext
 from consistency_checker import ConsistencyChecker
 from utils import log
@@ -48,12 +49,7 @@ def _auto_fix_issues(ctx: PipelineContext, issues: list) -> list[tuple[str, str]
         if not item:
             continue
         # 跳过手动保护的项目
-        # 兼容 StarItem (dataclass) 和 dict (SQLite 后端)
-        is_protected = (
-            item.get("manual_override", False) if isinstance(item, dict)
-            else getattr(item, "manual_override", False)
-        )
-        if is_protected:
+        if item.manual_override:
             continue
 
         original = {
@@ -88,10 +84,21 @@ def _auto_fix_issues(ctx: PipelineContext, issues: list) -> list[tuple[str, str]
                 changed_fields.append(f"ecology: {original['ecology']} → 独立项目 / Standalone")
 
         if changed_fields:
-            item.manual_override = True
+            # 自动修正不设置 manual_override（避免与用户手动保护混淆）
+            # 但仍记录修正字段和规则版本，便于追溯
             item.override_fields = [f.split(":")[0] for f in changed_fields]
+            item.override_rules_version = RULES_VERSION
             auto_fixed.append((issue.full_name, ", ".join(changed_fields)))
-            fb.record(issue.full_name, original, corrected, source="auto_fix")
+            item_features = {
+                "name": getattr(item, "name", ""),
+                "description": getattr(item, "description", "") or "",
+                "topics": list(getattr(item, "topics", [])) if getattr(item, "topics", None) else [],
+                "language": getattr(item, "language", "") or "",
+            }
+            fb.record(
+                issue.full_name, original, corrected,
+                source="auto_fix", item_features=item_features,
+            )
 
     if auto_fixed:
         fb.save()

@@ -7,6 +7,7 @@ import json
 import os
 from datetime import datetime, timezone
 
+from config_rules import RULES_VERSION
 from utils import log
 
 
@@ -50,6 +51,7 @@ class FirstRunHelper:
                 item.setdefault("owner", parts[0])
             item["manual_override"] = True
             item["override_fields"] = ["platform", "type", "ecology", "ecology_role", "language"]
+            item["override_rules_version"] = RULES_VERSION
             item["first_seen"] = datetime.now(timezone.utc).isoformat()
             item["last_updated"] = item["first_seen"]
             item["imported"] = True

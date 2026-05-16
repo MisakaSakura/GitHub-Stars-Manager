@@ -72,22 +72,37 @@ LLM_CONFIG = {
     "batch_size": 5,  # 每批处理的项目数（防止长描述项目触发 token 超限）
     "max_consecutive_failures": 3,  # 连续 batch 失败 N 次后终止，避免无底洞式消耗
     "batch_readme_max_length": 150,  # batch prompt 中每个项目的 README 截断长度（越小 prompt 越短，API 响应越快）
+    "enrich_readme_max_candidates": 50,  # enrich 阶段最多获取 README 的项目数
     "no_system_role": False,  # 兼容模式：部分国产 API 不支持 system role，设为 True 时合并到 user message
     "cache_results": True,  # 缓存 LLM 结果避免重复调用
 }
 
-LLM_SYSTEM_PROMPT = """你是 GitHub 项目分类专家。根据项目信息直接输出严格 JSON，不要任何其他内容（不要思考过程、不要解释、不要 markdown 代码块）。
+def _build_system_prompt() -> str:
+    """动态从 config_rules.py 生成系统提示词，确保分类列表与代码规则同步。"""
+    # 延迟导入避免循环依赖
+    from config_rules import PLATFORM_RULES, TYPE_RULES, ECOLOGY_ROLES, ECOLOGY_STANDARD_NAMES
+
+    platforms = ", ".join(PLATFORM_RULES.keys())
+    types = ", ".join(TYPE_RULES.keys())
+    roles = ", ".join(ECOLOGY_ROLES.keys())
+    # 生态规则较多，取前 30 个 + 省略提示（避免超出 token 限制）
+    ecology_subset = ECOLOGY_STANDARD_NAMES[:30]
+    ecologies = ", ".join(ecology_subset) + ", ...等"
+
+    return f"""你是 GitHub 项目分类专家。根据项目信息直接输出严格 JSON，不要任何其他内容（不要思考过程、不要解释、不要 markdown 代码块）。
 
 单条输出格式:
-{"platform":"平台","type":"类型","ecology":"生态或null","ecology_role":"角色或null","confidence":0.85,"reason":"分类理由","ai_summary":"50字概括","ai_tags":["标签1"],"ai_platforms":["web","cli"]}
+{{"platform":"平台","type":"类型","ecology":"生态或null","ecology_role":"角色或null","confidence":0.85,"reason":"分类理由","ai_summary":"50字概括","ai_tags":["标签1"],"ai_platforms":["web","cli"]}}
 
 batch 输出格式（JSON 数组，第 N 个元素对应第 N 个项目）:
-[{"platform":"...",...}, {...}, ...]
+[{{"platform":"...",...}}, {{...}}, ...]
 
-platform: Web 前端, Web 后端, 移动端, 桌面端, AI / 机器学习, DevOps / 运维, 数据库, 云原生, IoT / 嵌入式, 游戏 / 图形, CLI / 终端, 安全 / 渗透, 网络 / 代理, 音视频 / 流媒体, 其他 / 未分类
-【重要】AI / 机器学习 仅指 AI 模型、训练框架、推理引擎、数据集等核心 AI 项目。使用 AI 技术的游戏辅助工具、自动化脚本、游戏机器人应归类为 游戏 / 图形 或 自动化 / 工作流，不要归为 AI / 机器学习。
-type: 框架 / Framework, 工具 / Tool, 应用 / App, 编辑器 / IDE, 资源合集 / Awesome, 语言 / Compiler, 监控 / 可视化, 自动化 / 工作流, 笔记 / 知识管理, 算法 / 学习, 配置 / Dotfiles, 其他 / 未分类
-ecology: 必须使用标准名称（禁止自由发挥）。标准生态: Clash / Mihomo, MPV, VS Code, Neovim, Obsidian, Home Assistant, Docker, React, Vue, Tailwind CSS, FFmpeg, qBittorrent, Hyprland, Zsh / Oh-My-Zsh, Starship, Alacritty, Kitty, i3 / Sway, AwesomeWM, Firefox, Git, Magisk, OBS Studio, Electron; 非上述生态填 null 或 独立项目
-ecology_role: 核心 / Core, GUI 前端 / Client, 配置 / Config, 脚本 / Script, 主题 / Theme, 插件 / Plugin, 规则集 / Rules, Web UI / Dashboard, API 封装 / Wrapper, 教程 / Guide, 其他 / Other
+platform: {platforms}
+type: {types}
+ecology: 必须使用标准名称（禁止自由发挥）。标准生态: {ecologies}; 非上述生态填 null 或 独立项目
+ecology_role: {roles}
 confidence: 0-1。ai_summary: 50字内。ai_tags: 3-5个关键词。ai_platforms: [linux,mac,windows,docker,web,cli,ios,android]
 """
+
+
+LLM_SYSTEM_PROMPT = _build_system_prompt()

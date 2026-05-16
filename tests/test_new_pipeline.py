@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""NewPipeline 插件化架构验证测试"""
+"""Pipeline 插件化架构验证测试"""
 
 import os
 import sys
@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
-from orchestrator.new_pipeline import NewPipeline
+from orchestrator.new_pipeline import Pipeline
 from orchestrator.registry import StageRegistry
 from orchestrator.context import PipelineContext
 
@@ -40,6 +40,33 @@ class TestStageRegistry(unittest.TestCase):
         reg.run(MagicMock(), skip={"a"})
         self.assertEqual(calls, ["b"])
 
+    def test_validate_missing_dependency(self):
+        """验证未注册的依赖会抛出 ValueError"""
+        reg = StageRegistry()
+        reg.register("a", lambda ctx: None, deps=["nonexistent"])
+        with self.assertRaises(ValueError) as cm:
+            reg.run(MagicMock())
+        self.assertIn("nonexistent", str(cm.exception))
+
+    def test_validate_circular_dependency(self):
+        """验证循环依赖会抛出 ValueError"""
+        reg = StageRegistry()
+        reg.register("a", lambda ctx: None, deps=["b"])
+        reg.register("b", lambda ctx: None, deps=["a"])
+        with self.assertRaises(ValueError) as cm:
+            reg.run(MagicMock())
+        self.assertIn("循环依赖", str(cm.exception))
+
+    def test_stage_exception_propagates(self):
+        """验证阶段异常会正确向上传播"""
+        reg = StageRegistry()
+        reg.register("a", lambda ctx: None)
+        reg.register("b", lambda ctx: (_ for _ in ()).throw(RuntimeError("stage b failed")))
+        reg.register("c", lambda ctx: None)
+        with self.assertRaises(RuntimeError) as cm:
+            reg.run(MagicMock())
+        self.assertIn("stage b failed", str(cm.exception))
+
 
 class TestPipelineContext(unittest.TestCase):
     def test_get_set(self):
@@ -54,10 +81,10 @@ class TestPipelineContext(unittest.TestCase):
         self.assertEqual(ctx.new_keys, set())
 
 
-class TestNewPipelineStructure(unittest.TestCase):
+class TestPipelineStructure(unittest.TestCase):
     def test_registry_has_expected_stages(self):
         args = MagicMock()
-        np = NewPipeline(args)
+        np = Pipeline(args)
         names = np.registry.stage_names
         self.assertIn("setup", names)
         self.assertIn("auth", names)
@@ -92,16 +119,13 @@ class TestNewPipelineStructure(unittest.TestCase):
         args.notion_db = None
         args.auto_refresh_days = 90
 
-        np = NewPipeline(args)
+        np = Pipeline(args)
         # 用 skip 跳过需要真实 API 的阶段
         skip = {"fetch", "enrich", "sync_notion", "track_releases", "track_forks", "notify"}
         # setup 会创建数据库，但 dry_run 模式下不会保存
         # 由于 import_stage 会提前退出（dry_run + 无导入），流水线实际执行到 import 就停了
         # 这不是问题，因为我们要验证的是阶段注册和执行机制
-        try:
-            np.registry.run(np.context, skip=skip)
-        except Exception:
-            pass  # 某些阶段可能因 Mock 对象缺失属性而失败
+        np.registry.run(np.context, skip=skip)
 
         # 验证阶段至少被注册并尝试执行
         self.assertEqual(len(np.registry.stage_names), 18)

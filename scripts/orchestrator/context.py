@@ -2,28 +2,29 @@
 # -*- coding: utf-8 -*-
 """Pipeline 共享上下文：替代旧 Pipeline 的 self.* 属性，解耦各阶段"""
 
+import argparse
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
 class PipelineContext:
     """流水线各阶段之间的共享状态容器"""
 
-    args: Any
+    args: argparse.Namespace
 
-    db: Optional[Any] = None
-    ai_db: Optional[Any] = None
-    gh: Optional[Any] = None
-    rule: Optional[Any] = None
-    llm: Optional[Any] = None
-    engine: Optional[Any] = None
+    db: Any = None
+    ai_db: Any = None
+    gh: Any = None
+    rule: Any = None
+    llm: Any = None
+    engine: Any = None
 
     is_first_run: bool = False
     did_full_refresh: bool = False
 
     items: list[dict] = field(default_factory=list)
-    stats: Optional[dict] = None
+    stats: dict | None = None
     new_keys: set[str] = field(default_factory=set)
     star_changes: dict[str, int] = field(default_factory=dict)
     classification_changes: dict[str, dict] = field(default_factory=dict)
@@ -31,8 +32,8 @@ class PipelineContext:
     release_updates: list[dict] = field(default_factory=list)
     fork_updates: list[dict] = field(default_factory=list)
 
-    release_tracker: Optional[Any] = None
-    fork_tracker: Optional[Any] = None
+    release_tracker: Any = None
+    fork_tracker: Any = None
 
     ecology_candidate_summary: list[dict] = field(default_factory=list)
 

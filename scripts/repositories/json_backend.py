@@ -24,10 +24,7 @@ class JSONStarsRepository(Repository):
         self._backend.set(key, value)
 
     def delete(self, key: str) -> bool:
-        if self._backend.get(key) is not None:
-            del self._backend.data[key]
-            return True
-        return False
+        return self._backend.delete(key)
 
     def keys(self) -> Iterator[str]:
         return iter(self._backend.keys())

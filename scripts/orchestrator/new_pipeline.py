@@ -12,59 +12,43 @@ from .registry import StageRegistry
 from utils import log
 
 
-class NewPipeline:
+class Pipeline:
     def __init__(self, args: argparse.Namespace):
         self.args = args
         self.registry = StageRegistry()
         self.context = PipelineContext(args=args)
         self._build_registry()
 
-    def _build_registry(self):
-        from .stages.setup_stage import setup_stage
-        from .stages.import_stage import import_stage
-        from .stages.auth_stage import auth_stage
-        from .stages.handle_lists_stage import handle_lists_stage
-        from .stages.classify_stage import setup_llm_stage, enrich_stage, classify_stage
-        from .stages.fetch_stage import fetch_stage
-        from .stages.save_stage import save_stage
-        from .stages.sync_notion_stage import sync_notion_stage
-        from .stages.track_releases_stage import track_releases_stage
-        from .stages.track_forks_stage import track_forks_stage
-        from .stages.discover_ecologies_stage import discover_ecologies_stage
-        from .stages.check_consistency_stage import check_consistency_stage
-        from .stages.record_feedback_stage import record_feedback_stage
-        from .stages.reports_stage import reports_stage
-        from .stages.notify_stage import notify_stage
-        from .stages.print_summary_stage import print_summary_stage
+    # 阶段注册表：名称 -> (模块路径, 函数名, 依赖列表)
+    # P1-4: 集中定义阶段配置，便于动态发现和调整顺序
+    _STAGE_REGISTRY = [
+        ("setup", ".stages.setup_stage", "setup_stage", []),
+        ("import_and_early_exit", ".stages.import_stage", "import_stage", ["setup"]),
+        ("auth", ".stages.auth_stage", "auth_stage", ["setup"]),
+        ("handle_lists", ".stages.handle_lists_stage", "handle_lists_stage", ["auth"]),
+        ("setup_llm", ".stages.classify_stage", "setup_llm_stage", ["auth"]),
+        ("fetch", ".stages.fetch_stage", "fetch_stage", ["auth", "setup_llm"]),
+        ("enrich", ".stages.classify_stage", "enrich_stage", ["fetch", "setup_llm"]),
+        ("classify", ".stages.classify_stage", "classify_stage", ["fetch", "enrich"]),
+        ("save", ".stages.save_stage", "save_stage", ["classify"]),
+        ("sync_notion", ".stages.sync_notion_stage", "sync_notion_stage", ["save"]),
+        ("track_releases", ".stages.track_releases_stage", "track_releases_stage", ["save"]),
+        ("track_forks", ".stages.track_forks_stage", "track_forks_stage", ["save"]),
+        ("discover_ecologies", ".stages.discover_ecologies_stage", "discover_ecologies_stage", ["save"]),
+        ("check_consistency", ".stages.check_consistency_stage", "check_consistency_stage", ["save"]),
+        ("record_feedback", ".stages.record_feedback_stage", "record_feedback_stage", ["save"]),
+        ("generate_reports", ".stages.reports_stage", "reports_stage", ["track_releases", "track_forks"]),
+        ("notify", ".stages.notify_stage", "notify_stage", ["generate_reports"]),
+        ("print_summary", ".stages.print_summary_stage", "print_summary_stage", ["notify", "generate_reports"]),
+    ]
 
-        self.registry.register("setup", setup_stage, [])
-        self.registry.register("import_and_early_exit", import_stage, ["setup"])
-        self.registry.register("auth", auth_stage, ["setup"])
-        self.registry.register("handle_lists", handle_lists_stage, ["auth"])
-        self.registry.register("setup_llm", setup_llm_stage, ["auth"])
-        self.registry.register("fetch", fetch_stage, ["auth", "setup_llm"])
-        self.registry.register("enrich", enrich_stage, ["fetch", "setup_llm"])
-        self.registry.register("classify", classify_stage, ["fetch", "enrich"])
-        self.registry.register("save", save_stage, ["classify"])
-        self.registry.register("sync_notion", sync_notion_stage, ["save"])
-        self.registry.register("track_releases", track_releases_stage, ["save"])
-        self.registry.register("track_forks", track_forks_stage, ["save"])
-        self.registry.register("discover_ecologies", discover_ecologies_stage, ["save"])
-        self.registry.register("check_consistency", check_consistency_stage, ["save"])
-        self.registry.register("record_feedback", record_feedback_stage, ["save"])
-        self.registry.register("generate_reports", reports_stage, ["track_releases", "track_forks"])
-        self.registry.register("notify", notify_stage, ["generate_reports"])
-        self.registry.register("print_summary", print_summary_stage, ["notify", "generate_reports"])
+    def _build_registry(self):
+        import importlib
+        for name, module_path, fn_name, deps in self._STAGE_REGISTRY:
+            module = importlib.import_module(module_path, __package__)
+            fn = getattr(module, fn_name)
+            self.registry.register(name, fn, deps)
 
     def run(self) -> None:
         log("[NewPipeline] 启动插件化流水线", "STEP")
-        try:
-            self.registry.run(self.context)
-        except KeyboardInterrupt:
-            import sys
-            print("\n操作已取消")
-            sys.exit(130)
-        except Exception as e:
-            import sys
-            print(f"\n运行失败: {e}")
-            sys.exit(1)
+        self.registry.run(self.context)

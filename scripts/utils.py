@@ -37,16 +37,12 @@ def atomic_write(path: str, write_fn) -> None:
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     tmp_path = path + ".tmp"
 
-    # 跨进程文件锁（Unix 用 fcntl，Windows 跳过）
+    # 跨进程文件锁（Unix 用 fcntl，Windows 用 msvcrt）
     _lock_file = path + ".lock"
     lock_fd = None
     try:
         lock_fd = open(_lock_file, "w")
-        try:
-            import fcntl
-            fcntl.flock(lock_fd, fcntl.LOCK_EX)
-        except ImportError:
-            pass  # Windows 无 fcntl，依赖 workflow concurrency 控制
+        _acquire_file_lock(lock_fd)
     except Exception:
         pass
 
@@ -63,12 +59,41 @@ def atomic_write(path: str, write_fn) -> None:
         raise
     finally:
         if lock_fd:
-            try:
-                import fcntl
-                fcntl.flock(lock_fd, fcntl.LOCK_UN)
-            except ImportError:
-                pass
+            _release_file_lock(lock_fd)
             try:
                 lock_fd.close()
             except Exception:
                 pass
+
+
+def _acquire_file_lock(fd) -> bool:
+    """跨平台获取文件锁（独占锁）。"""
+    try:
+        import fcntl
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        return True
+    except ImportError:
+        pass
+    try:
+        import msvcrt
+        fd.seek(0)
+        msvcrt.locking(fd.fileno(), msvcrt.LK_LOCK, 1)
+        return True
+    except (ImportError, OSError):
+        pass
+    return False
+
+
+def _release_file_lock(fd) -> None:
+    """跨平台释放文件锁。"""
+    try:
+        import fcntl
+        fcntl.flock(fd, fcntl.LOCK_UN)
+    except ImportError:
+        pass
+    try:
+        import msvcrt
+        fd.seek(0)
+        msvcrt.locking(fd.fileno(), msvcrt.LK_UNLCK, 1)
+    except (ImportError, OSError):
+        pass

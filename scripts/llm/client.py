@@ -14,6 +14,10 @@ class LLMClient:
         self.provider_name = provider_name.lower()
         self.model = model
         self.profile = self._load_profile(model)
+        # P1-22: 反馈上下文缓存（60 秒 TTL，避免每次调用都读文件）
+        self._fb_ctx: str | None = None
+        self._fb_ctx_ts: float = 0.0
+        self._fb_ctx_ttl: float = 60.0
 
         base = api_base or self._default_base()
         self.provider = OpenAICompatibleProvider(api_key, base, model, self.provider_name)
@@ -62,14 +66,20 @@ class LLMClient:
         except (ValueError, TypeError):
             return 0.1
 
-    @staticmethod
-    def _build_feedback_context() -> str:
-        """从反馈系统读取高频修正模式，生成 LLM 上下文提示"""
+    def _build_feedback_context(self) -> str:
+        """从反馈系统读取高频修正模式，生成 LLM 上下文提示（带 60 秒缓存）。"""
+        import time
+        # 缓存命中且未过期，直接返回
+        if self._fb_ctx is not None and time.time() - self._fb_ctx_ts < self._fb_ctx_ttl:
+            return self._fb_ctx
+
         import os
         feedback_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "feedback.json")
         feedback_path = os.path.abspath(feedback_path)
         if not os.path.exists(feedback_path):
-            return ""
+            self._fb_ctx = ""
+            self._fb_ctx_ts = time.time()
+            return self._fb_ctx
 
         try:
             import json
@@ -77,7 +87,9 @@ class LLMClient:
                 data = json.load(f)
             entries = data.get("entries", {})
             if not entries:
-                return ""
+                self._fb_ctx = ""
+                self._fb_ctx_ts = time.time()
+                return self._fb_ctx
 
             # 统计高频否定模式（原始生态 != 目标生态）
             from collections import Counter
@@ -91,15 +103,21 @@ class LLMClient:
                     neg_patterns[(old_eco, new_eco)] += 1
 
             if not neg_patterns:
-                return ""
+                self._fb_ctx = ""
+                self._fb_ctx_ts = time.time()
+                return self._fb_ctx
 
             lines = ["\n【重要：用户已确认的分类修正案例，遇到类似项目时请优先参考】"]
             for (old, new), count in neg_patterns.most_common(8):
                 if count >= 2:
                     lines.append(f"- 曾被分到 '{old}' 但用户修正为 '{new}'（已确认 {count} 次）")
-            return "\n".join(lines)
+            self._fb_ctx = "\n".join(lines)
+            self._fb_ctx_ts = time.time()
+            return self._fb_ctx
         except Exception:
-            return ""
+            self._fb_ctx = ""
+            self._fb_ctx_ts = time.time()
+            return self._fb_ctx
 
     def call(self, prompt: str, system_prompt: str | None = None, max_tokens: int | None = None) -> str | None:
         """通用文本调用，返回原始响应文本。支持指数退避重试（3次）。"""

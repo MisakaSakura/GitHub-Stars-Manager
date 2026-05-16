@@ -17,8 +17,7 @@ def save_stage(ctx: PipelineContext) -> None:
         ctx.ai_db.save()
     if ctx.llm:
         ctx.db.meta_set("last_llm_classify_at", datetime.now(timezone.utc).isoformat())
-        ctx.db.meta_save()
     if ctx.did_full_refresh:
         ctx.db.meta_set("last_full_refresh_at", datetime.now(timezone.utc).isoformat())
-        ctx.db.meta_save()
+    ctx.db.meta_save()
     log("数据库已保存", "OK")

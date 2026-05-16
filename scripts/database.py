@@ -5,6 +5,7 @@
 import json
 import os
 
+from config_rules import RULES_VERSION
 from models import StarItem
 from utils import log
 
@@ -77,8 +78,16 @@ class StarsDB:
 
         atomic_write(self.db_path, _write)
 
-    def get(self, key: str) -> StarItem | dict | None:
+    def get(self, key: str) -> StarItem | None:
+        """统一返回 StarItem（P1-9: load() 已确保数据为 StarItem，无需 dict 兼容）。"""
         return self.data.get(key)
+
+    def delete(self, key: str) -> bool:
+        """删除项目，返回是否成功。"""
+        if key in self.data:
+            del self.data[key]
+            return True
+        return False
 
     def set(self, key: str, value: StarItem | dict) -> None:
         if isinstance(value, dict) and {"full_name", "name", "owner"}.issubset(value):
