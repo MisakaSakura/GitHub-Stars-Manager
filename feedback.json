@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "entries": {
+    "obra/superpowers": {
+      "timestamp": "2026-05-16T14:11:01.027751+00:00",
+      "original": {
+        "platform": "其他 / 未分类",
+        "type": "框架 / Framework",
+        "ecology": "独立项目 / Standalone",
+        "ecology_role": "-"
+      },
+      "corrected": {
+        "platform": "AI / 机器学习",
+        "type": "框架 / Framework",
+        "ecology": "独立项目 / Standalone",
+        "ecology_role": "-"
+      },
+      "source": "issue#3"
+    }
+  },
+  "patterns": {}
+}

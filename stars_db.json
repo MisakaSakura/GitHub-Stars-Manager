@@ -13498,7 +13498,7 @@
     "owner": "obra",
     "description": "An agentic skills framework & software development methodology that works.",
     "language": "Shell",
-    "platform": "其他 / 未分类",
+    "platform": "AI / 机器学习",
     "type": "框架 / Framework",
     "ecology": "独立项目 / Standalone",
     "ecology_role": "-",
@@ -13507,8 +13507,12 @@
     "url": "https://github.com/obra/superpowers",
     "first_seen": "2026-05-16T13:37:48.758257+00:00",
     "last_updated": "2026-05-16T13:37:48.758270+00:00",
-    "manual_override": false,
-    "override_fields": [],
+    "manual_override": true,
+    "override_fields": [
+      "platform",
+      "type",
+      "ecology"
+    ],
     "subscribe_releases": false,
     "last_release_tag": null,
     "last_release_checked": null,
