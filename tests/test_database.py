@@ -19,7 +19,8 @@ class TestStarsDB(unittest.TestCase):
 
     def tearDown(self):
         meta_path = os.path.splitext(self.db_path)[0] + ".meta.json"
-        for f in [self.db_path, self.db_path + ".tmp", meta_path]:
+        lock_path = self.db_path + ".lock"
+        for f in [self.db_path, self.db_path + ".tmp", meta_path, lock_path]:
             if os.path.exists(f):
                 os.remove(f)
         if os.path.exists(self.tmpdir):

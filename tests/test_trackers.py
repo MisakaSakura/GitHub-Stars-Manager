@@ -13,6 +13,12 @@ from release_tracker import ReleaseTracker
 from fork_tracker import ForkTracker
 
 
+def _future_date(days: int = 1) -> str:
+    """生成动态未来日期，避免硬编码 2099 年时间炸弹"""
+    from datetime import datetime, timezone, timedelta
+    return (datetime.now(timezone.utc) + timedelta(days=days)).isoformat().replace("+00:00", "Z")
+
+
 class TestReleaseTracker(unittest.TestCase):
     def test_check_no_subscription(self):
         gh = MagicMock()
@@ -25,7 +31,7 @@ class TestReleaseTracker(unittest.TestCase):
     def test_check_new_release(self):
         gh = MagicMock()
         gh.list_releases.return_value = [
-            {"tag_name": "v2.0", "published_at": "2099-01-01T00:00:00Z", "html_url": "https://github.com/a/b/releases/v2.0"},
+            {"tag_name": "v2.0", "published_at": _future_date(), "html_url": "https://github.com/a/b/releases/v2.0"},
         ]
         tracker = ReleaseTracker(gh)
         items = [{
@@ -42,7 +48,7 @@ class TestReleaseTracker(unittest.TestCase):
     def test_check_no_change(self):
         gh = MagicMock()
         gh.list_releases.return_value = [
-            {"tag_name": "v1.0", "published_at": "2099-01-01T00:00:00Z"},
+            {"tag_name": "v1.0", "published_at": _future_date()},
         ]
         tracker = ReleaseTracker(gh)
         items = [{
@@ -66,10 +72,10 @@ class TestReleaseTracker(unittest.TestCase):
         """一周内多次发布应全部捕获，intermediate_tags 记录中间版本"""
         gh = MagicMock()
         gh.list_releases.return_value = [
-            {"tag_name": "v1.3", "published_at": "2099-01-03T00:00:00Z", "html_url": "https://github.com/a/b/releases/v1.3"},
-            {"tag_name": "v1.2", "published_at": "2099-01-02T00:00:00Z", "html_url": "https://github.com/a/b/releases/v1.2"},
-            {"tag_name": "v1.1", "published_at": "2099-01-01T00:00:00Z", "html_url": "https://github.com/a/b/releases/v1.1"},
-            {"tag_name": "v1.0", "published_at": "2098-01-01T00:00:00Z", "html_url": "https://github.com/a/b/releases/v1.0"},
+            {"tag_name": "v1.3", "published_at": _future_date(3), "html_url": "https://github.com/a/b/releases/v1.3"},
+            {"tag_name": "v1.2", "published_at": _future_date(2), "html_url": "https://github.com/a/b/releases/v1.2"},
+            {"tag_name": "v1.1", "published_at": _future_date(1), "html_url": "https://github.com/a/b/releases/v1.1"},
+            {"tag_name": "v1.0", "published_at": "2024-01-01T00:00:00Z", "html_url": "https://github.com/a/b/releases/v1.0"},
         ]
         tracker = ReleaseTracker(gh)
         items = [{
@@ -89,7 +95,7 @@ class TestReleaseTracker(unittest.TestCase):
     def test_check_all_ignores_subscription_flag(self):
         gh = MagicMock()
         gh.list_releases.return_value = [
-            {"tag_name": "v2.0", "published_at": "2099-01-01T00:00:00Z", "html_url": "https://github.com/a/b/releases/v2.0"},
+            {"tag_name": "v2.0", "published_at": _future_date(), "html_url": "https://github.com/a/b/releases/v2.0"},
         ]
         tracker = ReleaseTracker(gh)
         items = [{
@@ -106,7 +112,7 @@ class TestReleaseTracker(unittest.TestCase):
         """首次发现的项目，最新 release 在窗口内时，应作为新收录动态展示"""
         gh = MagicMock()
         gh.list_releases.return_value = [
-            {"tag_name": "v1.0", "published_at": "2099-01-01T00:00:00Z", "html_url": "https://github.com/a/b/releases/v1.0"},
+            {"tag_name": "v1.0", "published_at": _future_date(), "html_url": "https://github.com/a/b/releases/v1.0"},
         ]
         from datetime import datetime, timezone
         tracker = ReleaseTracker(gh)
@@ -144,7 +150,7 @@ class TestReleaseTracker(unittest.TestCase):
     def test_check_all_no_change(self):
         gh = MagicMock()
         gh.list_releases.return_value = [
-            {"tag_name": "v1.0", "published_at": "2099-01-01T00:00:00Z"},
+            {"tag_name": "v1.0", "published_at": _future_date()},
         ]
         tracker = ReleaseTracker(gh)
         items = [{

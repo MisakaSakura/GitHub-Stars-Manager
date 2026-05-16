@@ -102,8 +102,9 @@ class LLMClient:
             return ""
 
     def call(self, prompt: str, system_prompt: str | None = None, max_tokens: int | None = None) -> str | None:
-        """通用文本调用，返回原始响应文本"""
+        """通用文本调用，返回原始响应文本。支持指数退避重试（3次）。"""
         from config import LLM_CONFIG, LLM_SYSTEM_PROMPT
+        import time
         sp = LLM_SYSTEM_PROMPT if system_prompt is None else system_prompt
 
         # 注入反馈上下文（用户已确认的修正案例）
@@ -121,4 +122,17 @@ class LLMClient:
             messages = [{"role": "system", "content": sp}, {"role": "user", "content": prompt}]
 
         mt = max_tokens or self.get_max_tokens("single")
-        return self.provider.call(messages, mt, self.get_temperature())
+        retries = 3
+        last_error = None
+        for attempt in range(retries):
+            try:
+                return self.provider.call(messages, mt, self.get_temperature())
+            except Exception as e:
+                last_error = e
+                if attempt < retries - 1:
+                    delay = 1.0 * (2 ** attempt)
+                    log(f"LLM 调用失败（尝试 {attempt + 1}/{retries}）: {e}，{delay:.1f}s 后重试...", "WARN")
+                    time.sleep(delay)
+                else:
+                    log(f"LLM 调用失败（尝试 {attempt + 1}/{retries}）: {e}，放弃重试", "ERROR")
+        return None

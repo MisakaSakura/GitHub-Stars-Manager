@@ -98,9 +98,10 @@ class GitHubAPI:
         import time
 
         cache_key = f"{owner}/{repo}"
-        # 缓存文件放在数据库所在目录，避免随工作目录变化
-        cache_dir = os.path.dirname(os.path.abspath(__file__))
-        cache_file = os.path.join(cache_dir, ".readme_cache.json")
+        # 缓存文件放在 data 目录，避免污染代码目录或随工作目录变化
+        cache_dir = os.path.join(os.path.expanduser("~"), ".cache", "github-stars-classifier")
+        os.makedirs(cache_dir, exist_ok=True)
+        cache_file = os.path.join(cache_dir, "readme_cache.json")
         cache_ttl = 7 * 86400  # 7 天
 
         # 尝试读取缓存
@@ -203,6 +204,7 @@ class GitHubAPI:
 
         # 并发获取后续页
         next_page = 2
+        failed_pages: list[int] = []
         while True:
             batch_pages = range(next_page, next_page + max_workers)
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -217,6 +219,7 @@ class GitHubAPI:
                         data = future.result()
                     except Exception as e:
                         log(f"  第 {page_num} 页获取失败: {e}", "WARN")
+                        failed_pages.append(page_num)
                         continue
                     if data:
                         all_pages[page_num] = data
@@ -230,6 +233,18 @@ class GitHubAPI:
                 break
             next_page += max_workers
             time.sleep(0.3)
+
+        # 重试失败的页面
+        if failed_pages:
+            log(f"重试 {len(failed_pages)} 个失败页面...", "STEP")
+            for page_num in failed_pages:
+                try:
+                    data = self.get_starred(username, page_num, per_page)
+                    if data:
+                        all_pages[page_num] = data
+                        log(f"  第 {page_num} 页重试成功: {len(data)} 个")
+                except Exception as e:
+                    log(f"  第 {page_num} 页重试仍失败: {e}", "ERROR")
 
         # 按页码排序合并
         all_stars = []

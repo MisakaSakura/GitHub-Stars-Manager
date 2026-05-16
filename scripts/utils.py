@@ -28,7 +28,7 @@ def _safe_print(msg: str) -> None:
 
 
 def atomic_write(path: str, write_fn) -> None:
-    """原子写入：先写临时文件再替换，失败时清理临时文件
+    """原子写入：先写临时文件再替换，带跨进程文件锁保护
 
     Args:
         path: 目标文件路径
@@ -36,6 +36,20 @@ def atomic_write(path: str, write_fn) -> None:
     """
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     tmp_path = path + ".tmp"
+
+    # 跨进程文件锁（Unix 用 fcntl，Windows 跳过）
+    _lock_file = path + ".lock"
+    lock_fd = None
+    try:
+        lock_fd = open(_lock_file, "w")
+        try:
+            import fcntl
+            fcntl.flock(lock_fd, fcntl.LOCK_EX)
+        except ImportError:
+            pass  # Windows 无 fcntl，依赖 workflow concurrency 控制
+    except Exception:
+        pass
+
     try:
         with open(tmp_path, "w", encoding="utf-8") as f:
             write_fn(f)
@@ -47,3 +61,14 @@ def atomic_write(path: str, write_fn) -> None:
             except Exception:
                 pass
         raise
+    finally:
+        if lock_fd:
+            try:
+                import fcntl
+                fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            except ImportError:
+                pass
+            try:
+                lock_fd.close()
+            except Exception:
+                pass

@@ -48,7 +48,12 @@ def _auto_fix_issues(ctx: PipelineContext, issues: list) -> list[tuple[str, str]
         if not item:
             continue
         # 跳过手动保护的项目
-        if getattr(item, "manual_override", False):
+        # 兼容 StarItem (dataclass) 和 dict (SQLite 后端)
+        is_protected = (
+            item.get("manual_override", False) if isinstance(item, dict)
+            else getattr(item, "manual_override", False)
+        )
+        if is_protected:
             continue
 
         original = {

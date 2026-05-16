@@ -78,28 +78,31 @@ class RuleClassifier:
 
     @staticmethod
     def _load_learned_overrides() -> dict:
-        """延迟加载用户反馈生成的规则补丁"""
+        """延迟加载用户反馈生成的规则补丁（安全方式：ast.literal_eval，不执行代码）"""
         import os
-        import sys
+        import ast
         if RuleClassifier._learned_overrides is not None:
             return RuleClassifier._learned_overrides
 
-        # 尝试从 data/learned_rules.py 加载
+        # 尝试从 data/learned_rules.py 安全加载
         learned_path = os.path.join(os.path.dirname(__file__), "..", "data", "learned_rules.py")
         learned_path = os.path.abspath(learned_path)
         if os.path.exists(learned_path):
             try:
-                # 使用 import 机制加载
-                import importlib.util
-                spec = importlib.util.spec_from_file_location("learned_rules", learned_path)
-                mod = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(mod)
-                RuleClassifier._learned_overrides = getattr(mod, "LEARNED_OVERRIDES", {})
+                with open(learned_path, "r", encoding="utf-8") as f:
+                    source = f.read()
+                # 安全解析：提取 LEARNED_OVERRIDES = {...} 的字典字面量
+                import re
+                match = re.search(r"LEARNED_OVERRIDES\s*=\s*(\{.*?\n\})", source, re.DOTALL)
+                if match:
+                    RuleClassifier._learned_overrides = ast.literal_eval(match.group(1))
+                else:
+                    RuleClassifier._learned_overrides = {}
             except Exception:
                 RuleClassifier._learned_overrides = {}
         else:
             RuleClassifier._learned_overrides = {}
-        return RuleClassifier._learned_overrides
+        return RuleClassifier._learned_overrides or {}
 
     @staticmethod
     def _apply_learned_overrides(eco_name: str, score: int, name: str, desc: str, topics: list[str]) -> int:
