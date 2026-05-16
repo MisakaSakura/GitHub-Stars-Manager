@@ -60,6 +60,33 @@ class ReportGenerator:
         log(f"HTML 报告: {path}", "OK")
         return path
 
+    @staticmethod
+    def _activity_score(item: dict) -> int:
+        """计算项目活跃度分数 (0-100)
+        - Stars: log10(stars+1) * 25 (max ~75 for 1M stars)
+        - 最近更新: 30天内+15, 90天内+10, 1年内+5
+        """
+        import math
+        stars = item.get("stars", 0)
+        score = min(int(math.log10(stars + 1) * 25), 75)
+
+        last_updated = item.get("last_updated", "")
+        if last_updated:
+            try:
+                from datetime import datetime, timezone, timedelta
+                dt = datetime.fromisoformat(last_updated)
+                now = datetime.now(timezone.utc)
+                days = (now - dt).days
+                if days <= 30:
+                    score += 15
+                elif days <= 90:
+                    score += 10
+                elif days <= 365:
+                    score += 5
+            except Exception:
+                pass
+        return min(score, 100)
+
     def generate_csv(self, output_dir: str) -> str:
         items = self._inject_ai_fields(list(self.db.values()))
         os.makedirs(output_dir, exist_ok=True)
@@ -67,7 +94,7 @@ class ReportGenerator:
         fieldnames = [
             "full_name", "name", "owner", "description", "language",
             "platform", "type", "ecology", "ecology_role",
-            "topics", "stars", "url", "manual_override"
+            "topics", "stars", "activity_score", "url", "manual_override"
         ]
         with open(path, "w", newline="", encoding="utf-8-sig") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
@@ -75,6 +102,7 @@ class ReportGenerator:
             for item in items:
                 row = item.to_dict() if hasattr(item, "to_dict") else dict(item)
                 row["topics"] = ", ".join(row.get("topics", []))
+                row["activity_score"] = self._activity_score(row)
                 writer.writerow(row)
         log(f"CSV 导出: {path}", "OK")
         return path
@@ -98,7 +126,10 @@ class ReportGenerator:
                         "ecology": Counter([r["ecology"] for r in items]),
                     }.items()
                 },
-                "repos": [item.to_dict() if hasattr(item, "to_dict") else item for item in items]
+                "repos": [
+                    {**(item.to_dict() if hasattr(item, "to_dict") else dict(item)), "activity_score": self._activity_score(item)}
+                    for item in items
+                ]
             }, f, ensure_ascii=False, indent=2)
         log(f"JSON 导出: {path}", "OK")
         return path
