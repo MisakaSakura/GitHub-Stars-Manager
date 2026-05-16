@@ -26,11 +26,11 @@ class TestStageRegistry(unittest.TestCase):
     def test_run_early_exit(self):
         reg = StageRegistry()
         calls = []
-        reg.register("a", lambda ctx: (calls.append("a") or True))
-        reg.register("b", lambda ctx: False)  # 提前终止
+        reg.register("a", lambda ctx: (calls.append("a") or None))
+        reg.register("b", lambda ctx: (calls.append("b") or True))  # 返回 True 提前终止
         reg.register("c", lambda ctx: calls.append("c"))
         reg.run(MagicMock())
-        self.assertEqual(calls, ["a"])
+        self.assertEqual(calls, ["a", "b"])
 
     def test_skip(self):
         reg = StageRegistry()

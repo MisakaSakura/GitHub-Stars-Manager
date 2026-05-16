@@ -28,7 +28,7 @@ class StageRegistry:
             try:
                 log(f"[Pipeline] 执行阶段: {name}", "STEP")
                 result = fn(context)
-                if result is False:
+                if result is True:
                     log(f"[Pipeline] 阶段 {name} 要求提前终止", "INFO")
                     break
             except Exception as e:
