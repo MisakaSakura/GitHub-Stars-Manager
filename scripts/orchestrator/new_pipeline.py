@@ -86,6 +86,9 @@ class NewPipeline:
         from .stages.auth_stage import auth_stage
         from .stages.fetch_stage import fetch_stage
         from .stages.classify_stage import setup_llm_stage, enrich_stage, classify_stage
+        from .stages.save_stage import save_stage
+        from .stages.reports_stage import reports_stage
+        from .stages.print_summary_stage import print_summary_stage
 
         # 注册阶段：独立阶段优先，其余委托旧 Pipeline
         self.registry.register("setup", setup_stage, [])
@@ -96,16 +99,16 @@ class NewPipeline:
         self.registry.register("fetch", fetch_stage, ["auth", "setup_llm"])
         self.registry.register("enrich", enrich_stage, ["fetch", "setup_llm"])
         self.registry.register("classify", classify_stage, ["fetch", "enrich"])
-        self.registry.register("save", _make_stage_fn("_save"), ["classify"])
+        self.registry.register("save", save_stage, ["classify"])
         self.registry.register("sync_notion", _make_stage_fn("_sync_notion"), ["save"])
         self.registry.register("track_releases", _make_stage_fn("_track_releases"), ["save"])
         self.registry.register("track_forks", _make_stage_fn("_track_forks"), ["save"])
         self.registry.register("discover_ecologies", _make_stage_fn("_discover_ecologies"), ["save"])
         self.registry.register("check_consistency", _make_stage_fn("_check_consistency"), ["save"])
         self.registry.register("record_feedback", _make_stage_fn("_record_feedback"), ["save"])
-        self.registry.register("generate_reports", _make_stage_fn("_generate_reports"), ["track_releases", "track_forks"])
+        self.registry.register("generate_reports", reports_stage, ["track_releases", "track_forks"])
         self.registry.register("notify", _make_stage_fn("_notify"), ["generate_reports"])
-        self.registry.register("print_summary", _make_stage_fn("_print_summary"), ["notify", "generate_reports"])
+        self.registry.register("print_summary", print_summary_stage, ["notify", "generate_reports"])
 
     def run(self) -> None:
         log("[NewPipeline] 启动插件化流水线", "STEP")

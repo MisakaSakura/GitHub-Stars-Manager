@@ -93,7 +93,27 @@ class GitHubAPI:
 
     def get_readme(self, owner: str, repo: str, max_length: int = 2000) -> str:
         import base64
-        import re
+        import json
+        import os
+        import time
+
+        cache_key = f"{owner}/{repo}"
+        cache_file = ".readme_cache.json"
+        cache_ttl = 7 * 86400  # 7 天
+
+        # 尝试读取缓存
+        if os.path.exists(cache_file):
+            try:
+                with open(cache_file, "r", encoding="utf-8") as f:
+                    cache = json.load(f)
+                entry = cache.get(cache_key)
+                if entry and time.time() - entry.get("ts", 0) < cache_ttl:
+                    return entry.get("text", "")[:max_length]
+            except Exception:
+                cache = {}
+        else:
+            cache = {}
+
         data = self._get(f"/repos/{owner}/{repo}/readme")
         if not data:
             return ""
@@ -101,7 +121,15 @@ class GitHubAPI:
         try:
             decoded = base64.b64decode(content).decode("utf-8")
             text = self._strip_markdown(decoded)
-            return text[:max_length]
+            result = text[:max_length]
+            # 写入缓存
+            cache[cache_key] = {"text": result, "ts": time.time()}
+            try:
+                with open(cache_file, "w", encoding="utf-8") as f:
+                    json.dump(cache, f, ensure_ascii=False, indent=2)
+            except Exception:
+                pass
+            return result
         except Exception:
             return ""
 
