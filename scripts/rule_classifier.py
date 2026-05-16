@@ -18,6 +18,29 @@ class RuleClassifier:
     NAME_PREFIX_WEIGHT = 3
 
     _learned_overrides: dict | None = None
+    _auto_ecologies: dict | None = None
+
+    @classmethod
+    def _load_auto_ecologies(cls, db_path: str = "") -> dict:
+        """加载自动发现的生态规则（data/auto_ecologies.json）"""
+        if cls._auto_ecologies is not None:
+            return cls._auto_ecologies
+        import os
+        # 尝试从 data 目录加载
+        auto_path = os.path.join(os.path.dirname(__file__), "..", "data", "auto_ecologies.json")
+        if db_path:
+            auto_path = os.path.join(os.path.dirname(db_path), "auto_ecologies.json")
+        auto_path = os.path.abspath(auto_path)
+        if os.path.exists(auto_path):
+            try:
+                import json
+                with open(auto_path, "r", encoding="utf-8") as f:
+                    cls._auto_ecologies = json.load(f)
+            except Exception:
+                cls._auto_ecologies = {}
+        else:
+            cls._auto_ecologies = {}
+        return cls._auto_ecologies or {}
 
     @staticmethod
     def _load_learned_overrides() -> dict:
@@ -106,7 +129,15 @@ class RuleClassifier:
         best_ecology = None
         best_score = 0
 
-        for eco_name, rules in ECOLOGY_RULES.items():
+        # 合并代码内置规则和自动发现的生态规则
+        all_rules = dict(ECOLOGY_RULES)
+        auto_rules = RuleClassifier._load_auto_ecologies()
+        if auto_rules:
+            for eco_name, rules in auto_rules.items():
+                if eco_name not in all_rules:
+                    all_rules[eco_name] = rules
+
+        for eco_name, rules in all_rules.items():
             score = 0
             # name 匹配：前缀/子串/核心项目
             for pattern in rules.get("name_patterns", []):
@@ -184,7 +215,7 @@ class RuleClassifier:
                 best_role = role_name
 
         if best_ecology:
-            cores = ECOLOGY_RULES[best_ecology].get("core_projects", [])
+            cores = all_rules.get(best_ecology, {}).get("core_projects", [])
             if any(name == c.lower() for c in cores):
                 best_role = "核心 / Core"
 
