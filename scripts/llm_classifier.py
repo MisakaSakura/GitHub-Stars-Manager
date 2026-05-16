@@ -12,6 +12,7 @@
 """
 
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from utils import log
 from llm import LLMClient, ResponseParser, TTLCache
@@ -92,38 +93,82 @@ class LLMClassifier:
         fail_count = 0
         consecutive_failures = 0
 
-        for i in range(0, total, self.batch_size):
-            batch = uncached_items[i:i + self.batch_size]
-            batch_num = i // self.batch_size + 1
+        def process_one_batch(batch_idx, batch):
             batch_start = time.time()
-
             batch_results = self._classify_batch(batch, fallback=fallback)
-            batch_elapsed = time.time() - batch_start
+            elapsed = time.time() - batch_start
+            return batch_idx, batch_results, elapsed
 
-            if batch_results:
-                results.update(batch_results)
-                success_count += len(batch_results)
-                consecutive_failures = 0
-                status = f"OK({len(batch_results)}个)"
-            else:
-                fail_count += len(batch)
-                consecutive_failures += 1
-                status = "FAIL"
+        # 串行 vs 并发：batch_size 较大时串行已足够，小 batch_size 时并发有收益
+        max_workers = 1 if self.batch_size >= 8 else 2
 
-            processed = min(i + self.batch_size, total)
-            elapsed_total = time.time() - start_time
-            avg_per_batch = elapsed_total / batch_num if batch_num > 0 else 0
-            remaining_batches = total_batches - batch_num
-            eta = avg_per_batch * remaining_batches
+        if max_workers > 1:
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = {}
+                for i in range(0, total, self.batch_size):
+                    batch = uncached_items[i:i + self.batch_size]
+                    batch_num = i // self.batch_size + 1
+                    fut = executor.submit(process_one_batch, batch_num, batch)
+                    futures[fut] = batch_num
+                    # 控制提交速率，避免触发 RPM 限制
+                    time.sleep(0.3)
 
-            log(f"[LLM] Batch {batch_num}/{total_batches} {status} | 已处理 {processed}/{total} | 本批 {batch_elapsed:.1f}s | 平均 {avg_per_batch:.1f}s/batch | 预计剩余 {eta/60:.1f}min", "STEP")
+                for fut in as_completed(futures):
+                    batch_num, batch_results, batch_elapsed = fut.result()
+                    if batch_results:
+                        results.update(batch_results)
+                        success_count += len(batch_results)
+                        consecutive_failures = 0
+                        status = f"OK({len(batch_results)}个)"
+                    else:
+                        fail_count += len(batch)
+                        consecutive_failures += 1
+                        status = "FAIL"
 
-            if consecutive_failures >= max_consecutive:
-                log(f"LLM 连续 {consecutive_failures} 个 batch 失败，已终止本轮后续分析", "ERROR")
-                break
+                    processed_count = len(results) + fail_count
+                    elapsed_total = time.time() - start_time
+                    avg_per_batch = elapsed_total / batch_num if batch_num > 0 else 0
+                    remaining_batches = total_batches - batch_num
+                    eta = avg_per_batch * remaining_batches
 
-            if i + self.batch_size < total:
-                time.sleep(0.5)
+                    log(f"[LLM] Batch {batch_num}/{total_batches} {status} | 已处理 {processed_count}/{total} | 本批 {batch_elapsed:.1f}s | 平均 {avg_per_batch:.1f}s/batch | 预计剩余 {eta/60:.1f}min", "STEP")
+
+                    if consecutive_failures >= max_consecutive:
+                        log(f"LLM 连续 {consecutive_failures} 个 batch 失败，已终止本轮后续分析", "ERROR")
+                        # 取消剩余 futures
+                        for f in futures:
+                            f.cancel()
+                        break
+        else:
+            for i in range(0, total, self.batch_size):
+                batch = uncached_items[i:i + self.batch_size]
+                batch_num = i // self.batch_size + 1
+                batch_num, batch_results, batch_elapsed = process_one_batch(batch_num, batch)
+
+                if batch_results:
+                    results.update(batch_results)
+                    success_count += len(batch_results)
+                    consecutive_failures = 0
+                    status = f"OK({len(batch_results)}个)"
+                else:
+                    fail_count += len(batch)
+                    consecutive_failures += 1
+                    status = "FAIL"
+
+                processed = min(i + self.batch_size, total)
+                elapsed_total = time.time() - start_time
+                avg_per_batch = elapsed_total / batch_num if batch_num > 0 else 0
+                remaining_batches = total_batches - batch_num
+                eta = avg_per_batch * remaining_batches
+
+                log(f"[LLM] Batch {batch_num}/{total_batches} {status} | 已处理 {processed}/{total} | 本批 {batch_elapsed:.1f}s | 平均 {avg_per_batch:.1f}s/batch | 预计剩余 {eta/60:.1f}min", "STEP")
+
+                if consecutive_failures >= max_consecutive:
+                    log(f"LLM 连续 {consecutive_failures} 个 batch 失败，已终止本轮后续分析", "ERROR")
+                    break
+
+                if i + self.batch_size < total:
+                    time.sleep(0.5)
 
         elapsed_total = time.time() - start_time
         log(f"LLM{label} 结束: 成功 {success_count}/{total} 个, 本轮失败 {fail_count}/{total} 个, 耗时 {elapsed_total:.1f}s", "OK")

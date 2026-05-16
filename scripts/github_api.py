@@ -6,6 +6,7 @@ import json
 import time
 import urllib.parse
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from http_client import HTTPClient
 from utils import log
 
@@ -149,19 +150,57 @@ class GitHubAPI:
             time.sleep(0.3)
         return all_repos
 
-    def fetch_all(self, username: str, per_page: int = 100) -> list:
-        all_stars = []
-        page = 1
+    def fetch_all(self, username: str, per_page: int = 100, max_workers: int = 4) -> list:
+        """全量获取 Star 项目，支持并发分页（max_workers 控制并发度）"""
         log(f"全量获取 {username} 的所有 Star 项目...", "STEP")
+
+        # 第1页串行获取（验证认证和基础参数）
+        first_page = self.get_starred(username, page=1, per_page=per_page)
+        if not first_page:
+            log("全量获取完成: 0 个项目", "OK")
+            return []
+
+        all_pages = {1: first_page}
+        log(f"  第 1 页: {len(first_page)} 个")
+
+        if len(first_page) < per_page:
+            log(f"全量获取完成: {len(first_page)} 个项目", "OK")
+            return first_page
+
+        # 并发获取后续页
+        next_page = 2
         while True:
-            data = self.get_starred(username, page=page, per_page=per_page)
-            if not data:
+            batch_pages = range(next_page, next_page + max_workers)
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = {
+                    executor.submit(self.get_starred, username, p, per_page): p
+                    for p in batch_pages
+                }
+                batch_done = False
+                for future in as_completed(futures):
+                    page_num = futures[future]
+                    try:
+                        data = future.result()
+                    except Exception as e:
+                        log(f"  第 {page_num} 页获取失败: {e}", "WARN")
+                        continue
+                    if data:
+                        all_pages[page_num] = data
+                        log(f"  第 {page_num} 页: {len(data)} 个")
+                        if len(data) < per_page:
+                            batch_done = True
+                    else:
+                        batch_done = True
+
+            if batch_done:
                 break
-            all_stars.extend(data)
-            log(f"  第 {page} 页: {len(data)} 个 (累计 {len(all_stars)})")
-            if len(data) < per_page:
-                break
-            page += 1
+            next_page += max_workers
             time.sleep(0.3)
+
+        # 按页码排序合并
+        all_stars = []
+        for p in sorted(all_pages.keys()):
+            all_stars.extend(all_pages[p])
+
         log(f"全量获取完成: {len(all_stars)} 个项目", "OK")
         return all_stars
