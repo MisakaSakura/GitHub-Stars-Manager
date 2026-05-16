@@ -95,29 +95,14 @@ class ReportGenerator:
     @staticmethod
     def _activity_score(item: dict) -> int:
         """计算项目活跃度分数 (0-100)
-        - Stars: log10(stars+1) * 25 (max ~75 for 1M stars)
-        - 最近更新: 30天内+15, 90天内+10, 1年内+5
+        基于 stars 数量的平方对数，放大高分段差异：
+        - 100 stars ≈ 20, 1000 ≈ 45, 10000 ≈ 80, 100000 ≈ 100
         """
         import math
         stars = item.get("stars", 0)
-        score = min(int(math.log10(stars + 1) * 25), 75)
-
-        last_updated = item.get("last_updated", "")
-        if last_updated:
-            try:
-                from datetime import datetime, timezone, timedelta
-                dt = datetime.fromisoformat(last_updated)
-                now = datetime.now(timezone.utc)
-                days = (now - dt).days
-                if days <= 30:
-                    score += 15
-                elif days <= 90:
-                    score += 10
-                elif days <= 365:
-                    score += 5
-            except Exception:
-                pass
-        return min(score, 100)
+        # 平方对数放大高分段差异，避免所有项目分数集中在同一区间
+        score = min(int((math.log10(stars + 1) ** 2) * 5), 100)
+        return score
 
     def generate_csv(self, output_dir: str) -> str:
         items = self._inject_ai_fields(list(self.db.values()))

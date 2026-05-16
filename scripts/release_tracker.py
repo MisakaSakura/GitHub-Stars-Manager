@@ -150,7 +150,6 @@ class ReleaseTracker(BaseTracker):
                     mutations = {
                         "last_release_tag": latest.get("tag_name"),
                         "last_release_checked": now,
-                        "last_updated": now,
                     }
                     return update, (item, mutations)
             except Exception as e:
