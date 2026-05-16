@@ -75,7 +75,8 @@ class StarItem:
             filtered["first_seen"] = filtered.get("last_updated") or "1970-01-01T00:00:00+00:00"
         return cls(**filtered)
 
-    # --- dict 兼容层（迁移期间使用）---
+    # --- dict 兼容层（已废弃，将在后续重构中移除）---
+    # TODO: 迁移完成后移除，所有代码应使用属性访问而非 dict 风格
     def __getitem__(self, key: str):
         return getattr(self, key)
 

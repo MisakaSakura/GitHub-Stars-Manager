@@ -36,3 +36,6 @@ data/
 .pytest_cache/
 .coverage
 htmlcov/
+
+backup_*.zip
+.claude/

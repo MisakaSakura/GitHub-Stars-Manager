@@ -55,8 +55,10 @@ class IncrementalEngine:
         self.star_changes: dict[str, int] = {}
         self.classification_changes: dict[str, dict] = {}
 
-    def _needs_llm(self, key: str, existing, force_refresh: bool, retry_failed: bool, llm_interval_days: int) -> bool:
-        """判断项目是否需要 LLM 分析：独立增量策略，不受规则增量模式影响"""
+    @staticmethod
+    def needs_llm(key: str, existing, ai_db, force_refresh: bool, retry_failed: bool, llm_interval_days: int) -> bool:
+        """判断项目是否需要 LLM 分析：独立增量策略，不受规则增量模式影响。
+        提取为静态方法，供 Pipeline._enrich() 复用，避免重复实现筛选逻辑。"""
         if not existing:
             return True  # 新项目必须分析
         if existing.get("manual_override"):
@@ -65,7 +67,7 @@ class IncrementalEngine:
             return True  # 强制刷新全部重分析
 
         # 从 AI 数据库查询上次分析状态
-        ai_record = self.ai_db.get(key) if self.ai_db else None
+        ai_record = ai_db.get(key) if ai_db else None
         if retry_failed and ai_record and ai_record.llm_status == "failed":
             return True  # 重试之前失败的项目
 
@@ -85,6 +87,10 @@ class IncrementalEngine:
             return True  # 时间戳异常，重新分析
 
         return False  # 已有成功分析且在间隔内，跳过
+
+    def _needs_llm(self, key: str, existing, force_refresh: bool, retry_failed: bool, llm_interval_days: int) -> bool:
+        """实例方法包装，保持向后兼容"""
+        return self.needs_llm(key, existing, self.ai_db, force_refresh, retry_failed, llm_interval_days)
 
     def process(self, items: list[dict], incremental: bool = False, force_refresh: bool = False, use_llm: bool = False, retry_failed: bool = False, subscribe_all_releases: bool = False, llm_interval_days: int = 30) -> dict:
         log(f"处理模式: {'强制刷新' if force_refresh else '增量更新' if incremental else '标准更新'}", "STEP")
@@ -189,14 +195,14 @@ class IncrementalEngine:
         existing = self.db.get(key)
 
         if existing:
-            if existing.get("manual_override"):
+            if existing.manual_override:
                 existing.stars = item.get("stargazers_count", 0)
                 existing.last_updated = datetime.now(timezone.utc).isoformat()
                 self.stats["protected"] += 1
                 return
 
             # 记录 stars 变化（用于周报动态）
-            old_stars = existing.get("stars", 0)
+            old_stars = existing.stars
             new_stars = item.get("stargazers_count", 0)
             if new_stars > old_stars:
                 self.star_changes[key] = new_stars - old_stars
@@ -218,7 +224,7 @@ class IncrementalEngine:
                 existing.last_updated = datetime.now(timezone.utc).isoformat()
                 # 增量模式下规则分类跳过，但 LLM 覆盖仍然应用（修正已有项目分类）
                 old_fields = self._snapshot_classification(existing)
-                applied = self._apply_llm_override(existing, llm_result, existing.get("ecology"))
+                applied = self._apply_llm_override(existing, llm_result, existing.ecology)
                 if applied:
                     self.stats["llm_enhanced"] += 1
                 self._record_classification_change(key, old_fields, existing)

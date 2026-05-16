@@ -16,7 +16,23 @@ except ImportError:
 
 
 class HTTPClient:
-    """统一 HTTP 请求封装，优先使用 requests，回退到 urllib"""
+    """统一 HTTP 请求封装，优先使用 requests（带连接池），回退到 urllib"""
+
+    _session = None
+
+    @classmethod
+    def _get_session(cls):
+        """延迟初始化并复用 requests.Session，启用连接池"""
+        if cls._session is None and HAS_REQUESTS:
+            cls._session = requests.Session()
+        return cls._session
+
+    @classmethod
+    def close(cls) -> None:
+        """关闭底层 Session，释放连接池资源"""
+        if cls._session is not None:
+            cls._session.close()
+            cls._session = None
 
     @staticmethod
     def request(url: str, headers: dict | None = None, method: str = "GET", data=None, timeout: int = 30) -> tuple[int, str]:
@@ -27,14 +43,15 @@ class HTTPClient:
 
     @staticmethod
     def _request_requests(url: str, headers, method: str, data, timeout: int) -> tuple[int, str]:
+        session = HTTPClient._get_session()
         try:
             kwargs = {"headers": headers or {}, "timeout": timeout}
             if isinstance(data, dict):
-                resp = requests.request(method, url, json=data, **kwargs)
+                resp = session.request(method, url, json=data, **kwargs)
             elif data:
-                resp = requests.request(method, url, data=data, **kwargs)
+                resp = session.request(method, url, data=data, **kwargs)
             else:
-                resp = requests.request(method, url, **kwargs)
+                resp = session.request(method, url, **kwargs)
             return resp.status_code, resp.text
         except requests.RequestException as e:
             return -1, str(e)

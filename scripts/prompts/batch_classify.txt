@@ -1,0 +1,9 @@
+请为以下 {count} 个项目分类，返回 JSON 数组，数组中第 N 个元素对应上面第 N 个项目：
+
+{projects_text}
+
+请严格按以下格式输出 JSON 数组，不要包含任何其他内容（如 markdown 代码块标记）：
+[
+  {{"platform": "最匹配的平台", "type": "最匹配的类型", "ecology": "最匹配的生态（没有则填 null）", "ecology_role": "生态内角色（没有则填 null）", "confidence": 0.85, "reason": "简要说明分类理由", "ai_summary": "50字概括", "ai_tags": ["标签1"], "ai_platforms": ["linux", "web"]}},
+  ...
+]

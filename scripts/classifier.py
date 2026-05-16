@@ -46,6 +46,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--token", required=True, help="GitHub Personal Access Token")
     parser.add_argument("--user", required=True, help="GitHub 用户名")
     parser.add_argument("--db", default="./data/stars_db.json", help="数据库路径")
+    parser.add_argument("--storage", default="json", choices=["json", "sqlite"],
+                        help="存储后端: json (默认) / sqlite (实验性)")
     parser.add_argument("--output", default="./docs", help="输出目录")
 
     # 运行模式

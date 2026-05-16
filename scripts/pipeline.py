@@ -103,7 +103,18 @@ class Pipeline:
         else:
             _safe_print(f"\n📂 加载已有数据库: {self.args.db}\n")
 
-        self.db = StarsDB(self.args.db)
+        # 存储后端选择：json (默认) / sqlite (实验性)
+        storage = getattr(self.args, 'storage', 'json')
+        if storage == 'sqlite':
+            from repositories import SQLiteStarsRepository
+            db_path = self.args.db.replace('.json', '.db')
+            self.db = SQLiteStarsRepository(db_path)
+            # 首次运行且 JSON 存在时自动迁移
+            if self.is_first_run and os.path.exists(self.args.db):
+                self.db.migrate_from_json(self.args.db)
+            _safe_print(f"   [SQLite] 使用 SQLite 后端: {db_path}")
+        else:
+            self.db = StarsDB(self.args.db)
 
         # 初始化 AI 数据库（与主数据库解耦，固定文件名 stars_ai.json）
         ai_db_path = os.path.join(os.path.dirname(self.args.db), "stars_ai.json")
@@ -220,35 +231,16 @@ class Pipeline:
         if not self.llm:
             return
         # P2 fix: 先筛选需要 LLM 的项目，再抓 README，避免浪费配额
-        from datetime import datetime, timezone
+        # P2 fix: 复用 engine.IncrementalEngine.needs_llm 静态方法，消除重复逻辑
+        from engine import IncrementalEngine
         llm_interval = getattr(self.args, 'llm_interval_days', 30)
+        force_llm = getattr(self.args, 'force_llm', False)
+        retry_failed = self.args.retry_failed
         candidates = []
         for item in self.items:
             key = f"{item['owner']['login']}/{item['name']}"
             existing = self.db.get(key)
-            needs = False
-            if not existing:
-                needs = True
-            elif self.ai_db:
-                rec = self.ai_db.get(key)
-                if rec and rec.analyzed_at:
-                    try:
-                        last = datetime.fromisoformat(rec.analyzed_at)
-                        if (datetime.now(timezone.utc) - last).days >= llm_interval:
-                            needs = True
-                    except Exception:
-                        needs = True
-                else:
-                    needs = True
-            else:
-                needs = True
-            if self.ai_db:
-                rec = self.ai_db.get(key)
-                if rec and rec.llm_status == "failed":
-                    needs = True
-            if getattr(self.args, 'force_llm', False):
-                needs = True
-            if needs:
+            if IncrementalEngine.needs_llm(key, existing, self.ai_db, force_llm, retry_failed, llm_interval):
                 candidates.append(item)
         log(f"获取 README 摘要用于 AI 分析... (共 {len(candidates)} 个候选项目)", "STEP")
         for item in candidates[:50]:
@@ -385,12 +377,8 @@ class Pipeline:
                 change_str = ", ".join([f"{k} {v['from']}→{v['to']}" for k, v in changes.items()])
                 llm_parts.append(f"- {key}: {change_str}")
 
-        prompt = (
-            "请根据以下本周 GitHub Stars 项目动态数据，用 3-5 句话生成一段简洁的中文总结。"
-            "总结要突出重要更新和亮点，语气轻松自然，像技术周刊的开篇语。"
-            "只输出总结内容，不要任何其他文字。\n\n"
-            + "\n".join(llm_parts)
-        )
+        from prompts import PromptLoader
+        prompt = PromptLoader.render("weekly_digest", data="\n".join(llm_parts))
         try:
             from config import LLM_SYSTEM_PROMPT
             summary = self.llm.summarize(prompt, system_prompt=LLM_SYSTEM_PROMPT, max_tokens=256)
