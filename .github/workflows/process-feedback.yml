@@ -6,7 +6,9 @@ on:
 
 jobs:
   apply-correction:
-    if: contains(github.event.issue.labels.*.name, '分类修正')
+    if: |
+      contains(github.event.issue.labels.*.name, '分类修正') ||
+      startsWith(github.event.issue.title, '[分类修正]')
     runs-on: ubuntu-latest
     permissions:
       contents: write
