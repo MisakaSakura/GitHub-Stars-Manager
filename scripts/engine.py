@@ -171,7 +171,7 @@ class IncrementalEngine:
             try:
                 key = f"{item['owner']['login']}/{item['name']}"
                 llm_result = self.llm_results.get(key)
-                self._process_single(item, config.incremental, config.force_refresh, config.use_llm, llm_result, config.subscribe_all_releases)
+                self._process_single(item, config, llm_result)
             except Exception as e:
                 log(f"处理 {item.get('full_name', item.get('name'))} 失败: {e}", "ERROR")
                 self.stats["error"] += 1
@@ -231,9 +231,11 @@ class IncrementalEngine:
                 changes["ecology_role"] = new_role
         return changes
 
-    def _replace_classification(self, key: str, item: dict, existing, use_llm: bool, llm_result: dict | None, subscribe_all_releases: bool, clear_override: bool = False) -> None:
+    def _replace_classification(self, key: str, item: dict, existing, config: EngineConfig, llm_result: dict | None, clear_override: bool = False) -> None:
         """重新分类已有项目并替换数据库中的记录。"""
-        classification = self._classify_item(item, use_llm, llm_result, subscribe_all_releases, existing)
+        classification = self._classify_item(
+            item, config.use_llm, llm_result, config.subscribe_all_releases, existing
+        )
         classification.first_seen = existing.first_seen
         if clear_override:
             classification.manual_override = False
@@ -243,47 +245,66 @@ class IncrementalEngine:
         self.db.set(key, classification)
         self.stats["updated"] += 1
 
-    def _process_single(self, item: dict, incremental: bool, force_refresh: bool, use_llm: bool, llm_result: dict | None = None, subscribe_all_releases: bool = False) -> None:
+    # ---------- P1-15: _process_single 策略拆分 ----------
+
+    def _process_single(self, item: dict, config: EngineConfig, llm_result: dict | None = None) -> None:
+        """调度器：根据项目状态选择处理策略（P1-15）。"""
         key = f"{item['owner']['login']}/{item['name']}"
         existing = self.db.get(key)
 
         if existing:
             if existing.manual_override:
-                existing.stars = item.get("stargazers_count", 0)
-                existing.last_updated = item.get("pushed_at") or existing.last_updated
-                self.stats["protected"] += 1
-                return
+                return self._process_protected(key, item, existing)
 
-            # 记录 stars 变化（用于周报动态）
-            old_stars = existing.stars
-            new_stars = item.get("stargazers_count", 0)
-            if new_stars > old_stars:
-                self.star_changes[key] = new_stars - old_stars
+            self._track_star_change(key, item, existing)
 
-            if force_refresh:
-                self._replace_classification(key, item, existing, use_llm, llm_result, subscribe_all_releases, clear_override=True)
-                return
+            if config.force_refresh:
+                return self._process_force_refresh(key, item, existing, config, llm_result)
+            if config.incremental:
+                return self._process_incremental(key, item, existing, config, llm_result)
+            return self._process_standard_refresh(key, item, existing, config, llm_result)
 
-            if incremental:
-                existing.stars = new_stars
-                existing.description = item.get("description") or ""
-                existing.topics = item.get("topics", [])
-                existing.last_updated = item.get("pushed_at") or existing.last_updated
-                # 增量模式下规则分类跳过，但 LLM 覆盖仍然应用（修正已有项目分类）
-                old_fields = self._snapshot_classification(existing)
-                changes = self._apply_llm_override(existing, llm_result, existing.ecology)
-                if changes:
-                    self.stats["llm_enhanced"] += 1
-                    for field, new_val in changes.items():
-                        setattr(existing, field, new_val)
-                self._record_classification_change(key, old_fields, existing)
-                self.stats["skipped"] += 1
-                return
+        return self._process_new_item(key, item, config, llm_result)
 
-            self._replace_classification(key, item, existing, use_llm, llm_result, subscribe_all_releases)
-            return
+    def _track_star_change(self, key: str, item: dict, existing) -> None:
+        """记录 stars 增长（用于周报动态）。"""
+        new_stars = item.get("stargazers_count", 0)
+        if new_stars > existing.stars:
+            self.star_changes[key] = new_stars - existing.stars
 
-        classification = self._classify_item(item, use_llm, llm_result, subscribe_all_releases, existing)
+    def _process_protected(self, key: str, item: dict, existing) -> None:
+        """策略：手动保护项目，只更新 stars 和 last_updated。"""
+        existing.stars = item.get("stargazers_count", 0)
+        existing.last_updated = item.get("pushed_at") or existing.last_updated
+        self.stats["protected"] += 1
+
+    def _process_force_refresh(self, key: str, item: dict, existing, config: EngineConfig, llm_result: dict | None) -> None:
+        """策略：强制刷新，重新分类并清除 override 标记。"""
+        self._replace_classification(key, item, existing, config, llm_result, clear_override=True)
+
+    def _process_incremental(self, key: str, item: dict, existing, config: EngineConfig, llm_result: dict | None) -> None:
+        """策略：增量更新，只更新元数据，应用 LLM 覆盖。"""
+        existing.stars = item.get("stargazers_count", 0)
+        existing.description = item.get("description") or ""
+        existing.topics = item.get("topics", [])
+        existing.last_updated = item.get("pushed_at") or existing.last_updated
+        # 增量模式下规则分类跳过，但 LLM 覆盖仍然应用
+        old_fields = self._snapshot_classification(existing)
+        changes = self._apply_llm_override(existing, llm_result, existing.ecology)
+        if changes:
+            self.stats["llm_enhanced"] += 1
+            for field, new_val in changes.items():
+                setattr(existing, field, new_val)
+        self._record_classification_change(key, old_fields, existing)
+        self.stats["skipped"] += 1
+
+    def _process_standard_refresh(self, key: str, item: dict, existing, config: EngineConfig, llm_result: dict | None) -> None:
+        """策略：标准更新，重新分类已有项目。"""
+        self._replace_classification(key, item, existing, config, llm_result)
+
+    def _process_new_item(self, key: str, item: dict, config: EngineConfig, llm_result: dict | None) -> None:
+        """策略：新项目，执行分类并入库。"""
+        classification = self._classify_item(item, config.use_llm, llm_result, config.subscribe_all_releases)
         self.db.set(key, classification)
         self.new_keys.add(key)
         self.stats["new"] += 1
