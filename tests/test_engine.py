@@ -46,7 +46,7 @@ class TestSafeInt(unittest.TestCase):
 
 class TestEcologyLock(unittest.TestCase):
     def test_unlocked_by_default(self):
-        self.assertFalse(_is_ecology_locked("独立项目 / Standalone"))
+        self.assertFalse(_is_ecology_locked("独立项目"))
 
 
 class MockDB:

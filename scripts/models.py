@@ -26,7 +26,7 @@ class StarItem:
     language: str = "文档 / 无代码"
     platform: str = "其他 / 未分类"
     type: str = "其他 / 未分类"
-    ecology: str = "独立项目 / Standalone"
+    ecology: str = "独立项目"
     ecology_role: str = "-"
     topics: List[str] = field(default_factory=list)
     stars: int = 0

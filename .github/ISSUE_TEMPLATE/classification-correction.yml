@@ -38,7 +38,7 @@ body:
     attributes:
       label: "建议分类（正确）"
       description: "你认为应该是什么分类？"
-      placeholder: "如: 独立项目 / Standalone"
+      placeholder: "如: 独立项目"
 
   - type: textarea
     id: reason

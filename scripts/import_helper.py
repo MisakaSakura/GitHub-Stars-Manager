@@ -82,7 +82,7 @@ class FirstRunHelper:
                     "language": row.get("language", "文档 / 无代码"),
                     "platform": row.get("platform", "其他 / 未分类"),
                     "type": row.get("type", "其他 / 未分类"),
-                    "ecology": row.get("ecology", "独立项目 / Standalone"),
+                    "ecology": row.get("ecology", "独立项目"),
                     "ecology_role": row.get("ecology_role", "-"),
                     "topics": row.get("topics", "").split(", ") if row.get("topics") else [],
                     "stars": _safe_int(row.get("stars"), 0),

@@ -77,12 +77,12 @@ def _auto_fix_issues(ctx: PipelineContext, issues: list) -> list[tuple[str, str]
                 changed_fields.append(f"type: {original['type']} → {expected_type}")
 
         elif issue.issue_type == "isolated_ecology":
-            if original["ecology"] not in ("独立项目 / Standalone", "独立项目", ""):
-                item.ecology = "独立项目 / Standalone"
+            if original["ecology"] not in ("独立项目", ""):
+                item.ecology = "独立项目"
                 item.ecology_role = "-"
-                corrected["ecology"] = "独立项目 / Standalone"
+                corrected["ecology"] = "独立项目"
                 corrected["ecology_role"] = "-"
-                changed_fields.append(f"ecology: {original['ecology']} → 独立项目 / Standalone")
+                changed_fields.append(f"ecology: {original['ecology']} → 独立项目")
 
         if changed_fields:
             # 自动修正不设置 manual_override（避免与用户手动保护混淆）

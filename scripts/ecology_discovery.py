@@ -55,7 +55,7 @@ class EcologyDiscovery:
         items = []
         for item in self.db.values():
             eco = item.ecology
-            if eco in ("独立项目", "独立项目 / Standalone", None, ""):
+            if eco in ("独立项目", None, ""):
                 items.append(item.to_dict() if hasattr(item, "to_dict") else dict(item))
         return items
 

@@ -354,7 +354,7 @@ class IncrementalEngine:
             language=language,
             platform=platform,
             type=ptype,
-            ecology=eco or "独立项目 / Standalone",
+            ecology=eco or "独立项目",
             ecology_role=role or "-",
             topics=item.get("topics", []),
             stars=item.get("stargazers_count", 0),

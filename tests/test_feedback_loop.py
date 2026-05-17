@@ -126,7 +126,7 @@ class TestDetectOverrideConflicts(unittest.TestCase):
     """测试 manual_override 冲突检测"""
 
     def _make_item(self, full_name, platform="其他 / 未分类", type_="其他 / 未分类",
-                   ecology="独立项目 / Standalone", ecology_role="其他 / Other",
+                   ecology="独立项目", ecology_role="其他 / Other",
                    manual_override=True, override_rules_version="test-v1"):
         return StarItem(
             full_name=full_name, name=full_name.split("/")[1],
@@ -143,7 +143,7 @@ class TestDetectOverrideConflicts(unittest.TestCase):
             "user/repo": self._make_item(
                 "user/repo",
                 platform="其他 / 未分类", type_="其他 / 未分类",
-                ecology="独立项目 / Standalone", ecology_role="其他 / Other",
+                ecology="独立项目", ecology_role="其他 / Other",
             )
         })
         conflicts = fb.detect_override_conflicts(db)
@@ -156,7 +156,7 @@ class TestDetectOverrideConflicts(unittest.TestCase):
             "user/repo": self._make_item(
                 "user/repo",
                 platform="Windows", type_="工具 / Tool",
-                ecology="独立项目 / Standalone",
+                ecology="独立项目",
                 override_rules_version="test-v2",  # 与当前版本一致
             )
         })
@@ -175,7 +175,7 @@ class TestDetectOverrideConflicts(unittest.TestCase):
             "user/repo": self._make_item(
                 "user/repo",
                 platform="Windows", type_="工具 / Tool",
-                ecology="独立项目 / Standalone",
+                ecology="独立项目",
                 override_rules_version="test-v1",
             )
         })
@@ -247,8 +247,8 @@ class TestGenerateConflictReport(unittest.TestCase):
             {
                 "full_name": "user/info",
                 "current": {"ecology": "Custom"},
-                "rules_suggest": {"ecology": "独立项目 / Standalone"},
-                "conflict_fields": [{"field": "ecology", "current": "Custom", "rules_suggest": "独立项目 / Standalone"}],
+                "rules_suggest": {"ecology": "独立项目"},
+                "conflict_fields": [{"field": "ecology", "current": "Custom", "rules_suggest": "独立项目"}],
                 "rules_version": "v1",
                 "is_version_mismatch": True,
                 "severity": "info",
@@ -276,7 +276,7 @@ class TestScanManualOverrides(unittest.TestCase):
             "owner": "user",
             "platform": "其他 / 未分类",
             "type": "其他 / 未分类",
-            "ecology": "独立项目 / Standalone",
+            "ecology": "独立项目",
             "ecology_role": "其他 / Other",
             "manual_override": True,
             "override_rules_version": "",

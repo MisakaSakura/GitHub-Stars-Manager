@@ -39,7 +39,7 @@ class FeedbackLoop:
         return {
             "platform": rule.classify_platform(item_dict),
             "type": rule.classify_type(item_dict),
-            "ecology": eco or "独立项目 / Standalone",
+            "ecology": eco or "独立项目",
             "ecology_role": role or "其他 / Other",
         }
 
@@ -293,7 +293,7 @@ class FeedbackLoop:
                 }
                 neg_evidence[old].append(evidence)
                 # 正向模式：new 生态被用户确认（从其他生态改过来的）
-                if new != "独立项目 / Standalone" and new != "独立项目":
+                if new != "独立项目":
                     pos_evidence[new].append(evidence)
 
         # 2. 生成否定规则

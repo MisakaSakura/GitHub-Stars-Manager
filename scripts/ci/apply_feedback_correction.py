@@ -37,7 +37,7 @@ def parse_multi_field(body: str, label: str) -> dict[str, str]:
         建议分类（正确）
         platform: macOS
         type: GUI 工具
-        ecology: 独立项目 / Standalone
+        ecology: 独立项目
     """
     m = re.search(rf"{re.escape(label)}\s*\n\s*(.+?)(?=\n\s*\n|\n[A-Z]|$)", body, re.DOTALL)
     if not m:

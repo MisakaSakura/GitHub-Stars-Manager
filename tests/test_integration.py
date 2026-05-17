@@ -56,7 +56,7 @@ class TestReportGeneratorWithStarItem(unittest.TestCase):
             "language": "Python",
             "platform": "CLI / 终端",
             "type": "工具 / Tool",
-            "ecology": "独立项目 / Standalone",
+            "ecology": "独立项目",
             "ecology_role": "-",
             "topics": ["cli", "tool"],
             "stars": 100,

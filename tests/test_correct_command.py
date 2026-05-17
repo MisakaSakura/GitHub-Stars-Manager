@@ -26,7 +26,7 @@ class TestCorrectCommand(unittest.TestCase):
             "owner": "owner",
             "platform": "其他 / 未分类",
             "type": "其他 / 未分类",
-            "ecology": "独立项目 / Standalone",
+            "ecology": "独立项目",
             "ecology_role": "-",
         })
         self.db.save()

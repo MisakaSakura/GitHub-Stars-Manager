@@ -367,7 +367,7 @@ class ReportGenerator:
             "ai_tags": raw_ai_tags[:5],
             "ai_platforms": raw_plat,
             "feedback_url": self._feedback_url(r["full_name"], r["ecology"]),
-            "has_eco_badge": r["ecology"] != "独立项目 / Standalone",
+            "has_eco_badge": r["ecology"] != "独立项目",
             "has_role_badge": r["ecology_role"] != "-",
         }
 
@@ -375,7 +375,7 @@ class ReportGenerator:
         """准备生态分组数据（供 Jinja2 模板渲染）。"""
         result = []
         for eco_name, count in stats["ecology"].most_common():
-            if eco_name == "独立项目 / Standalone":
+            if eco_name == "独立项目":
                 continue
             eco_items = [r for r in items if r["ecology"] == eco_name]
             roles = Counter([r["ecology_role"] for r in eco_items])
@@ -395,11 +395,11 @@ class ReportGenerator:
                 "is_standalone": False,
             })
 
-        standalone = sorted([r for r in items if r["ecology"] == "独立项目 / Standalone"],
+        standalone = sorted([r for r in items if r["ecology"] == "独立项目"],
                            key=lambda x: x["stars"], reverse=True)
         if standalone:
             result.append({
-                "name": "独立项目 / Standalone",
+                "name": "独立项目",
                 "count": len(standalone),
                 "roles": [{"name": None, "count": len(standalone),
                           "items": [self._eco_item_data(item) for item in standalone]}],
