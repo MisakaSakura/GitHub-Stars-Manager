@@ -1,4 +1,22 @@
 {
-  "negative": {},
+  "negative": {
+    "独立项目 / Standalone": {
+      "topic_blacklist": [],
+      "desc_blacklist": [
+        "the",
+        "and",
+        "for"
+      ],
+      "name_blacklist": [],
+      "evidence": 15,
+      "examples": [
+        "obra/superpowers",
+        "starship/starship",
+        "nickustinov/itsyhome-macos",
+        "SteamClientHomebrew/Millennium",
+        "jesseduffield/lazygit"
+      ]
+    }
+  },
   "positive": {}
 }

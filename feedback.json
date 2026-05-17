@@ -1,11 +1,12 @@
 {
   "version": 1,
-  "updated_at": "2026-05-16T15:43:23.608680+00:00",
+  "rules_version": "2026-05-17-platform-refactor",
+  "updated_at": "2026-05-17T11:35:04.821180+00:00",
   "entries": {
     "obra/superpowers": {
-      "timestamp": "2026-05-16T14:11:01.027751+00:00",
+      "timestamp": "2026-05-17T11:35:04.821063+00:00",
       "original": {
-        "platform": "其他 / 未分类",
+        "platform": "AI / 机器学习",
         "type": "框架 / Framework",
         "ecology": "独立项目 / Standalone",
         "ecology_role": "-"
@@ -13,10 +14,17 @@
       "corrected": {
         "platform": "AI / 机器学习",
         "type": "框架 / Framework",
-        "ecology": "独立项目 / Standalone",
+        "ecology": "独立项目",
         "ecology_role": "-"
       },
-      "source": "issue#3"
+      "source": "auto_detect",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "superpowers",
+        "description": "An agentic skills framework & software development methodology that works.",
+        "topics": [],
+        "language": "Shell"
+      }
     },
     "xishang0128/sparkle": {
       "timestamp": "2026-05-16T15:43:23.608245+00:00",
@@ -83,9 +91,9 @@
       "source": "auto_fix"
     },
     "Genymobile/gnirehtet": {
-      "timestamp": "2026-05-16T15:43:23.608313+00:00",
+      "timestamp": "2026-05-17T11:35:04.821038+00:00",
       "original": {
-        "platform": "移动端",
+        "platform": "网络 / 代理",
         "type": "工具 / Tool",
         "ecology": "Clash / Mihomo",
         "ecology_role": "其他 / Other"
@@ -93,10 +101,23 @@
       "corrected": {
         "platform": "网络 / 代理",
         "type": "工具 / Tool",
-        "ecology": "Clash / Mihomo",
-        "ecology_role": "其他 / Other"
+        "ecology": "独立项目",
+        "ecology_role": "-"
       },
-      "source": "auto_fix"
+      "source": "auto_detect",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "gnirehtet",
+        "description": "Gnirehtet provides reverse tethering for Android",
+        "topics": [
+          "android",
+          "java-8",
+          "reverse-tethering",
+          "rust",
+          "vpn"
+        ],
+        "language": "Java"
+      }
     },
     "zen-browser/desktop": {
       "timestamp": "2026-05-16T15:43:23.608323+00:00",
@@ -419,228 +440,441 @@
       "source": "auto_fix"
     },
     "starship/starship": {
-      "timestamp": "2026-05-16T15:43:23.608511+00:00",
+      "timestamp": "2026-05-17T11:35:04.820866+00:00",
       "original": {
-        "platform": "CLI / 终端",
-        "type": "配置 / Dotfiles",
-        "ecology": "Starship",
-        "ecology_role": "核心 / Core"
-      },
-      "corrected": {
         "platform": "CLI / 终端",
         "type": "配置 / Dotfiles",
         "ecology": "独立项目 / Standalone",
         "ecology_role": "-"
       },
-      "source": "auto_fix"
+      "corrected": {
+        "platform": "CLI / 终端",
+        "type": "配置 / Dotfiles",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_detect",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "starship",
+        "description": "☄🌌️  The minimal, blazing-fast, and infinitely customizable prompt for any shell!",
+        "topics": [
+          "bash",
+          "fish",
+          "fish-prompt",
+          "fish-theme",
+          "oh-my-zsh",
+          "powershell",
+          "rust",
+          "shell-prompt",
+          "starship",
+          "zsh",
+          "zsh-prompt",
+          "zsh-theme"
+        ],
+        "language": "Rust"
+      }
     },
     "nickustinov/itsyhome-macos": {
-      "timestamp": "2026-05-16T15:43:23.608518+00:00",
+      "timestamp": "2026-05-17T11:35:04.820890+00:00",
       "original": {
-        "platform": "桌面端",
-        "type": "应用 / App",
-        "ecology": "Home Assistant",
-        "ecology_role": "GUI 前端 / Client"
-      },
-      "corrected": {
         "platform": "桌面端",
         "type": "应用 / App",
         "ecology": "独立项目 / Standalone",
         "ecology_role": "-"
       },
-      "source": "auto_fix"
+      "corrected": {
+        "platform": "桌面端",
+        "type": "应用 / App",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_detect",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "itsyhome-macos",
+        "description": "A native macOS menu bar app for controlling your smart home devices.",
+        "topics": [],
+        "language": "Swift"
+      }
     },
     "SteamClientHomebrew/Millennium": {
-      "timestamp": "2026-05-16T15:43:23.608523+00:00",
+      "timestamp": "2026-05-17T11:35:04.820904+00:00",
       "original": {
-        "platform": "桌面端",
-        "type": "框架 / Framework",
-        "ecology": "Steam",
-        "ecology_role": "插件 / Plugin"
-      },
-      "corrected": {
         "platform": "桌面端",
         "type": "框架 / Framework",
         "ecology": "独立项目 / Standalone",
         "ecology_role": "-"
       },
-      "source": "auto_fix"
+      "corrected": {
+        "platform": "桌面端",
+        "type": "框架 / Framework",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_detect",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "Millennium",
+        "description": "An open-source low-code modding framework to create, manage and use themes/plugins for the desktop Steam Client without any low-level internal interaction or overhead.",
+        "topics": [
+          "millennium",
+          "patcher",
+          "plugins-api",
+          "reverse-engineering",
+          "skins",
+          "steam",
+          "themes",
+          "valve"
+        ],
+        "language": "C++"
+      }
     },
     "jesseduffield/lazygit": {
-      "timestamp": "2026-05-16T15:43:23.608529+00:00",
+      "timestamp": "2026-05-17T11:35:04.820922+00:00",
       "original": {
-        "platform": "CLI / 终端",
-        "type": "工具 / Tool",
-        "ecology": "Git",
-        "ecology_role": "GUI 前端 / Client"
-      },
-      "corrected": {
         "platform": "CLI / 终端",
         "type": "工具 / Tool",
         "ecology": "独立项目 / Standalone",
         "ecology_role": "-"
       },
-      "source": "auto_fix"
+      "corrected": {
+        "platform": "CLI / 终端",
+        "type": "工具 / Tool",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_detect",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "lazygit",
+        "description": "simple terminal UI for git commands",
+        "topics": [
+          "cli",
+          "git",
+          "terminal"
+        ],
+        "language": "Go"
+      }
     },
     "AUTOMATIC1111/stable-diffusion-webui": {
-      "timestamp": "2026-05-16T15:43:23.608536+00:00",
+      "timestamp": "2026-05-17T11:35:04.820940+00:00",
       "original": {
-        "platform": "AI / 机器学习",
-        "type": "应用 / App",
-        "ecology": "Stable Diffusion",
-        "ecology_role": "GUI 前端 / Client"
-      },
-      "corrected": {
         "platform": "AI / 机器学习",
         "type": "应用 / App",
         "ecology": "独立项目 / Standalone",
         "ecology_role": "-"
       },
-      "source": "auto_fix"
+      "corrected": {
+        "platform": "AI / 机器学习",
+        "type": "应用 / App",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_detect",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "stable-diffusion-webui",
+        "description": "Stable Diffusion web UI",
+        "topics": [
+          "ai",
+          "ai-art",
+          "deep-learning",
+          "diffusion",
+          "gradio",
+          "image-generation",
+          "image2image",
+          "img2img",
+          "pytorch",
+          "stable-diffusion",
+          "text2image",
+          "torch",
+          "txt2img",
+          "unstable",
+          "upscaling",
+          "web"
+        ],
+        "language": "Python"
+      }
     },
     "91270/MeiamSubtitles": {
-      "timestamp": "2026-05-16T15:43:23.608541+00:00",
+      "timestamp": "2026-05-17T11:35:04.820954+00:00",
       "original": {
-        "platform": "Web 后端",
-        "type": "插件 / Plugin",
-        "ecology": "其他 / 未分类",
-        "ecology_role": "插件 / Plugin"
-      },
-      "corrected": {
         "platform": "Web 后端",
         "type": "插件 / Plugin",
         "ecology": "独立项目 / Standalone",
         "ecology_role": "-"
       },
-      "source": "auto_fix"
+      "corrected": {
+        "platform": "Web 后端",
+        "type": "插件 / Plugin",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_detect",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "MeiamSubtitles",
+        "description": "Emby Server / Jellyfin Server 端字幕插件 ，使用  迅雷影音、 射手网 接口精准匹配视频字幕",
+        "topics": [],
+        "language": "C#"
+      }
     },
     "AlkaidLab/foundation-sunshine": {
-      "timestamp": "2026-05-16T15:43:23.608547+00:00",
+      "timestamp": "2026-05-17T11:35:04.820971+00:00",
       "original": {
-        "platform": "桌面端",
-        "type": "工具 / Tool",
-        "ecology": "Moonlight",
-        "ecology_role": "核心 / Core"
-      },
-      "corrected": {
         "platform": "桌面端",
         "type": "工具 / Tool",
         "ecology": "独立项目 / Standalone",
         "ecology_role": "-"
       },
-      "source": "auto_fix"
+      "corrected": {
+        "platform": "桌面端",
+        "type": "工具 / Tool",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_detect",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "foundation-sunshine",
+        "description": "Sunshine, a self-hosted game-stream host for Moonlight, now features an HDR-friendly fork that integrates virtual displays and control panels.",
+        "topics": [
+          "cloudgaming",
+          "game-streaming",
+          "moonlight",
+          "rdp",
+          "remote-desktop",
+          "stream",
+          "sunshine"
+        ],
+        "language": "C++"
+      }
     },
     "sumruler/typora-theme-phycat": {
-      "timestamp": "2026-05-16T15:43:23.608553+00:00",
+      "timestamp": "2026-05-17T11:35:04.820980+00:00",
       "original": {
-        "platform": "其他 / 未分类",
-        "type": "主题 / Theme",
-        "ecology": "VS Code",
-        "ecology_role": "主题 / Theme"
-      },
-      "corrected": {
         "platform": "其他 / 未分类",
         "type": "主题 / Theme",
         "ecology": "独立项目 / Standalone",
         "ecology_role": "-"
       },
-      "source": "auto_fix"
+      "corrected": {
+        "platform": "其他 / 未分类",
+        "type": "主题 / Theme",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_detect",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "typora-theme-phycat",
+        "description": "一款精心打磨过的多色多功能Typora主题",
+        "topics": [],
+        "language": "CSS"
+      }
     },
     "dubinc/dub": {
-      "timestamp": "2026-05-16T15:43:23.608559+00:00",
+      "timestamp": "2026-05-17T11:35:04.821001+00:00",
       "original": {
-        "platform": "Web 后端",
-        "type": "应用 / App",
-        "ecology": "Tailwind CSS",
-        "ecology_role": "GUI 前端 / Client"
-      },
-      "corrected": {
         "platform": "Web 后端",
         "type": "应用 / App",
         "ecology": "独立项目 / Standalone",
         "ecology_role": "-"
       },
-      "source": "auto_fix"
+      "corrected": {
+        "platform": "Web 后端",
+        "type": "应用 / App",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_detect",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "dub",
+        "description": "The modern link attribution platform. Loved by world-class marketing teams like Framer, Perplexity, Superhuman, Twilio, Buffer and more.",
+        "topics": [
+          "clickhouse",
+          "mysql",
+          "nextjs",
+          "open-source",
+          "planetscale",
+          "prisma",
+          "tailwindcss",
+          "tinybird",
+          "typescript",
+          "upstash",
+          "vercel"
+        ],
+        "language": "TypeScript"
+      }
     },
     "doitsujin/dxvk": {
-      "timestamp": "2026-05-16T15:43:23.608564+00:00",
+      "timestamp": "2026-05-17T11:35:04.821018+00:00",
       "original": {
-        "platform": "游戏 / 图形",
-        "type": "工具 / Tool",
-        "ecology": "Wine",
-        "ecology_role": "API 封装 / Wrapper"
-      },
-      "corrected": {
         "platform": "游戏 / 图形",
         "type": "工具 / Tool",
         "ecology": "独立项目 / Standalone",
         "ecology_role": "-"
       },
-      "source": "auto_fix"
+      "corrected": {
+        "platform": "游戏 / 图形",
+        "type": "工具 / Tool",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_detect",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "dxvk",
+        "description": "Vulkan-based implementation of D3D8, 9, 10 and 11 for Linux / Wine",
+        "topics": [
+          "d3d11",
+          "d3d9",
+          "dxbc",
+          "gaming",
+          "linux",
+          "spir-v",
+          "vulkan",
+          "wine"
+        ],
+        "language": "C++"
+      }
     },
     "CollapseLauncher/Collapse": {
-      "timestamp": "2026-05-16T15:43:23.608569+00:00",
+      "timestamp": "2026-05-17T11:35:04.821024+00:00",
       "original": {
-        "platform": "桌面端",
-        "type": "应用 / App",
-        "ecology": "i3 / Sway",
-        "ecology_role": "其他 / Other"
-      },
-      "corrected": {
         "platform": "桌面端",
         "type": "应用 / App",
         "ecology": "独立项目 / Standalone",
         "ecology_role": "-"
       },
-      "source": "auto_fix"
+      "corrected": {
+        "platform": "桌面端",
+        "type": "应用 / App",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_detect",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "Collapse",
+        "description": "An Advanced Launcher for miHoYo/HoYoverse Games",
+        "topics": [
+          "benghuai",
+          "dotnet",
+          "game-launcher",
+          "genshin",
+          "genshin-impact",
+          "honkai",
+          "honkai-impact",
+          "honkai-starrail",
+          "honkai3rd",
+          "juequling",
+          "launcher",
+          "net8",
+          "star-rail",
+          "starrail",
+          "winui",
+          "winui3",
+          "yuanshen",
+          "zenless-zone-zero"
+        ],
+        "language": "C#"
+      }
     },
     "the1812/Bilibili-Evolved": {
-      "timestamp": "2026-05-16T15:43:23.608575+00:00",
+      "timestamp": "2026-05-17T11:35:04.821045+00:00",
       "original": {
-        "platform": "Web 前端",
-        "type": "工具 / Tool",
-        "ecology": "Tampermonkey",
-        "ecology_role": "脚本 / Script"
-      },
-      "corrected": {
         "platform": "Web 前端",
         "type": "工具 / Tool",
         "ecology": "独立项目 / Standalone",
         "ecology_role": "-"
       },
-      "source": "auto_fix"
+      "corrected": {
+        "platform": "Web 前端",
+        "type": "工具 / Tool",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_detect",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "Bilibili-Evolved",
+        "description": "强大的哔哩哔哩增强脚本",
+        "topics": [
+          "bilibili",
+          "tampermonkey",
+          "userscript"
+        ],
+        "language": "TypeScript"
+      }
     },
     "rustdesk/rustdesk": {
-      "timestamp": "2026-05-16T15:43:23.608580+00:00",
+      "timestamp": "2026-05-17T11:35:04.821052+00:00",
       "original": {
-        "platform": "桌面端",
-        "type": "应用 / App",
-        "ecology": "Hyprland",
-        "ecology_role": "GUI 前端 / Client"
-      },
-      "corrected": {
         "platform": "桌面端",
         "type": "应用 / App",
         "ecology": "独立项目 / Standalone",
         "ecology_role": "-"
       },
-      "source": "auto_fix"
+      "corrected": {
+        "platform": "桌面端",
+        "type": "应用 / App",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_detect",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "rustdesk",
+        "description": "An open-source remote desktop application designed for self-hosting, as an alternative to TeamViewer.",
+        "topics": [
+          "android",
+          "anydesk",
+          "dart",
+          "flatpak",
+          "flutter",
+          "flutter-apps",
+          "ios",
+          "linux",
+          "macos",
+          "p2p",
+          "rdp",
+          "remote-control",
+          "remote-desktop",
+          "rust",
+          "rust-lang",
+          "teamviewer",
+          "vnc",
+          "wayland",
+          "windows"
+        ],
+        "language": "Rust"
+      }
     },
     "yangyangwithgnu/use_vim_as_ide": {
-      "timestamp": "2026-05-16T15:43:23.608585+00:00",
+      "timestamp": "2026-05-17T11:35:04.821057+00:00",
       "original": {
-        "platform": "CLI / 终端",
-        "type": "编辑器 / IDE",
-        "ecology": "Neovim",
-        "ecology_role": "教程 / Guide"
-      },
-      "corrected": {
         "platform": "CLI / 终端",
         "type": "编辑器 / IDE",
         "ecology": "独立项目 / Standalone",
         "ecology_role": "-"
       },
-      "source": "auto_fix"
+      "corrected": {
+        "platform": "CLI / 终端",
+        "type": "编辑器 / IDE",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_detect",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "use_vim_as_ide",
+        "description": "use vim as IDE",
+        "topics": [],
+        "language": "VimL"
+      }
     }
   },
   "patterns": {
@@ -719,6 +953,12 @@
       },
       "Neovim": {
         "独立项目 / Standalone": 1
+      },
+      "独立项目 / Standalone": {
+        "独立项目": 15
+      },
+      "Clash / Mihomo": {
+        "独立项目": 1
       }
     },
     "ecology_role": {
@@ -738,7 +978,7 @@
         "-": 1
       },
       "其他 / Other": {
-        "-": 1
+        "-": 2
       },
       "脚本 / Script": {
         "-": 1
