@@ -133,26 +133,30 @@ class AIDatabase:
 
     def migrate_from_stars_db(self, db_items: Iterable) -> int:
         """从主数据库迁移旧的 AI 字段到 AI 数据库，返回迁移数量"""
+
+        def _get(obj, field: str, default=None):
+            return obj.get(field, default) if isinstance(obj, dict) else getattr(obj, field, default)
+
         migrated = 0
         for item in db_items:
-            key = item.full_name if hasattr(item, "full_name") else item.get("full_name")
+            key = _get(item, "full_name")
             if not key:
                 continue
             # 如果已有 AI 记录，跳过
             if key in self.data:
                 continue
             # 只有当项目有 AI 字段时才迁移
-            llm_status = item.llm_status if hasattr(item, "llm_status") else item.get("llm_status")
+            llm_status = _get(item, "llm_status")
             if llm_status and llm_status != "not_analyzed":
                 self.data[key] = AIResult(
                     full_name=key,
-                    analyzed_at=item.last_updated if hasattr(item, "last_updated") else item.get("last_updated", ""),
+                    analyzed_at=_get(item, "last_updated", ""),
                     llm_status=llm_status,
-                    llm_confidence=item.llm_confidence if hasattr(item, "llm_confidence") else item.get("llm_confidence"),
-                    llm_reason=item.llm_reason if hasattr(item, "llm_reason") else item.get("llm_reason"),
-                    ai_summary=item.ai_summary if hasattr(item, "ai_summary") else item.get("ai_summary"),
-                    ai_tags=item.ai_tags if hasattr(item, "ai_tags") else item.get("ai_tags"),
-                    ai_platforms=item.ai_platforms if hasattr(item, "ai_platforms") else item.get("ai_platforms"),
+                    llm_confidence=_get(item, "llm_confidence"),
+                    llm_reason=_get(item, "llm_reason"),
+                    ai_summary=_get(item, "ai_summary"),
+                    ai_tags=_get(item, "ai_tags"),
+                    ai_platforms=_get(item, "ai_platforms"),
                 )
                 migrated += 1
         if migrated:
