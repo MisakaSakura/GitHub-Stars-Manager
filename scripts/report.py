@@ -556,6 +556,7 @@ class ReportGenerator:
         # 生态候选
         ecology_candidates = weekly_data.get("ecology_candidates", [])
         if ecology_candidates:
+            repo = self._repo_slug()
             for c in ecology_candidates:
                 c["status_icon"] = {
                     "candidate": "🔍",
@@ -563,6 +564,11 @@ class ReportGenerator:
                     "ai_reviewed": "🤖",
                     "trusted": "✅",
                 }.get(c.get("status"), "❓")
+                if repo:
+                    from html import escape
+                    title = f"[生态Blocklist] 提议排除 '{c['name']}' (topic)"
+                    body = f"此候选被自动识别为潜在生态，但可能属于平台/类型关键词而非独立生态。\n\n- 候选名称: {c['name']}\n- 状态: {c['status']}\n- 涉及项目数: {c['count']}\n- 置信度: {c['confidence']:.0%}\n\n请确认是否应加入 ecology_blocklist.yaml。"
+                    c["blocklist_url"] = f"https://github.com/{repo}/issues/new?template=ecology-blocklist.yml&title={escape(title)}&body={escape(body)}"
             tabs.append({
                 "id": "eco",
                 "label": f"🌱 候选 ({len(ecology_candidates)})",

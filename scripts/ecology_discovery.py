@@ -253,6 +253,7 @@ class EcologyDiscovery:
                 "```json",
                 json.dumps(c.suggested_patterns, ensure_ascii=False, indent=2),
                 "```",
+                f"- [🚫 这不是生态，提议加入 blocklist](../../issues/new?template=ecology-blocklist.yml&title=%5B生态Blocklist%5D+提议排除+'{c.name.replace(' ', '+')}'+(topic)",
                 "",
             ])
 

@@ -232,6 +232,7 @@ tr:hover td{background:var(--bg-hover)}
           <span>{{ c.status_icon }} {{ c.name|e }}</span>
           <span class="wd-tag">{{ c.count }} 个项目</span>
           <span style="color:var(--text-muted);font-size:11px">{{ c.progress|e }}</span>
+          {% if c.blocklist_url %}<a href="{{ c.blocklist_url|e }}" target="_blank" style="color:#8b949e;font-size:11px;text-decoration:none;margin-left:6px" title="提议加入 blocklist">🚫</a>{% endif %}
         </div>
         {% endfor %}
       </div></div>
