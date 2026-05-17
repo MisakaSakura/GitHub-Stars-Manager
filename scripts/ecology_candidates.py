@@ -4,10 +4,11 @@
 
 import json
 import os
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
+from config_rules import PLATFORM_RULES, TYPE_RULES
 from utils import log
 
 
@@ -25,6 +26,15 @@ class EcologyCandidateState:
     suggested_patterns: dict = field(default_factory=dict)
     ai_review: Optional[dict] = None
     rejected_reason: str = ""
+
+    def to_dict(self) -> dict:
+        return {k: getattr(self, k) for k in self.__dataclass_fields__}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "EcologyCandidateState":
+        known = {f.name for f in cls.__dataclass_fields__.values()}
+        filtered = {k: v for k, v in data.items() if k in known}
+        return cls(**filtered)
 
 
 class EcologyCandidatePool:
@@ -53,7 +63,6 @@ class EcologyCandidatePool:
     @staticmethod
     def _load_blocklist() -> set[str]:
         """加载 blocklist： ecology_blocklist.yaml + 自动从规则推导"""
-        import os
         from config_rules import PLATFORM_RULES, TYPE_RULES, ECOLOGY_STANDARD_NAMES, ECOLOGY_ALIASES
         from ecologies import ECOLOGY_RULES
 
@@ -78,15 +87,14 @@ class EcologyCandidatePool:
                     data = yaml.safe_load(f) or {}
                 noise.update(k.lower() for k in data.get("topics", []))
                 noise.update(k.lower() for k in data.get("name_prefixes", []))
-            except Exception:
-                pass
+            except (OSError, yaml.YAMLError) as e:
+                log(f"Blocklist 加载失败: {e}", "WARN")
 
         return noise
 
     @staticmethod
     def _load_manual_blocklist() -> set[str]:
         """仅加载手动 blocklist（ecology_blocklist.yaml），不包含自动推导。"""
-        import os
         blocklist_path = os.path.join(os.path.dirname(__file__), "ecology_blocklist.yaml")
         noise: set[str] = set()
         if os.path.exists(blocklist_path):
@@ -96,8 +104,8 @@ class EcologyCandidatePool:
                     data = yaml.safe_load(f) or {}
                 noise.update(k.lower() for k in data.get("topics", []))
                 noise.update(k.lower() for k in data.get("name_prefixes", []))
-            except Exception:
-                pass
+            except (OSError, yaml.YAMLError) as e:
+                log(f"手动 blocklist 加载失败: {e}", "WARN")
         return noise
 
     def _cleanup_blocklisted(self) -> None:
@@ -117,11 +125,20 @@ class EcologyCandidatePool:
                 raw = json.load(f)
             if isinstance(raw, dict) and raw.get("version") == self.VERSION:
                 for name, data in raw.get("candidates", {}).items():
-                    self.candidates[name] = EcologyCandidateState(**data)
+                    self.candidates[name] = EcologyCandidateState.from_dict(data)
+                self._proposed_blocklist = raw.get("proposed_blocklist", {})
             log(f"加载生态候选池: {len(self.candidates)} 个候选", "OK")
-        except Exception as e:
-            log(f"生态候选池加载失败，将重建: {e}", "WARN")
-            self.candidates = {}
+        except json.JSONDecodeError as e:
+            log(f"生态候选池 JSON 损坏: {e}", "WARN")
+            self._reset_state()
+        except OSError as e:
+            log(f"生态候选池读取失败: {e}", "WARN")
+            self._reset_state()
+
+    def _reset_state(self) -> None:
+        """重置候选池状态（加载失败时调用）。"""
+        self.candidates = {}
+        self._proposed_blocklist = {}
 
     def save(self) -> None:
         from utils import atomic_write
@@ -130,7 +147,8 @@ class EcologyCandidatePool:
             json.dump({
                 "version": self.VERSION,
                 "updated_at": datetime.now(timezone.utc).isoformat(),
-                "candidates": {k: asdict(v) for k, v in self.candidates.items()},
+                "candidates": {k: v.to_dict() for k, v in self.candidates.items()},
+                "proposed_blocklist": self._proposed_blocklist,
             }, f, ensure_ascii=False, indent=2)
 
         atomic_write(self.path, _write)
@@ -239,9 +257,11 @@ class EcologyCandidatePool:
             if state.status == "expired":
                 try:
                     last = datetime.fromisoformat(state.last_seen)
+                    if last.tzinfo is None:
+                        last = last.replace(tzinfo=timezone.utc)
                     if (now - last).days > 30:
                         to_remove.append(name)
-                except Exception:
+                except (ValueError, TypeError):
                     pass
         for name in to_remove:
             del self.candidates[name]
@@ -335,8 +355,6 @@ class EcologyCandidatePool:
         4. 该 indicator 当前不在 blocklist 中
         5. 过去 7 天内未对同一 indicator 创建过 issue
         """
-        from config_rules import PLATFORM_RULES, TYPE_RULES
-
         proposals: list[dict] = []
         now = datetime.now(timezone.utc)
 
@@ -406,41 +424,14 @@ class EcologyCandidatePool:
             return False
         try:
             dt = datetime.fromisoformat(proposed_at)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
             if (datetime.now(timezone.utc) - dt).days < days:
                 return True
-        except Exception:
+        except (ValueError, TypeError):
             pass
         return False
 
     def record_blocklist_proposal(self, indicator: str) -> None:
         """记录已创建的 blocklist issue，防止重复。"""
         self._proposed_blocklist[indicator.lower()] = datetime.now(timezone.utc).isoformat()
-
-    def save(self) -> None:
-        from utils import atomic_write
-
-        def _write(f):
-            json.dump({
-                "version": self.VERSION,
-                "updated_at": datetime.now(timezone.utc).isoformat(),
-                "candidates": {k: asdict(v) for k, v in self.candidates.items()},
-                "proposed_blocklist": self._proposed_blocklist,
-            }, f, ensure_ascii=False, indent=2)
-
-        atomic_write(self.path, _write)
-
-    def load(self) -> None:
-        if not os.path.exists(self.path):
-            return
-        try:
-            with open(self.path, "r", encoding="utf-8") as f:
-                raw = json.load(f)
-            if isinstance(raw, dict) and raw.get("version") == self.VERSION:
-                for name, data in raw.get("candidates", {}).items():
-                    self.candidates[name] = EcologyCandidateState(**data)
-                self._proposed_blocklist = raw.get("proposed_blocklist", {})
-            log(f"加载生态候选池: {len(self.candidates)} 个候选", "OK")
-        except Exception as e:
-            log(f"生态候选池加载失败，将重建: {e}", "WARN")
-            self.candidates = {}
-            self._proposed_blocklist = {}

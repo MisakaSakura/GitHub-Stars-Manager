@@ -11,6 +11,7 @@ from functools import lru_cache
 from html import escape
 
 from jinja2 import Template
+from config_rules import check_consistency
 from utils import log
 
 
@@ -351,7 +352,6 @@ class ReportGenerator:
         llm_status = r.get("llm_status", "")
 
         # P3: 一致性自检
-        from config_rules import check_consistency
         is_suspicious, consistency_flags = check_consistency(r)
 
         return {

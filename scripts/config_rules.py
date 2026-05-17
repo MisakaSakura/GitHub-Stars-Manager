@@ -400,7 +400,7 @@ def check_consistency(item: dict) -> tuple[bool, list[str]]:
 
     # 1. 编辑器/播放器/桌面工具生态需要桌面或跨平台
     if ecology in _DESKTOP_REQUIRED_ECOLOGIES:
-        if platform not in {"桌面端", "跨平台", "macOS", "Windows", "Linux"}:
+        if platform not in {"跨平台", "macOS", "Windows", "Linux"}:
             flags.append("编辑器/播放器生态但平台非桌面端")
 
     # 2. 代理/下载/容器工具生态需要工具/应用类型
