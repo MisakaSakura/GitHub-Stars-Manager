@@ -24,6 +24,13 @@
 - **config.py 相对导入** — 绝对导入改为相对导入，支持从任意目录导入
 - **219 个测试通过** — 新增 `test_correct_command.py`（8 用例）、SQLite 后端测试（8 用例）、Pipeline 依赖验证测试等
 
+### 🗑 遗留清理
+
+- **删除 `data/learned_rules.py`** — 旧 .py 格式规则补丁，代码已只使用 .json 格式
+- **清理未使用导入** — `sys`（utils.py）、`asdict`（models.py、ai_database.py）、`Counter`（engine.py）
+- **更新过时注释** — config_rules.py（生态 YAML 化说明）、rule_classifier.py（移除 .py 回退说明）
+- **统一 re 导入位置** — github_api.py 中 `import re` 从方法内部移至模块顶部
+
 ### 🏗 架构
 
 - **存储层完整性** — 全部 4 个 Repository 实现（StarsDB / AIDatabase / JSONStarsRepository / JSONAIRepository / SQLiteStarsRepository）接口对齐，支持 `close()` 统一释放

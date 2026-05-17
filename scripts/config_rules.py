@@ -76,8 +76,8 @@ TYPE_RULES = {
 }
 
 # ==================== 生态归属规则 ====================
-# 生态规则已按生态拆分到 ecologies/ 目录下，每个生态一个独立文件。
-# 新增生态：直接在 ecologies/ 下新建 .py 文件调用 register_ecology() 即可。
+# 生态规则已从 ecologies/ 下的独立 .py 文件迁移到 data/ecologies.yaml。
+# 新增生态：修改 data/ecologies.yaml，无需新建 Python 文件。
 from ecologies import ECOLOGY_RULES  # noqa: E402
 
 # 已确认准确的生态，AI 批量分析时不会覆盖这些生态下的项目分类

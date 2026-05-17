@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """增量更新引擎"""
 
-from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 

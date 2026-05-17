@@ -3,7 +3,6 @@
 """通用工具函数"""
 
 import os
-import sys
 from datetime import datetime, timezone
 
 

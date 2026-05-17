@@ -4,6 +4,7 @@
 
 import json
 import os
+import re
 import time
 import urllib.parse
 
@@ -168,7 +169,6 @@ class GitHubAPI:
 
     @staticmethod
     def _strip_markdown(text: str) -> str:
-        import re
         text = re.sub(r'```[\s\S]*?```', ' ', text)
         text = re.sub(r'`[^`]*`', ' ', text)
         # 先移除图片，再处理链接，避免 ![alt](url) 被误解析为链接

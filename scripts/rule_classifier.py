@@ -98,7 +98,7 @@ class RuleClassifier:
 
     @staticmethod
     def _load_learned_overrides() -> dict:
-        """加载用户反馈生成的规则补丁。优先 JSON 格式，回退旧版 .py 格式。"""
+        """加载用户反馈生成的规则补丁（JSON 格式）。"""
         if RuleClassifier._learned_overrides is not None:
             return RuleClassifier._learned_overrides
 

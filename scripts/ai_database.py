@@ -5,7 +5,7 @@
 import json
 import os
 from collections.abc import Iterable
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from typing import Optional, List
 
 from utils import log

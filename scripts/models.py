@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """数据模型：统一的数据结构和 Schema 定义"""
 
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional, List, Dict, Any
