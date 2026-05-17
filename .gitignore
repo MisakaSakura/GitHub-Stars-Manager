@@ -18,8 +18,9 @@ env/
 *.swo
 
 # 项目生成文件
-docs/
-fake_docs/
+docs/index.html
+docs/releases.html
+docs/ecology_discovery.md
 fake_db.json
 
 # ==================== 双分支数据隔离 ====================

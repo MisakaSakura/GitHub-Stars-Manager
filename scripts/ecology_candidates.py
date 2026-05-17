@@ -42,6 +42,10 @@ class EcologyCandidatePool:
         self.path = pool_path
         self.candidates: dict[str, EcologyCandidateState] = {}
         self.blocklist: set[str] = self._load_blocklist()
+        # 仅手动 blocklist（ecology_blocklist.yaml），用于判断是否需要创建 issue
+        self._manual_blocklist: set[str] = self._load_manual_blocklist()
+        # 已创建 blocklist issue 的记录: {indicator: proposed_at}
+        self._proposed_blocklist: dict[str, str] = {}
         self.load()
         # 初始化时清理已被 blocklist 的历史候选
         self._cleanup_blocklisted()
@@ -77,6 +81,23 @@ class EcologyCandidatePool:
             except Exception:
                 pass
 
+        return noise
+
+    @staticmethod
+    def _load_manual_blocklist() -> set[str]:
+        """仅加载手动 blocklist（ecology_blocklist.yaml），不包含自动推导。"""
+        import os
+        blocklist_path = os.path.join(os.path.dirname(__file__), "ecology_blocklist.yaml")
+        noise: set[str] = set()
+        if os.path.exists(blocklist_path):
+            try:
+                import yaml
+                with open(blocklist_path, "r", encoding="utf-8") as f:
+                    data = yaml.safe_load(f) or {}
+                noise.update(k.lower() for k in data.get("topics", []))
+                noise.update(k.lower() for k in data.get("name_prefixes", []))
+            except Exception:
+                pass
         return noise
 
     def _cleanup_blocklisted(self) -> None:
@@ -303,3 +324,123 @@ class EcologyCandidatePool:
                 "consecutive": state.consecutive_runs,
             })
         return sorted(result, key=lambda x: (-x["confidence"], -x["count"]))
+
+    def get_blocklist_proposals(self) -> list[dict]:
+        """检查候选池中应加入 blocklist 但尚未 blocklist 的项，返回提议列表。
+
+        触发条件（同时满足）：
+        1. 候选状态为 candidate 或 watchlist
+        2. 出现次数 >= 3（排除偶发噪声）
+        3. 候选名或 topic 命中 PLATFORM_RULES / TYPE_RULES 等已确认噪声源
+        4. 该 indicator 当前不在 blocklist 中
+        5. 过去 7 天内未对同一 indicator 创建过 issue
+        """
+        from config_rules import PLATFORM_RULES, TYPE_RULES
+
+        proposals: list[dict] = []
+        now = datetime.now(timezone.utc)
+
+        # 构建已确认噪声关键词集合（除手动 blocklist 外）
+        noise_keywords: set[str] = set()
+        for keywords in PLATFORM_RULES.values():
+            noise_keywords.update(k.lower() for k in keywords)
+        for keywords in TYPE_RULES.values():
+            noise_keywords.update(k.lower() for k in keywords)
+
+        for name, state in self.candidates.items():
+            if state.status not in ("candidate", "watchlist"):
+                continue
+            if state.appear_count < 3:
+                continue
+
+            name_lower = name.lower()
+
+            # 检查候选名本身是否在噪声列表中
+            if name_lower in noise_keywords and name_lower not in self._manual_blocklist:
+                if not self._was_recently_proposed(name_lower):
+                    proposals.append({
+                        "indicator": name,
+                        "indicator_type": "topic",
+                        "candidate_name": name,
+                        "appear_count": state.appear_count,
+                        "project_count": state.project_count_history[-1] if state.project_count_history else 0,
+                        "reason": f"'{name}' 属于平台/类型关键词，不应被识别为独立生态",
+                    })
+                continue
+
+            # 检查 topic_patterns 中是否有噪声关键词
+            patterns = state.suggested_patterns or {}
+            for topic in patterns.get("topic_patterns", []):
+                topic_lower = topic.lower()
+                if topic_lower in noise_keywords and topic_lower not in self._manual_blocklist:
+                    if not self._was_recently_proposed(topic_lower):
+                        proposals.append({
+                            "indicator": topic,
+                            "indicator_type": "topic",
+                            "candidate_name": name,
+                            "appear_count": state.appear_count,
+                            "project_count": state.project_count_history[-1] if state.project_count_history else 0,
+                            "reason": f"'{topic}' 属于平台/类型关键词，不应被识别为独立生态",
+                        })
+
+            # 检查 name_prefixes 中的通用前缀
+            for prefix in patterns.get("name_patterns", []):
+                prefix_lower = prefix.lower()
+                if prefix_lower in {"go", "py", "js", "my", "simple", "test", "mini"} and prefix_lower not in self._manual_blocklist:
+                    if not self._was_recently_proposed(prefix_lower):
+                        proposals.append({
+                            "indicator": prefix,
+                            "indicator_type": "name_prefix",
+                            "candidate_name": name,
+                            "appear_count": state.appear_count,
+                            "project_count": state.project_count_history[-1] if state.project_count_history else 0,
+                            "reason": f"'{prefix}' 是常见通用前缀，不应被识别为独立生态",
+                        })
+
+        return proposals
+
+    def _was_recently_proposed(self, indicator: str, days: int = 7) -> bool:
+        """检查 indicator 是否在指定天数内已提议过 blocklist。"""
+        proposed_at = self._proposed_blocklist.get(indicator.lower())
+        if not proposed_at:
+            return False
+        try:
+            dt = datetime.fromisoformat(proposed_at)
+            if (datetime.now(timezone.utc) - dt).days < days:
+                return True
+        except Exception:
+            pass
+        return False
+
+    def record_blocklist_proposal(self, indicator: str) -> None:
+        """记录已创建的 blocklist issue，防止重复。"""
+        self._proposed_blocklist[indicator.lower()] = datetime.now(timezone.utc).isoformat()
+
+    def save(self) -> None:
+        from utils import atomic_write
+
+        def _write(f):
+            json.dump({
+                "version": self.VERSION,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "candidates": {k: asdict(v) for k, v in self.candidates.items()},
+                "proposed_blocklist": self._proposed_blocklist,
+            }, f, ensure_ascii=False, indent=2)
+
+        atomic_write(self.path, _write)
+
+    def load(self) -> None:
+        if not os.path.exists(self.path):
+            return
+        try:
+            with open(self.path, "r", encoding="utf-8") as f:
+                raw = json.load(f)
+            if isinstance(raw, dict) and raw.get("version") == self.VERSION:
+                for name, data in raw.get("candidates", {}).items():
+                    self.candidates[name] = EcologyCandidateState(**data)
+                self._proposed_blocklist = raw.get("proposed_blocklist", {})
+            log(f"加载生态候选池: {len(self.candidates)} 个候选", "OK")
+        except Exception as e:
+            log(f"生态候选池加载失败，将重建: {e}", "WARN")
+            self.candidates = {}
+            self._proposed_blocklist = {}

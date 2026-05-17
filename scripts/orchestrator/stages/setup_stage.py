@@ -14,7 +14,7 @@ from utils import log, _safe_print
 def setup_stage(ctx: PipelineContext) -> None:
     ctx.is_first_run = FirstRunHelper.detect_first_run(ctx.args.db)
     _safe_print("=" * 60)
-    _safe_print("⭐ GitHub Stars 自动分类工具 v4")
+    _safe_print("⭐ GitHub Stars 自动分类工具")
     _safe_print("=" * 60)
 
     if ctx.is_first_run:

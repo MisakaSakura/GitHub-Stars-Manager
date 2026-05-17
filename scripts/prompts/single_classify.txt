@@ -2,6 +2,6 @@
 作者: {owner}
 描述: {description}
 Topics: {topics}
-语言: {language}{readme_section}
+语言: {language}{readme_section}{preclassify_section}
 
 请分类。

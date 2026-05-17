@@ -43,6 +43,7 @@ class LLMClassifier:
             topics=", ".join(item.get("topics", [])) or "无",
             language=item.get("language") or "未指定",
             readme_section=self._readme_section(item),
+            preclassify_section=self._preclassify_section(item),
         )
 
         max_tokens = self.client.get_max_tokens("single")
@@ -191,10 +192,12 @@ class LLMClassifier:
             topics = ", ".join(item.get("topics", []))
             readme = item.get("readme_excerpt", "")
             readme_part = f" | README: {readme[:readme_max]}" if readme else ""
+            pre = self._preclassify_section(item, inline=True)
+            pre_part = f" | 参考: {pre}" if pre else ""
             lines.append(
                 f"{idx}. {item['owner']['login']}/{item['name']}: "
                 f"{item.get('description') or '无'} "
-                f"(Topics: {topics or '无'}, 语言: {item.get('language') or '未指定'}){readme_part}"
+                f"(Topics: {topics or '无'}, 语言: {item.get('language') or '未指定'}){readme_part}{pre_part}"
             )
 
         prompt = PromptLoader.render(
@@ -269,3 +272,34 @@ class LLMClassifier:
     def _readme_section(item) -> str:
         readme = item.get("readme_excerpt", "")
         return f"\nREADME摘要: {readme[:800]}" if readme else ""
+
+    @staticmethod
+    def _preclassify_section(item, inline: bool = False) -> str:
+        """P1: 根据预分类结果生成 prompt 附加文本。
+
+        Args:
+            inline: True 时返回单行紧凑格式（用于 batch），
+                    False 时返回多行格式（用于 single）。
+        """
+        pre = item.get("_preclassify")
+        if not pre:
+            return ""
+
+        parts = []
+        if "ecology" in pre:
+            parts.append(f"生态={pre['ecology']}")
+        if "type" in pre:
+            parts.append(f"类型={pre['type']}")
+        if "platform" in pre:
+            parts.append(f"平台={pre['platform']}")
+
+        if not parts:
+            return ""
+
+        if inline:
+            return ", ".join(parts)
+
+        return (
+            "\n\n参考分类（基于 topics 和名称自动推导，仅供参考，如有不符请以实际内容为准修正）：\n"
+            + "\n".join(f"- {p}" for p in parts)
+        )

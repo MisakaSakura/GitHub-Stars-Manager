@@ -140,6 +140,8 @@ class IncrementalEngine:
                     llm_requested_keys.add(key)
 
             if llm_candidates:
+                # P1: 预分类增强 — 为 LLM 候选项目生成参考分类
+                self._attach_preclassify(llm_candidates)
                 self._run_llm_rounds(llm_candidates)
 
         for item in config.items:
@@ -152,6 +154,46 @@ class IncrementalEngine:
                 self.stats["error"] += 1
 
         return self.stats
+
+    @staticmethod
+    def _preclassify_item(item: dict) -> dict:
+        """P1: 基于 topics + 项目名做语义预分类，返回供 LLM 参考的分类提示。
+
+        规则来源: config_rules.PRECLASSIFY_RULES（从 ECOLOGY_RULES 自动推导 + 手动覆盖）
+        """
+        from config_rules import PRECLASSIFY_RULES
+
+        result: dict[str, str] = {}
+        topics = [t.lower() for t in item.get("topics", [])]
+        name = item.get("name", "").lower()
+
+        # 1. topics 命中
+        for topic in topics:
+            if topic in PRECLASSIFY_RULES:
+                rule = PRECLASSIFY_RULES[topic]
+                for field in ("ecology", "type", "platform"):
+                    if field in rule and field not in result:
+                        result[field] = rule[field]
+
+        # 2. 项目名精确命中 core_projects（作为补充）
+        if name in PRECLASSIFY_RULES:
+            rule = PRECLASSIFY_RULES[name]
+            for field in ("ecology", "type", "platform"):
+                if field in rule and field not in result:
+                    result[field] = rule[field]
+
+        return result
+
+    def _attach_preclassify(self, items: list[dict]) -> None:
+        """为 LLM 候选项目附加预分类结果（就地修改 item dict）。"""
+        attached = 0
+        for item in items:
+            pre = self._preclassify_item(item)
+            if pre:
+                item["_preclassify"] = pre
+                attached += 1
+        if attached > 0:
+            log(f"P1 预分类: {attached}/{len(items)} 个项目生成参考提示", "OK")
 
     def _run_llm_rounds(self, llm_candidates: list[dict]) -> None:
         """执行多轮 LLM 分类，每轮处理上一轮失败的候选项目。"""

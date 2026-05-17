@@ -276,3 +276,160 @@ class TestIncrementalEngine(unittest.TestCase):
         stats = self.engine.process(EngineConfig(items=items, incremental=True))
         self.assertEqual(stats["skipped"], 1)
         self.assertNotIn("user/repo", self.engine.star_changes)
+
+
+class TestPreclassify(unittest.TestCase):
+    """P1: 预分类增强测试"""
+
+    def test_preclassify_with_topics_match(self):
+        """topics 命中 PRECLASSIFY_RULES 时应返回对应生态"""
+        item = _fake_item(name="my-plugin", topics=["neovim", "vim"])
+        result = IncrementalEngine._preclassify_item(item)
+        self.assertIn("ecology", result)
+        self.assertEqual(result["ecology"], "Neovim")
+        self.assertIn("type", result)
+        self.assertEqual(result["type"], "编辑器 / IDE")
+
+    def test_preclassify_with_name_match(self):
+        """项目名精确命中 core_projects 时应返回对应生态"""
+        item = _fake_item(name="alacritty", topics=["terminal"])
+        result = IncrementalEngine._preclassify_item(item)
+        self.assertIn("ecology", result)
+        self.assertEqual(result["ecology"], "Alacritty")
+
+    def test_preclassify_no_match_returns_empty(self):
+        """无命中时应返回空 dict"""
+        item = _fake_item(name="random-repo", topics=["unknown-topic"])
+        result = IncrementalEngine._preclassify_item(item)
+        self.assertEqual(result, {})
+
+    def test_preclassify_case_insensitive(self):
+        """topics 和名称匹配应大小写不敏感"""
+        item = _fake_item(name="MY-APP", topics=["NEOVIM"])
+        result = IncrementalEngine._preclassify_item(item)
+        self.assertIn("ecology", result)
+        self.assertEqual(result["ecology"], "Neovim")
+
+    def test_attach_preclassify_sets_field(self):
+        """_attach_preclassify 应正确设置 item['_preclassify']"""
+        items = [
+            _fake_item(name="nvim-treesitter", topics=["neovim"]),
+            _fake_item(name="random", topics=["unknown"]),
+        ]
+        engine = IncrementalEngine(MockDB(), RuleClassifier())
+        engine._attach_preclassify(items)
+
+        self.assertIn("_preclassify", items[0])
+        self.assertEqual(items[0]["_preclassify"]["ecology"], "Neovim")
+
+        self.assertNotIn("_preclassify", items[1])
+
+    def test_preclassify_does_not_override_manual(self):
+        """预分类不影响 manual_override 项目的规则分类"""
+        db = MockDB()
+        db.set("user/nvim-plugin", {
+            "full_name": "user/nvim-plugin", "name": "nvim-plugin", "owner": "user",
+            "manual_override": True, "platform": "跨平台", "type": "插件 / Plugin",
+            "ecology": "Neovim", "ecology_role": "插件 / Plugin",
+            "first_seen": "2024-01-01",
+        })
+        engine = IncrementalEngine(db, RuleClassifier())
+        items = [_fake_item(name="nvim-plugin", topics=["neovim"])]
+        stats = engine.process(EngineConfig(items=items, incremental=True))
+        self.assertEqual(stats["protected"], 1)
+        self.assertEqual(db.data["user/nvim-plugin"].ecology, "Neovim")
+
+
+class TestConsistencyCheck(unittest.TestCase):
+    """P3: 分类一致性自检测试"""
+
+    def test_editor_ecology_needs_desktop_platform(self):
+        """编辑器生态但平台为 Web 时应标记可疑"""
+        from config_rules import check_consistency
+        item = {
+            "ecology": "Neovim", "platform": "Web",
+            "type": "编辑器 / IDE", "stars": 1000,
+            "ecology_role": "核心 / Core", "name": "nvim-plugin",
+            "topics": ["neovim"],
+        }
+        is_sus, flags = check_consistency(item)
+        self.assertTrue(is_sus)
+        self.assertTrue(any("编辑器" in f for f in flags))
+
+    def test_editor_ecology_desktop_platform_ok(self):
+        """编辑器生态 + 桌面平台不应标记"""
+        from config_rules import check_consistency
+        item = {
+            "ecology": "Neovim", "platform": "跨平台",
+            "type": "编辑器 / IDE", "stars": 1000,
+            "ecology_role": "核心 / Core", "name": "nvim-plugin",
+            "topics": ["neovim"],
+        }
+        is_sus, flags = check_consistency(item)
+        self.assertFalse(is_sus)
+        self.assertEqual(flags, [])
+
+    def test_proxy_tool_needs_tool_type(self):
+        """代理工具生态但类型为框架时应标记可疑"""
+        from config_rules import check_consistency
+        item = {
+            "ecology": "Clash / Mihomo", "platform": "跨平台",
+            "type": "框架 / Framework", "stars": 1000,
+            "ecology_role": "核心 / Core", "name": "clash-core",
+            "topics": ["clash"],
+        }
+        is_sus, flags = check_consistency(item)
+        self.assertTrue(is_sus)
+        self.assertTrue(any("工具生态" in f for f in flags))
+
+    def test_framework_with_low_stars(self):
+        """框架类型但 stars 过少应标记可疑"""
+        from config_rules import check_consistency
+        item = {
+            "ecology": "独立项目", "platform": "跨平台",
+            "type": "框架 / Framework", "stars": 10,
+            "ecology_role": "-", "name": "tiny-lib",
+            "topics": ["library"],
+        }
+        is_sus, flags = check_consistency(item)
+        self.assertTrue(is_sus)
+        self.assertTrue(any("stars 过少" in f for f in flags))
+
+    def test_core_role_with_low_stars(self):
+        """核心角色但 stars 过少应标记可疑"""
+        from config_rules import check_consistency
+        item = {
+            "ecology": "Docker", "platform": "Linux",
+            "type": "工具 / Tool", "stars": 20,
+            "ecology_role": "核心 / Core", "name": "docker-lite",
+            "topics": ["docker"],
+        }
+        is_sus, flags = check_consistency(item)
+        self.assertTrue(is_sus)
+        self.assertTrue(any("核心角色" in f for f in flags))
+
+    def test_independent_but_name_matches_eco(self):
+        """独立项目但名称命中生态规则应标记可疑"""
+        from config_rules import check_consistency
+        item = {
+            "ecology": "独立项目", "platform": "跨平台",
+            "type": "工具 / Tool", "stars": 500,
+            "ecology_role": "-", "name": "alacritty-theme",
+            "topics": ["terminal"],
+        }
+        is_sus, flags = check_consistency(item)
+        self.assertTrue(is_sus)
+        self.assertTrue(any("名称" in f for f in flags))
+
+    def test_normal_item_not_suspicious(self):
+        """正常项目不应被标记"""
+        from config_rules import check_consistency
+        item = {
+            "ecology": "Neovim", "platform": "跨平台",
+            "type": "插件 / Plugin", "stars": 500,
+            "ecology_role": "插件 / Plugin", "name": "nvim-treesitter",
+            "topics": ["neovim", "treesitter"],
+        }
+        is_sus, flags = check_consistency(item)
+        self.assertFalse(is_sus)
+        self.assertEqual(flags, [])

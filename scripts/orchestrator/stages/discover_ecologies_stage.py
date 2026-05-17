@@ -123,6 +123,83 @@ def _llm_review_watchlist(ctx: PipelineContext, pool: EcologyCandidatePool) -> N
             log(f"  [{name}] LLM 审查失败: {e}", "WARN")
 
 
+def _get_repo_slug() -> str:
+    """获取当前仓库的 owner/repo，用于创建 issue。"""
+    import subprocess
+    repo = os.environ.get("GITHUB_REPOSITORY", "")
+    if repo and "/" in repo:
+        return repo
+    try:
+        result = subprocess.run(
+            ["git", "remote", "get-url", "origin"],
+            capture_output=True, text=True, timeout=5
+        )
+        url = result.stdout.strip()
+        if url and "github.com" in url:
+            parts = url.replace(":", "/").split("/")
+            if len(parts) >= 2:
+                return f"{parts[-2]}/{parts[-1].replace('.git', '')}"
+    except Exception:
+        pass
+    return ""
+
+
+def _propose_blocklist_via_issue(ctx: PipelineContext, pool: EcologyCandidatePool) -> int:
+    """自动创建 GitHub Issue 提议加入 blocklist。返回创建的 issue 数量。"""
+    proposals = pool.get_blocklist_proposals()
+    if not proposals:
+        return 0
+
+    # 需要 GitHub API 和仓库信息
+    gh = getattr(ctx, "gh", None)
+    if not gh:
+        log("跳过 blocklist issue 创建: 无 GitHub API 实例", "WARN")
+        return 0
+
+    repo_slug = _get_repo_slug()
+    if not repo_slug or "/" not in repo_slug:
+        log("跳过 blocklist issue 创建: 无法获取仓库标识", "WARN")
+        return 0
+
+    owner, repo = repo_slug.split("/", 1)
+    created = 0
+
+    for prop in proposals:
+        indicator = prop["indicator"]
+        indicator_type = prop["indicator_type"]
+        candidate_name = prop["candidate_name"]
+        reason = prop["reason"]
+
+        title = f"[生态Blocklist] 提议排除 '{indicator}' ({indicator_type})"
+        body = (
+            f"## 自动检测到的噪声候选\n\n"
+            f"- **待排除项**: `{indicator}`\n"
+            f"- **类型**: {indicator_type}\n"
+            f"- **触发的候选生态**: {candidate_name}\n"
+            f"- **出现次数**: {prop['appear_count']}\n"
+            f"- **涉及项目数**: {prop['project_count']}\n"
+            f"- **理由**: {reason}\n\n"
+            f"---\n"
+            f"此 Issue 由生态自动发现流程自动创建。"
+            f"如确认应加入 blocklist，请编辑 `scripts/ecology_blocklist.yaml` 后关闭此 Issue。"
+        )
+
+        try:
+            issue = gh.create_issue(owner, repo, title, body, labels=["生态-blocklist"])
+            if issue:
+                pool.record_blocklist_proposal(indicator)
+                created += 1
+                log(f"  Blocklist issue 已创建: {issue.get('html_url', '')}", "OK")
+        except Exception as e:
+            log(f"  创建 blocklist issue 失败 ({indicator}): {e}", "WARN")
+
+    if created > 0:
+        pool.save()
+        log(f"Blocklist 提议: 创建 {created}/{len(proposals)} 个 issue", "OK")
+
+    return created
+
+
 def discover_ecologies_stage(ctx: PipelineContext) -> None:
     if ctx.args.dry_run or not ctx.db:
         return
@@ -141,6 +218,9 @@ def discover_ecologies_stage(ctx: PipelineContext) -> None:
 
     # LLM 审查 watchlist
     _llm_review_watchlist(ctx, pool)
+
+    # 自动创建 blocklist issue
+    _propose_blocklist_via_issue(ctx, pool)
 
     # 同步 trusted 到 auto_ecologies.json
     _sync_trusted_to_auto_ecologies(ctx, pool)

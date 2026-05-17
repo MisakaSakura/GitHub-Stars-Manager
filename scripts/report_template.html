@@ -284,7 +284,7 @@ tr:hover td{background:var(--bg-hover)}
               {% for topic in row.topics %}<span class="tt">{{ topic|e }}</span>{% endfor %}
             </div>
           </td>
-          <td>{% if row.has_eco_badge %}<span class="be">{{ row.ecology|e }}</span>{% else %}<span style="color:#484f58;font-size:11px">-</span>{% endif %}</td>
+          <td>{% if row.has_eco_badge %}<span class="be">{{ row.ecology|e }}</span>{% else %}<span style="color:#484f58;font-size:11px">-</span>{% endif %}{% if row.is_suspicious %}<span title="{{ row.consistency_flags|join('; ')|e }}" style="color:var(--warning);cursor:help;margin-left:4px">⚠️</span>{% endif %}</td>
           <td>{% if row.has_role_badge %}<span class="br">{{ row.ecology_role|e }}</span>{% else %}<span style="color:#484f58;font-size:11px">-</span>{% endif %}</td>
           <td><span class="bp">{{ row.platform|e }}</span></td>
           <td><span class="bt">{{ row.type|e }}</span></td>

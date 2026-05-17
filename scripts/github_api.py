@@ -81,7 +81,7 @@ class GitHubAPI:
         self.headers = {
             "Authorization": f"Bearer {token}",
             "Accept": "application/vnd.github.v3+json",
-            "User-Agent": "GitHub-Stars-Classifier-v4"
+            "User-Agent": "GitHub-Stars-Classifier"
         }
         self.client = HTTPClient()
         self._readme_cache = ReadmeCache()
@@ -181,6 +181,25 @@ class GitHubAPI:
         text = re.sub(r'<[^>]+>', ' ', text)
         text = re.sub(r'\s+', ' ', text).strip()
         return text
+
+    def create_issue(self, owner: str, repo: str, title: str, body: str, labels: list[str] | None = None) -> dict | None:
+        """创建 GitHub Issue。
+
+        Returns:
+            创建成功的 issue dict（含 number, html_url 等），失败时返回 None。
+        """
+        url = f"{self.base}/repos/{owner}/{repo}/issues"
+        payload: dict = {"title": title, "body": body}
+        if labels:
+            payload["labels"] = labels
+        code, response_body = self.client.request(url, headers=self.headers, method="POST", data=json.dumps(payload))
+        if code == 201 and response_body:
+            try:
+                return json.loads(response_body)
+            except json.JSONDecodeError:
+                pass
+        log(f"创建 Issue 失败 ({code}): {title[:60]}...", "WARN")
+        return None
 
     def get_latest_release(self, owner: str, repo: str) -> dict | None:
         return self._get(f"/repos/{owner}/{repo}/releases/latest")

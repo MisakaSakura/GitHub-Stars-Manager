@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "github-stars-classifier"
-version = "4.0.0"
+version = "1.0.0"
 description = "自动为你的 GitHub Stars 按平台、类型、语言、生态归属四维分类"
 readme = "README.md"
 license = {text = "MIT"}

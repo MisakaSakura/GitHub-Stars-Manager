@@ -244,9 +244,9 @@
 
 | 批次 | 报告文件 |
 |------|----------|
-| 批次1 | `review_reports/01_architecture_v2.md` |
-| 批次2 | `review_reports/02_engine_rules_v2.md` |
-| 批次3 | `review_reports/03_stages_utils_v2.md` |
-| 批次4 | `review_reports/04_tests_v2.md` |
-| 批次5 | `review_reports/05_ci_delivery_v2.md` |
-| 批次6 | `review_reports/06_ecologies_v2.md` |
+| 批次1 | [`01_architecture_v2.md`](./01_architecture_v2.md) |
+| 批次2 | [`02_engine_rules_v2.md`](./02_engine_rules_v2.md) |
+| 批次3 | [`03_stages_utils_v2.md`](./03_stages_utils_v2.md) |
+| 批次4 | [`04_tests_v2.md`](./04_tests_v2.md) |
+| 批次5 | [`05_ci_delivery_v2.md`](./05_ci_delivery_v2.md) |
+| 批次6 | [`06_ecologies_v2.md`](./06_ecologies_v2.md) |

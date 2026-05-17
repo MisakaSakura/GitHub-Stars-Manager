@@ -294,7 +294,7 @@ TOTAL                     219 passed
 
 ### 7.4 规范文档
 
-审查完成后已建立 `docs/conventions.md` 全局一致性规范文档，涵盖：
+审查完成后已建立 `conventions.md` 全局一致性规范文档，涵盖：
 - 数据模型设计规范（dataclass、序列化、默认值）
 - 存储层接口规范（Repository ABC 完整契约）
 - 分类器接口规范（输入输出类型、返回值语义）

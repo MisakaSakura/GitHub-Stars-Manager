@@ -1,4 +1,4 @@
-# GitHub Stars 自动分类工具 v4
+# GitHub Stars 自动分类工具
 
 自动为你的 GitHub Stars 按 **平台、类型、语言、生态归属** 四维分类，生成可搜索的 HTML 报告和周报摘要，支持 LLM 智能增强、增量更新、手动修正保护、Notion 导出、多通道通知、Release 跟踪、Fork 上游跟踪。
 
@@ -90,6 +90,8 @@
 ├── docs/
 │   ├── index.html                 ← 报告（首次运行后生成）
 │   ├── releases.html              ← Release 历史页面
+│   ├── plans/                     ← 设计实现计划
+│   └── reviews/                   ← 审查报告
 ├── conventions.md                 ← 全局一致性规范文档
 └── tests/                         ← 测试目录（219 个测试）
 ```

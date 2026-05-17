@@ -286,3 +286,148 @@ ECOLOGY_ROLE_ALIASES = {
 ECOLOGY_STANDARD_NAMES = list(ECOLOGY_RULES.keys()) + [
     "独立项目", "AI/ML", "Android", "Apple", "AirPlay", "HMS",
 ]
+
+
+# ==================== 预分类规则（P1：供 LLM 参考）====================
+# 从 ECOLOGY_RULES 自动推导 + 手动补充。
+# key: topic 或项目名（小写）
+# value: {"ecology": 生态名, "type": 类型名, "platform": 平台名}
+
+def _build_preclassify_rules() -> dict[str, dict]:
+    """从现有规则自动推导预分类规则。"""
+    rules: dict[str, dict] = {}
+
+    # 1. 从 ECOLOGY_RULES 的 topic_patterns 推导 ecology
+    for eco_name, eco_rule in ECOLOGY_RULES.items():
+        for topic in eco_rule.get("topic_patterns", []):
+            topic_lower = topic.lower()
+            if topic_lower not in rules:
+                rules[topic_lower] = {}
+            rules[topic_lower]["ecology"] = eco_name
+
+        # core_projects → 项目名命中时提示生态
+        for proj in eco_rule.get("core_projects", []):
+            proj_lower = proj.lower()
+            if proj_lower not in rules:
+                rules[proj_lower] = {}
+            rules[proj_lower]["ecology"] = eco_name
+
+    return rules
+
+
+# 自动推导的基础规则
+PRECLASSIFY_RULES: dict[str, dict] = _build_preclassify_rules()
+
+# 手动补充：自动推导未覆盖或需要修正的边缘 case
+# 格式与 PRECLASSIFY_RULES 一致，会覆盖自动推导的值
+_PRECLASSIFY_OVERRIDES: dict[str, dict] = {
+    # 编辑器生态（topic 命中时同时提示类型）
+    "neovim": {"ecology": "Neovim", "type": "编辑器 / IDE"},
+    "nvim": {"ecology": "Neovim", "type": "编辑器 / IDE"},
+    "vim": {"ecology": "Neovim", "type": "编辑器 / IDE"},
+    "vscode": {"ecology": "VS Code", "type": "编辑器 / IDE"},
+    "obsidian": {"ecology": "Obsidian", "type": "笔记 / 知识管理"},
+    # 播放器生态
+    "mpv": {"ecology": "MPV", "type": "工具 / Tool"},
+    # 代理工具生态
+    "clash": {"ecology": "Clash / Mihomo", "type": "工具 / Tool"},
+    "mihomo": {"ecology": "Clash / Mihomo", "type": "工具 / Tool"},
+    "sing-box": {"ecology": "Clash / Mihomo", "type": "工具 / Tool"},
+    "v2ray": {"ecology": "V2Ray", "type": "工具 / Tool"},
+    # 容器生态
+    "docker": {"ecology": "Docker", "type": "工具 / Tool"},
+    "kubernetes": {"ecology": "Kubernetes", "type": "工具 / Tool"},
+    # 开发框架生态
+    "electron": {"ecology": "Electron", "type": "框架 / Framework"},
+    "flutter": {"ecology": "Flutter", "type": "框架 / Framework"},
+    "react": {"ecology": "React", "type": "框架 / Framework"},
+    "vue": {"ecology": "Vue", "type": "框架 / Framework"},
+    # Android Root 生态
+    "magisk": {"ecology": "Magisk", "type": "工具 / Tool"},
+    "kernelsu": {"ecology": "KernelSU", "type": "工具 / Tool"},
+    # 其他高置信度映射
+    "obs-studio": {"ecology": "OBS Studio", "type": "工具 / Tool", "platform": "跨平台"},
+    "obs": {"ecology": "OBS Studio", "type": "工具 / Tool"},
+    "homebrew": {"ecology": "Homebrew", "type": "工具 / Tool"},
+    "zsh": {"ecology": "Zsh / Oh-My-Zsh", "type": "CLI / 终端"},
+    "yt-dlp": {"ecology": "yt-dlp", "type": "工具 / Tool"},
+    "scoop": {"ecology": "Scoop", "type": "工具 / Tool"},
+}
+
+# 应用覆盖
+for _key, _val in _PRECLASSIFY_OVERRIDES.items():
+    PRECLASSIFY_RULES[_key] = _val
+
+
+# ==================== 一致性自检规则（P3）====================
+
+# 需要桌面/跨平台平台的生态集合
+_DESKTOP_REQUIRED_ECOLOGIES = {
+    "Neovim", "VS Code", "Obsidian", "Vim", "Emacs",
+    "MPV", "Alacritty", "Kitty", "i3 / Sway", "AwesomeWM",
+    "Hyprland", "Firefox", "Zen Browser",
+}
+
+# 应为工具/应用类型的生态集合
+_TOOL_REQUIRED_ECOLOGIES = {
+    "Clash / Mihomo", "V2Ray", "Sing-box", "Docker", "Kubernetes",
+    "Homebrew", "Scoop", "yt-dlp", "Aria2", "qBittorrent",
+}
+
+# 从 ECOLOGY_RULES 自动收集 topic 和 name 关键词集合（用于独立项目误检）
+_ECOLOGY_TOPIC_SET: set[str] = set()
+_ECOLOGY_NAME_SET: set[str] = set()
+for _eco_name, _eco_rule in ECOLOGY_RULES.items():
+    for _topic in _eco_rule.get("topic_patterns", []):
+        _ECOLOGY_TOPIC_SET.add(_topic.lower())
+    for _name in _eco_rule.get("name_patterns", []):
+        _ECOLOGY_NAME_SET.add(_name.lower())
+
+
+def check_consistency(item: dict) -> tuple[bool, list[str]]:
+    """P3: 检查项目分类的逻辑一致性。
+
+    返回: (是否可疑, 原因列表)
+    """
+    flags: list[str] = []
+    ecology = item.get("ecology", "")
+    platform = item.get("platform", "")
+    ptype = item.get("type", "")
+    stars = item.get("stars", 0) or 0
+    role = item.get("ecology_role", "")
+    name = item.get("name", "")
+    topics = item.get("topics", []) or []
+
+    # 1. 编辑器/播放器/桌面工具生态需要桌面或跨平台
+    if ecology in _DESKTOP_REQUIRED_ECOLOGIES:
+        if platform not in {"桌面端", "跨平台", "macOS", "Windows", "Linux"}:
+            flags.append("编辑器/播放器生态但平台非桌面端")
+
+    # 2. 代理/下载/容器工具生态需要工具/应用类型
+    if ecology in _TOOL_REQUIRED_ECOLOGIES:
+        if ptype not in {"工具 / Tool", "应用 / App"}:
+            flags.append("工具生态但类型非工具/应用")
+
+    # 3. 框架类型应有较多 stars（低于 30 可疑）
+    if ptype == "框架 / Framework" and stars < 30:
+        flags.append("框架类型但 stars 过少")
+
+    # 4. 核心角色应有较多 stars（低于 50 可疑）
+    if role == "核心 / Core" and stars < 50:
+        flags.append("核心角色但 stars 过少")
+
+    # 5. 标注独立项目但 topics/名称命中生态规则
+    if ecology == "独立项目":
+        name_lower = name.lower()
+        # 名称包含匹配（如 "alacritty-theme" 包含 "alacritty"）
+        for eco_name in _ECOLOGY_NAME_SET:
+            if eco_name in name_lower:
+                flags.append(f"独立项目但名称'{name}'命中生态'{eco_name}'")
+                break
+        else:
+            for topic in topics:
+                if topic.lower() in _ECOLOGY_TOPIC_SET:
+                    flags.append(f"独立项目但 topic '{topic}' 命中生态规则")
+                    break
+
+    return bool(flags), flags

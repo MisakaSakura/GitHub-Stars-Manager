@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GitHub Stars 自动分类工具 v4 — CLI 入口
+GitHub Stars 自动分类工具 — CLI 入口
 ======================================
 支持：规则分类、LLM 智能增强、增量更新、手动修正保护、
       Notion 导出、多通道通知、HTML 报告、Release/Fork 追踪
@@ -25,7 +25,7 @@ from orchestrator import Pipeline
 def _create_parser() -> argparse.ArgumentParser:
     """创建 ArgumentParser 实例。"""
     return argparse.ArgumentParser(
-        description="GitHub Stars 自动分类工具 v4",
+        description="GitHub Stars 自动分类工具",
         epilog="""
 首次运行说明:
   1. 首次运行（数据库不存在）会自动创建新数据库，对所有项目执行全新分类

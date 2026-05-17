@@ -125,7 +125,7 @@ class ReportGenerator:
                 "meta": {
                     "generated_at": datetime.now(timezone.utc).isoformat(),
                     "total": len(items),
-                    "version": "4.0"
+                    "version": "1.0"
                 },
                 "stats": {
                     k: dict(v.most_common()) for k, v in {
@@ -349,6 +349,11 @@ class ReportGenerator:
         if isinstance(raw_plat, str):
             raw_plat = [raw_plat]
         llm_status = r.get("llm_status", "")
+
+        # P3: 一致性自检
+        from config_rules import check_consistency
+        is_suspicious, consistency_flags = check_consistency(r)
+
         return {
             "platform": r["platform"],
             "type": r["type"],
@@ -369,6 +374,9 @@ class ReportGenerator:
             "feedback_url": self._feedback_url(r["full_name"], r["ecology"]),
             "has_eco_badge": r["ecology"] != "独立项目",
             "has_role_badge": r["ecology_role"] != "-",
+            "is_suspicious": is_suspicious,
+            "consistency_flags": consistency_flags,
+            "suspicious_icon": " ⚠️" if is_suspicious else "",
         }
 
     def _build_ecology_data(self, items: list, stats: dict) -> list[dict]:

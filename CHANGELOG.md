@@ -2,6 +2,22 @@
 
 所有重要变更均记录于此。格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [v4.2.2] - 2026-05-18
+
+### 🆕 新增
+
+- **P1 预分类增强** — 调用 LLM 前基于 topics + 项目名做语义预分类，结果注入 prompt 供 LLM 参考修正。从 `ecologies.yaml` 的 `topic_patterns`/`core_projects` 自动推导映射 + 30+ 条手动覆盖（Neovim/VS Code/MPV/Clash/Docker 等）
+- **生态 Blocklist 远程自动提交** — 当噪声候选（如 `android`/`cli` 等平台/类型关键词）满足条件时，自动创建 GitHub Issue 提议加入 `ecology_blocklist.yaml`，7 天防重复
+- **P3 分类一致性自检** — 报告渲染时自动检查分类逻辑一致性，命中规则（编辑器生态但平台非桌面端、代理工具但类型非工具、框架 stars 过少、核心角色 stars 过少、独立项目但名称/topics 命中生态规则）的项目在生态列显示 ⚠️ 标记，悬停显示具体原因
+
+### 🔧 改进
+
+- **文档同步更新** — README 文件树补全 `docs/plans/` 和 `docs/reviews/`、`docs/conventions.md` 路径修正、review 报告内部链接更新
+- **项目版本号去 V4** — README 标题、CLI 描述、User-Agent、模板页脚等去掉显式 v4 标注，保留 CHANGELOG 历史记录
+- **计划文档状态修正** — `classification_optimization.md` 从虚假"全部完成"修正为各子项真实状态
+
+---
+
 ## [v4.2.1] - 2026-05-17
 
 ### 🐛 修复
@@ -22,7 +38,7 @@
 
 ### 🆕 新增
 
-- **`docs/conventions.md` 全局一致性规范** — 涵盖数据模型、存储接口、分类器接口、异常处理、Pipeline 阶段、命名与导入、配置、日志等 9 大规范领域
+- **`conventions.md` 全局一致性规范** — 涵盖数据模型、存储接口、分类器接口、异常处理、Pipeline 阶段、命名与导入、配置、日志等 9 大规范领域
 - **生态规则 YAML 化** — 73 个重复结构的 Python 生态文件迁移到 `data/ecologies.yaml`，新增生态只需修改 YAML，无需新建 .py 文件
 - **Jinja2 模板引擎** — `report.py` 内嵌 300+ 行 HTML 字符串改为 `report_template.html` 模板渲染，代码-视图分离
 - **Pipeline 拓扑排序** — `StageRegistry` 使用 Kahn 算法按依赖关系排序执行，新增/调整阶段顺序不再破坏依赖
