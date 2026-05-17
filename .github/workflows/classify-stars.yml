@@ -1,8 +1,15 @@
 name: Auto Classify GitHub Stars
 
 # 触发条件:
-# 1. 每周一凌晨 2:00 UTC 自动运行（增量更新）
-# 2. 手动触发（支持多种参数组合）
+# 1. 每周一：增量更新（日常）
+# 2. 每月1日：深度整理（force-refresh 重新分类）
+# 3. 每季度1日：全量刷新（非增量拉取 + LLM 全量分析）
+# 4. 手动触发（支持多种参数组合）
+#
+# 自动执行计划（北京时间）：
+# - 每周一 10:17 → incremental（日常增量 + Release 周报）
+# - 每月1日 11:17 → deep（深度整理：重新分类 + Fork 检查）
+# - 每季度1日 12:17 → full（全量刷新：全量拉取 + LLM 全量分析 + 订阅标记）
 #
 # 首次运行建议:
 # - 如果你有已有分类想保留，先在本地用 --import-json 导入后再推送到仓库
@@ -17,7 +24,9 @@ name: Auto Classify GitHub Stars
 
 on:
   schedule:
-    - cron: '17 2 * * 1'   # 每周一凌晨 2:17 UTC（北京时间周一 10:17），随机偏移避免 Actions 集群峰值
+    - cron: '17 2 * * 1'        # 每周一 2:17 UTC → incremental
+    - cron: '17 3 1 * *'        # 每月1日 3:17 UTC → deep
+    - cron: '17 4 1 1,4,7,10 *' # 每季度1日 4:17 UTC → full（1月/4月/7月/10月）
 
   workflow_dispatch:
     inputs:
@@ -162,7 +171,26 @@ jobs:
 
           MODE="${{ github.event.inputs.mode }}"
           if [ -z "$MODE" ]; then
-            MODE="incremental"
+            # schedule 触发时根据日期自动判断模式
+            if [ "${{ github.event_name }}" = "schedule" ]; then
+              DAY=$(date -u +%d)
+              MONTH=$(date -u +%m)
+              # 季度第一天 (1月/4月/7月/10月) → full
+              if [ "$DAY" = "01" ] && { [ "$MONTH" = "01" ] || [ "$MONTH" = "04" ] || [ "$MONTH" = "07" ] || [ "$MONTH" = "10" ]; }; then
+                MODE="full"
+                echo "[自动计划] 季度全量刷新 ($MONTH/$DAY)"
+              # 每月第一天 → deep
+              elif [ "$DAY" = "01" ]; then
+                MODE="deep"
+                echo "[自动计划] 月度深度整理 ($MONTH/$DAY)"
+              # 每周一 → incremental
+              else
+                MODE="incremental"
+                echo "[自动计划] 日常增量更新 (周一)"
+              fi
+            else
+              MODE="incremental"
+            fi
           fi
 
           ARGS=(

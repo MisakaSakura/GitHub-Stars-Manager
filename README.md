@@ -152,9 +152,19 @@
 - **full（全量）**：**非增量拉取**（确保没有遗漏任何 Stars），对所有未保护项目重新规则分类，检查 Release + Fork，并标记所有仓库订阅 Release。适合首次运行、年度大扫除、或规则大幅调整后的全库梳理。
 - **custom（自定义）**：保留给高级用户，可以单独控制 `--incremental`、`--force-refresh`、`--check-all-releases`、`--check-forks`、`--subscribe-releases` 等每个开关。
 
-**自动运行（schedule）与手动运行的区别**：
-- **自动运行（每周一）**：固定 `--mode incremental`，自动做增量分类 + Release 检查。若距离上次全量刷新超过 `auto_refresh_days`（默认 90 天），增量模式会自动升级为强制刷新
-- **手动运行**：默认 `--mode incremental`，和自动运行一致。可切换为 `deep` 或 `full` 做深度维护，或 `custom` 精细控制
+### 自动执行计划
+
+| 时间 | 模式 | 说明 | 耗时 | LLM |
+|------|------|------|------|-----|
+| **每周一 10:17** | `incremental` | 日常增量 + Release 周报 | 3-5 min | ❌ 不启用 |
+| **每月1日 11:17** | `deep` | 深度整理：重新分类 + Fork 检查 | 15-25 min | ❌ 不启用 |
+| **每季度1日 12:17** | `full` | 全量刷新：全量拉取 + 自动启用 LLM | 20-35 min | ✅ 自动启用 |
+
+> 时间均为北京时间（UTC+8）。使用随机偏移避免 Actions 集群峰值。
+
+**自动运行与手动运行的区别**：
+- **自动运行**：按日期自动选择模式（季度首月 → full，其他月首日 → deep，每周一 → incremental），无需人工干预
+- **手动运行**：默认 `incremental`，可在 Actions 页面切换为 `deep` / `full` / `custom`
 
 ### Actions 手动运行选项说明
 
