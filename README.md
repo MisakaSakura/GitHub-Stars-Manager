@@ -74,7 +74,8 @@
 │   ├── consistency_checker.py     ← 分类一致性检查
 │   ├── feedback_loop.py           ← 反馈循环系统
 │   ├── correct_command.py         ← 快捷修正命令
-│   ├── ecology_candidates.py      ← 生态候选发现
+│   ├── ecology_discovery.py       ← 生态自动发现（P4）
+│   ├── ecology_blocklist.yaml     ← 生态发现手动排除列表
 │   ├── config.py                  ← 向后兼容配置总入口
 │   ├── config_rules.py            ← 分类规则配置
 │   ├── config_llm.py              ← LLM 配置
@@ -89,7 +90,7 @@
 ├── docs/
 │   ├── index.html                 ← 报告（首次运行后生成）
 │   ├── releases.html              ← Release 历史页面
-│   └── conventions.md             ← 全局一致性规范文档
+├── conventions.md                 ← 全局一致性规范文档
 └── tests/                         ← 测试目录（219 个测试）
 ```
 
@@ -498,19 +499,43 @@ commit 后，下次自动运行会 **完全跳过** 这个项目。
 
 ## 自定义生态规则
 
-编辑 `scripts/config_rules.py` 中的 `ECOLOGY_RULES`：
+编辑 `data/ecologies.yaml` 添加新生态：
 
-```python
-"你的工具链生态": {
-    "name_patterns": ["工具名"],
-    "desc_patterns": ["描述关键词"],
-    "topic_patterns": ["topic标签"],
-    "related_types": ["config", "gui", "plugin"],
-    "core_projects": ["核心项目名"],
-},
+```yaml
+your_tool_eco:
+  display_name: 你的工具链生态
+  name_patterns:
+    - 工具名
+  desc_patterns:
+    - 描述关键词
+  topic_patterns:
+    - topic标签
+  related_types:
+    - config
+    - gui
+    - plugin
+  core_projects:
+    - 核心项目名
 ```
 
-如需覆盖 `LOCKED_ECOLOGIES`（LLM 不能修改的生态），也在 `config_rules.py` 中修改。
+如需覆盖 `LOCKED_ECOLOGIES`（LLM 不能修改的生态），在 `scripts/config_rules.py` 中修改。
+
+### 生态发现与 blocklist
+
+每次运行会自动扫描独立项目，通过命名前缀和 topics 聚类发现潜在生态候选，生成 `docs/ecology_discovery.md` 报告。
+
+如果某些 topic/前缀被误识别为生态候选（如平台词 `android`、类型词 `cli`），编辑 `scripts/ecology_blocklist.yaml` 添加排除项：
+
+```yaml
+topics:
+  - android   # 平台，不应作为生态
+  - cli       # 类型，不应作为生态
+
+name_prefixes:
+  - apk       # 文件格式前缀
+```
+
+修改后提交到 main 分支，下次 Actions 运行自动生效。
 
 ---
 

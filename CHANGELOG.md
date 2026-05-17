@@ -2,6 +2,21 @@
 
 所有重要变更均记录于此。格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [v4.2.1] - 2026-05-17
+
+### 🐛 修复
+
+- **`config.py` 导入错误** — 相对导入 `from .config_rules import ...` 在直接运行 `python scripts/classifier.py` 时因无包上下文而失败，改为绝对导入
+- **`ai_database.py` StarItem 兼容性** — `migrate_from_stars_db()` 使用 `hasattr/else item.get()` 模式，当 `StarItem` 无目标字段时 fallthrough 到 `.get()` 报错（`'StarItem' object has no attribute 'get'`）。统一为 `_get()` helper，通过 `isinstance(obj, dict)` 判断后分别使用 `dict.get()` / `getattr()`
+
+### 🔧 改进
+
+- **统一「独立项目」生态名称** — 消除 `独立项目 / Standalone` 与 `独立项目` 的重复。`StarItem` 默认值、`ECOLOGY_ALIASES` 目标值、`ECOLOGY_STANDARD_NAMES` 全部统一为 `独立项目`，涉及 14 个文件
+- **生态发现噪声过滤** — `ecology_discovery.py` 的 `NOISE_TOPICS` 从硬编码改为自动推导：从 `PLATFORM_RULES`、`TYPE_RULES`、`ecology_rules`、`ECOLOGY_STANDARD_NAMES`、`ECOLOGY_ALIASES` 自动提取关键词。Android / Dart / Cli 等平台/类型/已有生态不再被误识别为候选生态
+- **生态发现手动 blocklist** — 新增 `scripts/ecology_blocklist.yaml`，支持手动补充排除特定 topic/前缀。修改后随代码提交，Actions 自动生效
+
+---
+
 ## [v4.2.0] - 2026-05-17
 
 ### 🆕 新增
