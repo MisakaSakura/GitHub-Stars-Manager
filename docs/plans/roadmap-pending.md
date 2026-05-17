@@ -1,7 +1,7 @@
 # 待办排期 — P1 / P3 / 生态 Blocklist 远程提交
 
 > 创建日期: 2026-05-18
-> 状态: P1 ✅ 已完成 / P3 ✅ 已完成 / Blocklist ✅ 已完成 — 排期全部完成
+> 状态: P1 ✅ 已完成 / P3 ✅ 已完成 / Blocklist ✅ 已完成 / 展示优化 ✅ 已完成 — 遗留异常捕获细化 ⏳ 待排期
 
 ---
 
@@ -12,8 +12,36 @@
 | **P0** | P1 预分类增强 | 2.5-3.5h | 无 | ✅ 2026-05-18 完成 |
 | **P1** | P3 分类一致性自检 | 1.5-2h | **P1 运行稳定后** | ✅ 2026-05-18 完成 |
 | **P2** | 生态 Blocklist 远程自动提交 | 2-3h | 无 | ✅ 2026-05-18 完成 |
+| **P3** | 生态候选展示优化（示例项目 + 展开查看） | 0.5h | 无 | ✅ 2026-05-18 完成 |
+| **P4** | 遗留代码异常捕获细化（6 处） | 0.5h | 无 | ⏳ 待排期 |
 
-**总计**: 6-8.5h，建议分 2 次迭代完成
+**总计**: 6-8.5h（已实现）+ 0.5h（遗留）
+
+---
+
+## 任务四：遗留代码异常捕获细化
+
+### 背景
+
+前期一致性审查发现 6 处既有代码使用过于宽泛的 `except Exception`，违反 §8.2 日志规范。这些问题在本次迭代中未触及，需后续单独修复。
+
+### 问题清单
+
+| # | 文件 | 位置 | 当前代码 | 应改为 |
+|---|------|------|----------|--------|
+| 1 | `llm_classifier.py` | `classify():58` | `except Exception as e` | `except (json.JSONDecodeError, ValueError, KeyError)` |
+| 2 | `llm_classifier.py` | `_classify_batch():228` | `except Exception as e` | `except (json.JSONDecodeError, ValueError)` |
+| 3 | `engine.py` | `process():152` | `except Exception as e` | `except (KeyError, ValueError, TypeError)` |
+| 4 | `ecology_discovery.py` | `_load_blocklist():97` | `except Exception: pass` | `except (OSError, yaml.YAMLError)` + log |
+| 5 | `discover_ecologies_stage.py` | `_llm_review_watchlist():120` | `except Exception as e` | `except (json.JSONDecodeError, ValueError)` |
+| 6 | `discover_ecologies_stage.py` | `_load_auto_ecologies():28` | `except Exception: pass` | `except (OSError, json.JSONDecodeError)` + log |
+
+### 工作量
+**0.5h**（纯替换，无逻辑变更）
+
+### 风险
+- 无功能风险，仅异常类型细分
+- 需验证测试仍通过
 
 ---
 
