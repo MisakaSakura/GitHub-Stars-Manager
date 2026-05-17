@@ -148,7 +148,7 @@
 **模式详解**：
 
 - **incremental（增量）**：只拉取最近 star 的项目，已有项目只更新 stars 数，分类不变。检查所有仓库的 Release 生成周报。**日常自动运行就是这个模式。**
-- **deep（深度）**：在增量基础上，**对所有未保护项目重新执行规则分类**（`force-refresh`），同时检查 Release + Fork。适合验证规则是否有遗漏、分类是否合理。
+- **deep（深度）**：在增量基础上，**对所有未保护项目重新执行规则分类**（`force-refresh`），同时检查 Release + Fork。适合验证规则是否有遗漏、分类是否合理。**⚠️ 未保护项目会被重新分类，如有满意的项目请先标记 `manual_override: true`。**
 - **full（全量）**：**非增量拉取**（确保没有遗漏任何 Stars），对所有未保护项目重新规则分类，检查 Release + Fork，并标记所有仓库订阅 Release。适合首次运行、年度大扫除、或规则大幅调整后的全库梳理。
 - **custom（自定义）**：保留给高级用户，可以单独控制 `--incremental`、`--force-refresh`、`--check-all-releases`、`--check-forks`、`--subscribe-releases` 等每个开关。
 
@@ -494,6 +494,113 @@ python scripts/classifier.py --token ghp_xxx --user yourname --lists-strategy ig
 commit 后，下次自动运行会 **完全跳过** 这个项目。
 
 报告中的 🔒 标记表示手动保护，🤖 标记表示 LLM 增强。
+
+---
+
+## 分类体系参考
+
+工具使用 **四个维度** 对项目进行归类：
+
+```
+┌─────────────┐  ┌─────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│   平台      │  │   类型      │  │   生态归属      │  │   生态角色      │
+│  Platform   │  │   Type      │  │   Ecology       │  │   Ecology Role  │
+└─────────────┘  └─────────────┘  └─────────────────┘  └─────────────────┘
+     ↓                ↓                   ↓                    ↓
+  操作系统/        应用形态 +         项目所属的           在生态中的
+  运行时环境       功能角色            技术族谱             功能定位
+```
+
+### 平台（Platform）
+
+项目运行的**操作系统或运行时环境**：
+
+| 平台 | 关键词匹配 |
+|------|-----------|
+| **Android** | android, apk, aar, android-app |
+| **iOS** | ios, swift, objective-c, objc, iphone, ipad, ipa |
+| **Windows** | windows, win32, win64, uwp, wsl, winforms, wpf |
+| **Linux** | linux, ubuntu, debian, fedora, arch, gentoo, redhat |
+| **macOS** | macos, mac-os, osx, darwin, apple |
+| **Web** | browser, web, html5, pwa, webapp |
+| **跨平台** | cross-platform, multi-platform, electron, tauri, qt, flutter, react-native, xamarin |
+| **其他 / 未分类** | 无匹配时 fallback |
+
+> 平台 ≠ 生态。一个跨平台 GUI 工具（如 Electron 应用）平台为「跨平台」，生态可能属于「VS Code」或某个具体工具链。
+
+### 类型（Type）
+
+项目的**应用形态 + 功能角色**：
+
+| 类型 | 说明 | 关键词匹配 |
+|------|------|-----------|
+| **框架 / Framework** | 供其他项目依赖的库/SDK | framework, library, sdk, runtime, engine |
+| **工具 / Tool** | 单一用途的实用程序 | tool, utility, generator, builder, scaffold |
+| **应用 / App** | 面向终端用户的完整应用 | app, application, client, service, portal |
+| **Web 前端** | 浏览器端/UI 层技术 | frontend, react, vue, angular, svelte, webpack, vite |
+| **Web 后端** | 服务端/API/数据库层 | backend, api, server, rest, graphql, fastapi, django |
+| **移动端 App** | 手机/平板原生或混合应用 | mobile, ios-app, android-app, apk, cordova, capacitor |
+| **桌面 GUI** | 桌面图形界面程序 | desktop, gui, nw.js, wxwidgets, gtk, native-app |
+| **CLI / 终端** | 命令行工具 | cli, terminal, shell, command-line, bash, zsh, tmux |
+| **游戏** | 游戏引擎、游戏本体、模拟器 | game, unity, unreal, godot, emulator, retroarch |
+| **编辑器 / IDE** | 代码/文本编辑工具 | editor, ide, vscode, vim, neovim, emacs, text-editor |
+| **资源合集 / Awesome** |  curated 列表、awesome 系列 | awesome, list, curated, resources, cheatsheet |
+| **语言 / Compiler** | 编程语言/编译器/解释器 | language, compiler, interpreter, transpiler |
+| **监控 / 可视化** | Dashboard、指标、图表 | monitoring, dashboard, visualization, metrics, grafana |
+| **自动化 / 工作流** | 自动化脚本、CI/CD、机器人 | automation, workflow, integration, bot, cron, scheduler |
+| **笔记 / 知识管理** | 笔记工具、Wiki、文档系统 | notes, knowledge, wiki, markdown, second-brain |
+| **算法 / 学习** | 教程、面试题、学习资源 | algorithm, leetcode, interview, tutorial, course |
+| **配置 / Dotfiles** | 个人配置、预设、RC 文件 | dotfiles, config, configuration, settings, preset |
+| **其他 / 未分类** | 无明确匹配 | fallback |
+
+### 生态归属（Ecology）
+
+项目所属的**技术族谱或工具链生态**。例如 Clash / Mihomo 生态下的项目包括核心代理、GUI 前端、配置订阅、规则集等。
+
+生态规则存储在 `data/ecologies.yaml`，当前定义了 74+ 生态。常见生态包括：
+
+- **Clash / Mihomo**、**V2Ray**、**Sing-box** — 代理工具生态
+- **MPV**、**Obsidian**、**Neovim**、**VS Code** — 编辑器/播放器生态
+- **Docker**、**Kubernetes** — 容器生态
+- **Flutter**、**Electron**、**React**、**Vue** — 开发框架生态
+- **Magisk**、**KernelSU**、**LSPosed** — Android  root 生态
+- **独立项目** — 不属于任何已知生态的项目
+
+> 新增生态：直接编辑 `data/ecologies.yaml`，无需修改代码。
+
+### 生态角色（Ecology Role）
+
+项目在所属生态中的**功能定位**：
+
+| 角色 | 说明 | 示例 |
+|------|------|------|
+| **核心 / Core** | 生态的核心引擎/主程序 | Clash.Meta 核心 |
+| **GUI 前端 / Client** | 图形界面客户端 | Clash Verge Rev, Mihomo Party |
+| **配置 / Config** | 预设配置、Dotfiles | 个人 Clash 配置仓库 |
+| **脚本 / Script** | 自动化脚本 | 自动更新规则脚本 |
+| **主题 / Theme** | 外观/颜色方案 | VS Code 主题 |
+| **插件 / Plugin** | 扩展/插件 | VS Code 插件 |
+| **规则集 / Rules** | 过滤规则、列表 | Clash 规则集 |
+| **Web UI / Dashboard** | 网页管理面板 | Yacd, Meta Cube |
+| **API 封装 / Wrapper** | SDK、绑定库 | Python Clash 封装 |
+| **教程 / Guide** | 教程、Awesome 列表 | Clash 使用指南 |
+| **其他 / Other** | 无明确角色 | fallback |
+
+### 分类修正示例
+
+编辑 `data/stars_db.json` 修正某个项目的分类：
+
+```json
+{
+  "full_name": "owner/repo",
+  "platform": "跨平台",
+  "type": "工具 / Tool",
+  "ecology": "Clash / Mihomo",
+  "ecology_role": "GUI 前端 / Client",
+  "manual_override": true,
+  "override_fields": ["platform", "type", "ecology", "ecology_role"]
+}
+```
 
 ---
 
