@@ -1,3 +1,5 @@
+> **注意：本文档为 V1 版本，已合并到 [fix_schedule_v2.md](./fix_schedule_v2.md)。V2 包含更准确的 Phase 4 进度追踪和剩余任务清单。**
+
 # P0/P1 问题修复排期计划
 
 **制定日期**：2026-05-17  
@@ -131,9 +133,33 @@
 | 批次 | 问题数 | 状态 | 完成日期 | PR |
 |------|--------|------|----------|-----|
 | 批次 1 | 6 | ✅ 已完成 | 2026-05-17 | — |
-| 批次 2 | 8 | 待开始 | — | — |
-| 批次 3 | 8 | 待开始 | — | — |
-| 批次 4 | 10 | 待开始 | — | — |
-| 批次 5 | 11 | 待开始 | — | — |
-| 批次 6 | 12 | 待开始 | — | — |
-| **合计** | **56** | — | — | — |
+| 批次 2 | 8 | ✅ 已完成 | 2026-05-17 | — |
+| 批次 3 | 8 | ✅ 已完成 | 2026-05-17 | — |
+| 批次 4 | 10 | 🔄 已合并到 V2 Phase 4（7 项完成，3 项未完成）| 2026-05-17 | — |
+| 批次 5 | 11 | 🔄 已合并到 V2 Phase 4（7 项完成，4 项未完成）| 2026-05-17 | — |
+| 批次 6 | 12 | 🔄 已合并到 V2 Phase 4（10 项完成，2 项未完成）| 2026-05-17 | — |
+| **合计** | **56** | **44 完成 / 12 未完成（见 V2 详细清单）** | — | — |
+
+---
+
+## 本次修复（2026-05-17 补完）
+
+| 编号 | 文件 | 修复内容 |
+|------|------|----------|
+| P1-7 | `orchestrator/context.py` | `Any` 替换为 `Optional[具体类型]`（`TYPE_CHECKING` 前向引用避免循环导入） |
+| P1-31 | `model_profiles.py` | 显式添加 `ecology_review` 场景到 `ModelProfile`，`get_max_tokens` 映射支持 |
+| P1-56 | `.github/workflows/process-feedback.yml` + `scripts/ci/regenerate_learned_rules.py` | 内联 Python 脚本提取为独立可测试文件 |
+| P1-49 | `tests/test_repositories.py` | 新增 `TestSQLiteStarsRepository`（8 个测试用例） |
+| — | `tests/test_correct_command.py` | 新增 `CorrectCommand` 单元测试（8 个用例） |
+| — | `scripts/repositories/sqlite_backend.py` | 修复 `_parse_schema_columns` 的 `);` 解析 bug；拆分 SCHEMA 确保索引在列同步后创建 |
+
+---
+
+## 剩余大改动（需确认优先级）
+
+| 编号 | 文件 | 问题 | 工作量评估 | 状态 |
+|------|------|------|-----------|------|
+| P1-41/P1-42 | `report.py` | `_build_html()` 内嵌 HTML 改用 Jinja2 模板引擎 | 大 | ✅ 已完成（2026-05-17）|
+| P1-8 | `models.py` | 提取 `AIRecord` dataclass，从 `StarItem` 彻底移除旧 AI 字段 | 大 | ✅ 已完成（2026-05-17）|
+
+P1-8 涉及面广、可能影响生产数据，建议单独评估后再实施。

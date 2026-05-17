@@ -12,7 +12,7 @@
 
 | 功能 | 说明 |
 |------|------|
-| 🌿 **生态归属** | 自动识别项目族谱（Clash、MPV、VS Code、Neovim 等 15+ 生态） |
+| 🌿 **生态归属** | 自动识别项目族谱（Clash、MPV、VS Code、Neovim 等 74+ 生态，YAML 配置） |
 | 🤖 **LLM 智能增强** | 支持 OpenAI / Moonshot / DeepSeek / xiaomimimo / OpenRouter，自动补全规则分类盲区 |
 | 📦 **增量更新** | 只处理新 star 的项目，已有分类保持不变 |
 | 🔒 **手动修正保护** | `manual_override` 标记的项目永久不被覆盖 |
@@ -23,7 +23,7 @@
 | 🍴 **Fork 上游跟踪** | 检测 Fork 项目是否有上游更新 |
 | ⏰ **定时自动执行** | GitHub Actions 每周自动运行 |
 | 📊 **可视化报告** | 暗色主题交互式 HTML，支持筛选和生态视图 |
-| 🧪 **测试覆盖** | 109 个测试（103 单元 + 6 集成）覆盖核心逻辑 |
+| 🧪 **测试覆盖** | 219 个测试覆盖核心逻辑，全部通过 |
 
 ---
 
@@ -36,37 +36,61 @@
 ```
 .
 ├── .github/workflows/classify-stars.yml   ← 定时工作流
+├── .github/workflows/process-feedback.yml ← 反馈处理工作流
 ├── scripts/
-│   ├── classifier.py          ← CLI 入口（参数解析）
-│   ├── pipeline.py            ← 16 阶段执行编排
-│   ├── engine.py              ← 增量更新引擎
-│   ├── models.py              ← StarItem 数据模型
-│   ├── ai_database.py         ← AI 分析结果独立数据库
-│   ├── database.py            ← JSON 持久化（原子写入）
-│   ├── github_api.py          ← GitHub REST API 封装
-│   ├── http_client.py         ← HTTP 客户端（requests / urllib 双后端）
-│   ├── rule_classifier.py     ← 规则分类器
-│   ├── llm_classifier.py      ← LLM 分类器
-│   ├── report.py              ← HTML / CSV / JSON 报告生成
-│   ├── notion.py              ← Notion 数据库导出
-│   ├── notify.py              ← 多通道通知分发
-│   ├── lists_manager.py       ← GitHub Lists 管理
-│   ├── release_tracker.py     ← Release 发布跟踪
-│   ├── fork_tracker.py        ← Fork 上游跟踪
-│   ├── base_tracker.py        ← 跟踪器基类
-│   ├── import_helper.py       ← JSON / CSV 导入工具
-│   ├── config.py              ← 向后兼容配置总入口
-│   ├── config_rules.py        ← 分类规则配置
-│   ├── config_llm.py          ← LLM 配置
-│   ├── config_notion.py       ← Notion 配置
-│   ├── config_notify.py       ← 通知配置
-│   ├── utils.py               ← 工具函数
-│   └── requirements.txt       ← 依赖
+│   ├── classifier.py              ← CLI 入口（参数解析）
+│   ├── orchestrator/
+│   │   ├── new_pipeline.py        ← 18 阶段插件化流水线
+│   │   ├── context.py             ← Pipeline 共享上下文
+│   │   ├── registry.py            ← 阶段注册器（拓扑排序）
+│   │   └── stages/                ← 18 个独立阶段模块
+│   ├── engine.py                  ← 增量更新引擎
+│   ├── models.py                  ← StarItem 数据模型
+│   ├── database.py                ← Stars 主数据库（JSON）
+│   ├── ai_database.py             ← AI 分析结果独立数据库
+│   ├── repositories/
+│   │   ├── base.py                ← Repository 抽象基类
+│   │   ├── json_backend.py        ← JSON 存储适配器
+│   │   └── sqlite_backend.py      ← SQLite 存储适配器（实验性）
+│   ├── github_api.py              ← GitHub REST API 封装
+│   ├── http_client.py             ← HTTP 客户端（requests / urllib 双后端）
+│   ├── rule_classifier.py         ← 规则分类器
+│   ├── llm_classifier.py          ← LLM 分类器 Facade
+│   ├── llm/                       ← LLM 分层子包
+│   │   ├── client.py              ← LLM 统一客户端
+│   │   ├── parser.py              ← 响应解析器
+│   │   ├── cache.py               ← TTL 缓存
+│   │   └── providers/             ← Provider 实现
+│   ├── ecologies/                 ← 生态规则（YAML 加载）
+│   ├── report.py                  ← HTML / CSV / JSON 报告生成
+│   ├── notion.py                  ← Notion 数据库导出
+│   ├── notify.py                  ← 多通道通知分发
+│   ├── lists_manager.py           ← GitHub Lists 管理
+│   ├── release_tracker.py         ← Release 发布跟踪
+│   ├── fork_tracker.py            ← Fork 上游跟踪
+│   ├── base_tracker.py            ← 跟踪器基类
+│   ├── import_helper.py           ← JSON / CSV 导入工具
+│   ├── model_profiles.py          ← AI 模型配置中心
+│   ├── consistency_checker.py     ← 分类一致性检查
+│   ├── feedback_loop.py           ← 反馈循环系统
+│   ├── correct_command.py         ← 快捷修正命令
+│   ├── ecology_candidates.py      ← 生态候选发现
+│   ├── config.py                  ← 向后兼容配置总入口
+│   ├── config_rules.py            ← 分类规则配置
+│   ├── config_llm.py              ← LLM 配置
+│   ├── config_notion.py           ← Notion 配置
+│   ├── config_notify.py           ← 通知配置
+│   └── utils.py                   ← 工具函数
 ├── data/
-│   ├── stars_db.json          ← 持久化数据库（首次运行后生成）
-│   └── stars_ai.json          ← AI 分析结果数据库（与主库解耦）
-└── docs/
-    └── index.html             ← 报告（首次运行后生成）
+│   ├── stars_db.json              ← 持久化数据库（首次运行后生成）
+│   ├── stars_ai.json              ← AI 分析结果数据库（与主库解耦）
+│   ├── ecologies.yaml             ← 生态规则配置（74+ 生态）
+│   └── learned_rules.json         ← 用户反馈学习规则
+├── docs/
+│   ├── index.html                 ← 报告（首次运行后生成）
+│   ├── releases.html              ← Release 历史页面
+│   └── conventions.md             ← 全局一致性规范文档
+└── tests/                         ← 测试目录（219 个测试）
 ```
 
 ### 2. 配置 Secrets
@@ -664,7 +688,7 @@ QQ_CONFIG = {
 
 ### 运行测试
 
-项目包含 109 个测试（103 个单元测试 + 6 个集成测试）：
+项目包含 219 个测试：
 
 ```bash
 # 运行全部测试
@@ -702,7 +726,7 @@ python -m unittest discover -s tests -v
 classifier.py (CLI 入口)
     │
     ▼
-pipeline.py (16 阶段 Pipeline)
+orchestrator/new_pipeline.py (18 阶段插件化 Pipeline)
     ├── setup / auth
     ├── GitHub Lists 处理
     ├── fetch (github_api.py)

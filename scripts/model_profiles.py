@@ -12,6 +12,14 @@ AI 模型配置中心 — 遍历主流厂商模型，自动匹配最优参数。
 from dataclasses import dataclass, field
 from typing import Optional
 
+# P1-34: 评分权重常量
+PRICE_WEIGHT = 10.0          # 价格系数（越低越好）
+NON_REASONING_BONUS = 50     # 非 reasoning 模型加分
+JSON_MODE_BONUS = 20         # 原生 JSON 模式加分
+LARGE_CONTEXT_BONUS = 10     # 大上下文加分
+MIN_CONTEXT_LIMIT = 32_000   # 最小上下文限制
+LARGE_CONTEXT_THRESHOLD = 128_000  # 大上下文阈值
+
 
 @dataclass
 class ModelProfile:
@@ -30,12 +38,18 @@ class ModelProfile:
     single_max_tokens: int       # 单条分类
     summarize_max_tokens: int    # 文本摘要 / 周报总结
     release_digest_max_tokens: int  # Release Notes 摘要
+    ecology_review_max_tokens: int = 128  # 生态候选审查（默认 128，通常只需简短 JSON）
 
     temperature: float = 0.1     # 默认 temperature
     batch_size: int = 5          # 默认 batch_size（prompt 越长应越小）
+    batch_readme_max_length: int = 150  # batch prompt 中 README 截断长度（P1-51: 移至 ModelProfile）
 
     # 定价参考（输出侧，单位：元 / 1M tokens，仅用于排序推荐）
     price_cny_per_1m_output: float = 0.0
+
+    # 响应提取路径（P1-33: 配置化替代硬编码）
+    # 格式: "choices.0.message.content" 表示 data["choices"][0]["message"]["content"]
+    response_extract_paths: list[str] = field(default_factory=list)
 
     # system prompt 策略
     system_prompt_mode: str = "default"  # default / no_thinking / no_system_role
@@ -44,12 +58,13 @@ class ModelProfile:
     recommendation: str = ""
 
     def get_max_tokens(self, scene: str) -> int:
-        """根据场景返回匹配的 max_tokens"""
+        """根据场景返回匹配的 max_tokens（P1-31: 显式支持 ecology_review 场景）。"""
         mapping = {
             "batch": self.batch_max_tokens,
             "single": self.single_max_tokens,
             "summarize": self.summarize_max_tokens,
             "release_digest": self.release_digest_max_tokens,
+            "ecology_review": self.ecology_review_max_tokens,
         }
         return mapping.get(scene, self.single_max_tokens)
 
@@ -75,6 +90,7 @@ MODEL_PROFILES: dict[str, ModelProfile] = {
         release_digest_max_tokens=512,
         temperature=0.1,
         batch_size=8,
+        batch_readme_max_length=150,
         price_cny_per_1m_output=4.40,  # 约 $0.60
         system_prompt_mode="default",
         recommendation="非 reasoning、速度快、价格低，分类任务首选。"
@@ -94,6 +110,7 @@ MODEL_PROFILES: dict[str, ModelProfile] = {
         release_digest_max_tokens=512,
         temperature=0.1,
         batch_size=8,
+        batch_readme_max_length=200,
         price_cny_per_1m_output=109.00,
         system_prompt_mode="default",
         recommendation="能力最强但贵，只有对分类精度极度敏感时才用。"
@@ -115,6 +132,7 @@ MODEL_PROFILES: dict[str, ModelProfile] = {
         release_digest_max_tokens=512,
         temperature=0.1,
         batch_size=5,
+        batch_readme_max_length=100,
         price_cny_per_1m_output=12.00,
         system_prompt_mode="default",
         recommendation="上下文较短（8K），适合小批量分析。"
@@ -134,6 +152,7 @@ MODEL_PROFILES: dict[str, ModelProfile] = {
         release_digest_max_tokens=1024,
         temperature=0.1,
         batch_size=5,
+        batch_readme_max_length=150,
         price_cny_per_1m_output=24.00,
         system_prompt_mode="default",
         recommendation="32K 上下文，适合中等规模 batch。"
@@ -153,6 +172,7 @@ MODEL_PROFILES: dict[str, ModelProfile] = {
         release_digest_max_tokens=1024,
         temperature=0.1,
         batch_size=5,
+        batch_readme_max_length=200,
         price_cny_per_1m_output=60.00,
         system_prompt_mode="default",
         recommendation="128K 上下文，价格偏贵。"
@@ -174,6 +194,7 @@ MODEL_PROFILES: dict[str, ModelProfile] = {
         release_digest_max_tokens=1024,
         temperature=0.1,
         batch_size=5,
+        batch_readme_max_length=150,
         price_cny_per_1m_output=2.00,
         system_prompt_mode="no_thinking",
         recommendation="reasoning 模型，价格便宜（¥2/1M），需给足 max_tokens。"
@@ -216,6 +237,7 @@ MODEL_PROFILES: dict[str, ModelProfile] = {
         release_digest_max_tokens=2048,
         temperature=0.1,
         batch_size=5,
+        batch_readme_max_length=300,
         price_cny_per_1m_output=2.10,
         system_prompt_mode="no_thinking",
         recommendation="xiaomimimo 性价比之王（¥2.1/1M），分类任务完全够用，推荐作为默认。"
@@ -235,6 +257,7 @@ MODEL_PROFILES: dict[str, ModelProfile] = {
         release_digest_max_tokens=2048,
         temperature=0.1,
         batch_size=5,
+        batch_readme_max_length=400,
         price_cny_per_1m_output=14.00,
         system_prompt_mode="no_thinking",
         recommendation="全模态理解，比 flash 强但贵 6.7 倍。"
@@ -275,6 +298,7 @@ MODEL_PROFILES: dict[str, ModelProfile] = {
         release_digest_max_tokens=512,
         temperature=0.1,
         batch_size=5,
+        batch_readme_max_length=150,
         price_cny_per_1m_output=10.00,  # 不固定
         system_prompt_mode="default",
         recommendation="自动路由到最便宜的可用模型，参数保守适配。"
@@ -300,18 +324,18 @@ def recommend_model(preferred_provider: Optional[str] = None) -> str:
     candidates = list(MODEL_PROFILES.values())
 
     # 过滤掉明显不合适的
-    candidates = [m for m in candidates if m.context_limit >= 32_000]
+    candidates = [m for m in candidates if m.context_limit >= MIN_CONTEXT_LIMIT]
 
     # 评分：价格低 + 非 reasoning 加分
     def score(m: ModelProfile) -> float:
         s = 0.0
-        s -= m.price_cny_per_1m_output * 10  # 价格低是核心优势
+        s -= m.price_cny_per_1m_output * PRICE_WEIGHT
         if not m.is_reasoning:
-            s += 50  # 非 reasoning 大幅加分（不需要兼容处理）
+            s += NON_REASONING_BONUS
         if m.supports_json_mode:
-            s += 20  # 原生 JSON 模式加分
-        if m.context_limit >= 128_000:
-            s += 10  # 大上下文加分
+            s += JSON_MODE_BONUS
+        if m.context_limit >= LARGE_CONTEXT_THRESHOLD:
+            s += LARGE_CONTEXT_BONUS
         return s
 
     candidates.sort(key=score, reverse=True)

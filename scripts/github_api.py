@@ -28,15 +28,19 @@ class ReadmeCache:
             try:
                 with open(self.cache_file, "r", encoding="utf-8") as f:
                     self._cache = json.load(f)
-            except Exception:
+            except json.JSONDecodeError as e:
+                log(f"README 缓存 JSON 损坏，将重建: {e}", "WARN")
+                self._cache = {}
+            except OSError as e:
+                log(f"README 缓存读取失败: {e}", "WARN")
                 self._cache = {}
 
     def _save(self) -> None:
         try:
             with open(self.cache_file, "w", encoding="utf-8") as f:
                 json.dump(self._cache, f, ensure_ascii=False, indent=2)
-        except Exception:
-            pass
+        except OSError as e:
+            log(f"README 缓存写入失败: {e}", "WARN")
 
     def get(self, key: str, max_length: int = 2000) -> str | None:
         entry = self._cache.get(key)
@@ -85,7 +89,12 @@ class GitHubAPI:
         url = f"{self.base}{endpoint}"
         if params:
             url += "?" + urllib.parse.urlencode(params)
-        code, body = self.client.request(url, headers=self.headers, retries=3)
+        try:
+            code, body = self.client.request(url, headers=self.headers, retries=3)
+        except HTTPClientError as e:
+            # GC-5: 将底层 HTTPClientError 转换为 GitHubAPIError
+            log(f"GitHub API 网络请求失败: {e}", "ERROR")
+            raise GitHubServerError(f"无法连接到 GitHub API: {e}") from e
         if code == 200:
             if not body:
                 log("API 返回空响应体", "WARN")
@@ -121,7 +130,7 @@ class GitHubAPI:
 
     def get_list_items(self, list_id) -> list:
         result = self._get(f"/lists/{list_id}/items")
-        if result and "items" in result:
+        if isinstance(result, dict) and "items" in result:
             return result["items"]
         return []
 
@@ -149,12 +158,13 @@ class GitHubAPI:
             result = text[:max_length]
             self._readme_cache.set(cache_key, result)
             return result
-        except Exception:
+        except (ValueError, UnicodeDecodeError) as e:
+            log(f"README 解码失败 {owner}/{repo}: {e}", "WARN")
+            return ""
+        except Exception as e:
+            log(f"README 处理失败 {owner}/{repo}: {e}", "WARN")
             return ""
 
-    def _init_readme_cache(self) -> "ReadmeCache":
-        """初始化 README 缓存层（P1-38）。"""
-        return ReadmeCache()
 
     @staticmethod
     def _strip_markdown(text: str) -> str:

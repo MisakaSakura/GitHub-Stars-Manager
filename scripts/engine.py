@@ -7,7 +7,8 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
 from models import StarItem
-from utils import log
+from utils import log, parse_iso
+from config import LOCKED_ECOLOGIES
 
 
 def should_auto_refresh(force_refresh: bool, last_refresh_at: str, auto_refresh_days: int) -> bool:
@@ -25,7 +26,9 @@ def should_auto_refresh(force_refresh: bool, last_refresh_at: str, auto_refresh_
     if not last_refresh_at:
         return True
     try:
-        last_dt = datetime.fromisoformat(last_refresh_at)
+        last_dt = parse_iso(last_refresh_at)
+        if last_dt is None:
+            return True
         interval = timedelta(days=auto_refresh_days)
         if datetime.now(timezone.utc) - last_dt >= interval:
             return True
@@ -48,7 +51,6 @@ class EngineConfig:
 
 def _is_ecology_locked(ecology_name: str | None) -> bool:
     """检查生态是否被用户锁定（不允许 AI 覆盖）"""
-    from config import LOCKED_ECOLOGIES
     return ecology_name in LOCKED_ECOLOGIES
 
 
@@ -114,10 +116,9 @@ class IncrementalEngine:
         # 检查是否超过间隔天数
         from datetime import datetime, timezone, timedelta
         try:
-            last_dt = datetime.fromisoformat(ai_record.analyzed_at)
-            # 兼容无时区的旧时间戳
-            if last_dt.tzinfo is None:
-                last_dt = last_dt.replace(tzinfo=timezone.utc)
+            last_dt = parse_iso(ai_record.analyzed_at)
+            if last_dt is None:
+                return True
             if datetime.now(timezone.utc) - last_dt >= timedelta(days=llm_interval_days):
                 return True  # 间隔已到，需要重新分析
         except Exception:
@@ -140,32 +141,7 @@ class IncrementalEngine:
                     llm_requested_keys.add(key)
 
             if llm_candidates:
-                max_rounds = 3
-                for round_num in range(1, max_rounds + 1):
-                    remaining = [item for item in llm_candidates
-                                if f"{item['owner']['login']}/{item['name']}" not in self.llm_results]
-                    if not remaining:
-                        break
-
-                    round_label = f"第 {round_num}/{max_rounds} 轮" if round_num > 1 else "第 1/3 轮"
-                    round_results = self.llm.classify_batch(remaining, fallback=False, round_label=round_label)
-                    self.llm_results.update(round_results)
-
-                    # 记录本轮失败项到 AI DB
-                    if self.ai_db:
-                        for item in remaining:
-                            key = f"{item['owner']['login']}/{item['name']}"
-                            if key not in self.llm_results:
-                                self.ai_db.update_from_llm_result(key, None, status="failed")
-
-                # 最终统计
-                total_requested = len(llm_candidates)
-                total_success = len(self.llm_results)
-                total_failed = total_requested - total_success
-                if total_failed > 0:
-                    log(f"LLM 最终: {total_success}/{total_requested} 成功, {total_failed}/{total_requested} 失败（已记录到 AI DB）", "WARN")
-                else:
-                    log(f"LLM 最终: {total_success}/{total_requested} 全部成功", "OK")
+                self._run_llm_rounds(llm_candidates)
 
         for item in config.items:
             try:
@@ -177,6 +153,35 @@ class IncrementalEngine:
                 self.stats["error"] += 1
 
         return self.stats
+
+    def _run_llm_rounds(self, llm_candidates: list[dict]) -> None:
+        """执行多轮 LLM 分类，每轮处理上一轮失败的候选项目。"""
+        max_rounds = 3
+        for round_num in range(1, max_rounds + 1):
+            remaining = [item for item in llm_candidates
+                        if f"{item['owner']['login']}/{item['name']}" not in self.llm_results]
+            if not remaining:
+                break
+
+            round_label = f"第 {round_num}/{max_rounds} 轮" if round_num > 1 else "第 1/3 轮"
+            round_results = self.llm.classify_batch(remaining, fallback=False, round_label=round_label)
+            self.llm_results.update(round_results)
+
+            # 记录本轮失败项到 AI DB
+            if self.ai_db:
+                for item in remaining:
+                    key = f"{item['owner']['login']}/{item['name']}"
+                    if key not in self.llm_results:
+                        self.ai_db.update_from_llm_result(key, None, status="failed")
+
+        # 最终统计
+        total_requested = len(llm_candidates)
+        total_success = len(self.llm_results)
+        total_failed = total_requested - total_success
+        if total_failed > 0:
+            log(f"LLM 最终: {total_success}/{total_requested} 成功, {total_failed}/{total_requested} 失败（已记录到 AI DB）", "WARN")
+        else:
+            log(f"LLM 最终: {total_success}/{total_requested} 全部成功", "OK")
 
     @staticmethod
     def _snapshot_classification(item) -> dict:
@@ -245,26 +250,39 @@ class IncrementalEngine:
         self.db.set(key, classification)
         self.stats["updated"] += 1
 
-    # ---------- P1-15: _process_single 策略拆分 ----------
+    # ---------- P1-15/P1-20: _process_single 策略拆分 + 映射表 dispatch ----------
 
     def _process_single(self, item: dict, config: EngineConfig, llm_result: dict | None = None) -> None:
-        """调度器：根据项目状态选择处理策略（P1-15）。"""
+        """调度器：根据项目状态选择处理策略（P1-15 + P1-20 映射表 dispatch）。"""
         key = f"{item['owner']['login']}/{item['name']}"
         existing = self.db.get(key)
 
+        strategy_fn, strategy_args = self._select_strategy(key, item, existing, config, llm_result)
+        return strategy_fn(*strategy_args)
+
+    def _select_strategy(self, key: str, item: dict, existing, config: EngineConfig, llm_result: dict | None):
+        """策略选择器：返回 (策略方法, 参数元组)（P1-20: 映射表替代 if/elif 链）。"""
+        # 策略条件映射：(检查函数, 策略方法, 额外参数)
+        strategies = [
+            (lambda: existing is None, self._process_new_item, (key, item, config, llm_result)),
+            (lambda: existing.manual_override, self._process_protected, (key, item, existing)),
+            (lambda: config.force_refresh, self._process_force_refresh, (key, item, existing, config, llm_result)),
+            (lambda: config.incremental, self._process_incremental, (key, item, existing, config, llm_result)),
+        ]
+        for check, fn, args in strategies:
+            if check():
+                # 对于非 protected/force_refresh 策略，先追踪 star 变化
+                if existing and fn not in (self._process_protected,):
+                    self._track_star_change(key, item, existing)
+                return fn, args
+
+        # 默认策略：标准刷新
         if existing:
-            if existing.manual_override:
-                return self._process_protected(key, item, existing)
-
             self._track_star_change(key, item, existing)
+            return self._process_standard_refresh, (key, item, existing, config, llm_result)
 
-            if config.force_refresh:
-                return self._process_force_refresh(key, item, existing, config, llm_result)
-            if config.incremental:
-                return self._process_incremental(key, item, existing, config, llm_result)
-            return self._process_standard_refresh(key, item, existing, config, llm_result)
-
-        return self._process_new_item(key, item, config, llm_result)
+        # 兜底：理论上不会到达这里（existing 为 None 的情况已在第一个策略处理）
+        return self._process_new_item, (key, item, config, llm_result)
 
     def _track_star_change(self, key: str, item: dict, existing) -> None:
         """记录 stars 增长（用于周报动态）。"""

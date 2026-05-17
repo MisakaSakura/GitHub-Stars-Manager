@@ -4,6 +4,7 @@
 
 import json
 import os
+from collections.abc import Iterable
 from dataclasses import dataclass, field, asdict
 from typing import Optional, List
 
@@ -28,12 +29,20 @@ class AIResult:
     ai_ecology_role: Optional[str] = None
 
     def to_dict(self) -> dict:
-        return asdict(self)
+        # GC-7: 统一为浅拷贝，与 StarItem.to_dict() 保持一致
+        return {k: getattr(self, k) for k in self.__dataclass_fields__}
 
     @classmethod
     def from_dict(cls, data: dict) -> "AIResult":
         known = {f.name for f in cls.__dataclass_fields__.values()}
-        return cls(**{k: v for k, v in data.items() if k in known})
+        filtered = {k: v for k, v in data.items() if k in known}
+        # GC-8: 兜底默认值（向后兼容）
+        if not filtered.get("analyzed_at"):
+            from datetime import datetime, timezone
+            filtered["analyzed_at"] = datetime.now(timezone.utc).isoformat()
+        if not filtered.get("llm_status"):
+            filtered["llm_status"] = "not_analyzed"
+        return cls(**filtered)
 
 
 class AIDatabase:
@@ -103,7 +112,26 @@ class AIDatabase:
         )
         self.data[full_name] = result
 
-    def migrate_from_stars_db(self, db_items: list) -> int:
+    def delete(self, key: str) -> bool:
+        """删除记录，返回是否成功。"""
+        if key in self.data:
+            del self.data[key]
+            return True
+        return False
+
+    def keys(self):
+        return self.data.keys()
+
+    def values(self):
+        return self.data.values()
+
+    def items(self):
+        return self.data.items()
+
+    def __len__(self) -> int:
+        return len(self.data)
+
+    def migrate_from_stars_db(self, db_items: Iterable) -> int:
         """从主数据库迁移旧的 AI 字段到 AI 数据库，返回迁移数量"""
         migrated = 0
         for item in db_items:

@@ -62,3 +62,8 @@ class Repository(ABC):
     def meta_save(self) -> None:
         """保存元数据"""
         pass
+
+    @abstractmethod
+    def close(self) -> None:
+        """释放资源（文件句柄、数据库连接、Session 等）"""
+        pass

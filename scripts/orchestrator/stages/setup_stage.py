@@ -32,7 +32,7 @@ def setup_stage(ctx: PipelineContext) -> None:
     storage = getattr(ctx.args, 'storage', 'json')
     if storage == 'sqlite':
         from repositories import SQLiteStarsRepository
-        db_path = ctx.args.db.replace('.json', '.db')
+        db_path = os.path.splitext(ctx.args.db)[0] + '.db'
         ctx.db = SQLiteStarsRepository(db_path)
         if ctx.is_first_run and os.path.exists(ctx.args.db):
             ctx.db.migrate_from_json(ctx.args.db)

@@ -156,8 +156,100 @@ tr:hover td{background:var(--bg-hover)}
 <body>
 <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">🌙</button>
 <h1>⭐ GitHub Stars 自动分类报告</h1>
-<p class="sub">生成时间：{{TIMESTAMP}} · 共 {{TOTAL}} 个项目 · 🔒=手动保护 🤖=LLM增强</p>
-{{WEEKLY_DIGEST}}
+<p class="sub">生成时间：{{ timestamp }} · 共 {{ total }} 个项目 · 🔒=手动保护 🤖=LLM增强</p>
+{% if weekly_digest %}
+<div class="weekly-digest" id="wd-main">
+  <div class="wd-header"><h2>📅 本周摘要</h2><button class="wd-toggle" onclick="tw()">收起 ▲</button></div>
+  <div id="wd-body">
+    {% if weekly_digest.ai_summary %}
+    <div class="wd-summary-card"><div class="wd-summary-title">🤖 本周动态总结</div><div class="wd-summary-body">{{ weekly_digest.ai_summary|e }}</div></div>
+    {% endif %}
+    <div class="wd-tabs">
+      {% for tab in weekly_digest.tabs %}
+      <button class="wd-tab {% if loop.first %}active{% endif %}" onclick="wst(this,'{{ tab.id }}')">{{ tab.label }}</button>
+      {% endfor %}
+    </div>
+    {% for tab in weekly_digest.tabs %}
+    <div id="wd-tab-{{ tab.id }}" class="wd-tab-content {% if loop.first %}active{% endif %}">
+      {% if tab.type == 'new_items' %}
+      <div class="wd-section"><h3>🆕 新收录 ({{ tab.entries|length }})</h3><div class="wd-list">
+        {% for it in tab.entries %}
+        <div class="wd-item"><a href="{{ it.url|default('#') }}" target="_blank">{{ it.full_name|e }}</a><span class="wd-eco">{{ it.ecology|e }}</span></div>
+        {% endfor %}
+      </div></div>
+      {% elif tab.type == 'hot' %}
+      <div class="wd-section"><h3>🔥 本周热门 (Stars +)</h3><div class="wd-list">
+        {% for it in tab.entries %}
+        <div class="wd-item"><a href="{{ it.url|default('#') }}" target="_blank">{{ it.full_name|e }}</a><span class="wd-tag">+{{ "{:,}".format(it.delta) }} ⭐</span></div>
+        {% endfor %}
+      </div></div>
+      {% elif tab.type == 'classify' %}
+      <div class="wd-section"><h3>📝 分类变更 ({{ (tab.entries|length) + (tab.hidden_entries|length) }})</h3><div class="wd-list">
+        {% for it in tab.entries %}
+        <div class="wd-item"><a href="{{ it.url|default('#') }}" target="_blank">{{ it.full_name|e }}</a><span class="wd-tag">{{ it.change|e }}</span></div>
+        {% endfor %}
+      </div>
+        {% if tab.hidden_entries %}
+        <div class="wd-list-hidden" style="display:none;flex-direction:column;gap:6px">
+          {% for it in tab.hidden_entries %}
+          <div class="wd-item"><a href="{{ it.url|default('#') }}" target="_blank">{{ it.full_name|e }}</a><span class="wd-tag">{{ it.change|e }}</span></div>
+          {% endfor %}
+        </div>
+        <span class="wd-expand-toggle" onclick="wet(this)">展开全部 ({{ tab.hidden_entries|length }} 个) ▼</span>
+        {% endif %}
+      </div>
+      {% elif tab.type == 'release' %}
+      <div class="wd-section"><h3>{{ tab.title_html|default('🚀 Release') }}</h3>
+        {% for ru in tab.entries %}
+        <div class="wd-release-card">
+          <div class="wd-release-header">
+            <img class="wd-release-avatar" src="{{ ru.avatar_url }}" alt="{{ ru.owner|e }}" loading="lazy" onerror="this.style.display='none'">
+            <div class="wd-release-meta">
+              <a href="https://github.com/{{ ru.full_name|e }}" target="_blank">{{ ru.full_name|e }}</a> {% if ru.is_new_repo %}收录于{% else %}released{% endif %}
+              <span class="wd-release-time">{{ ru.rel_time|e }}</span>{% if ru.is_new_repo %}<span class="wd-new-badge">🆕 新收录</span>{% endif %}
+            </div>
+          </div>
+          <div class="wd-release-version">
+            <a href="{{ ru.html_url|e }}" target="_blank">{{ ru.new_tag|e }}</a>
+          </div>
+          {% if ru.body_html %}
+          <div class="wd-release-body">{{ ru.body_html }}</div>
+          <span class="wd-release-toggle" onclick="wtn(this)">展开</span>
+          {% else %}
+          <div class="wd-release-empty">无更新日志</div>
+          {% endif %}
+          {% if ru.ai_digest %}
+          <div class="wd-ai-digest">🤖 {{ ru.ai_digest|e }}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+        <div style="margin-top:10px;text-align:right"><a href="releases.html" target="_blank" style="color:#58a6ff;font-size:12px;text-decoration:none">查看完整 Release 日志 →</a></div>
+      </div>
+      {% elif tab.type == 'eco_candidates' %}
+      <div class="wd-section"><h3>🌱 生态候选 ({{ tab.entries|length }})</h3><div class="wd-list">
+        {% for c in tab.entries %}
+        <div class="wd-item">
+          <span>{{ c.status_icon }} {{ c.name|e }}</span>
+          <span class="wd-tag">{{ c.count }} 个项目</span>
+          <span style="color:var(--text-muted);font-size:11px">{{ c.progress|e }}</span>
+        </div>
+        {% endfor %}
+      </div></div>
+      {% elif tab.type == 'fork_updates' %}
+      <div class="wd-section"><h3>🔱 Fork 上游更新 ({{ tab.entries|length }})</h3><div class="wd-list">
+        {% for fu in tab.entries %}
+        <div class="wd-item">
+          <a href="https://github.com/{{ fu.parent_full_name|e }}" target="_blank">{{ fu.full_name|e }}</a>
+          <span class="wd-tag">← {{ fu.parent_full_name|e }} ({{ (fu.parent_pushed_at|default(''))[:10] }})</span>
+        </div>
+        {% endfor %}
+      </div></div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
 <div class="tabs">
   <button class="tab active" onclick="st('list')">📋 列表视图</button>
   <button class="tab" onclick="st('eco')">🌿 生态视图</button>
@@ -167,17 +259,41 @@ tr:hover td{background:var(--bg-hover)}
 <div id="t-list" class="tc active">
   <div class="tw">
     <div class="fb">
-      <select id="fp" onchange="fl()"><option value="">所有平台</option>{{PLATFORM_OPTIONS}}</select>
-      <select id="ft" onchange="fl()"><option value="">所有类型</option>{{TYPE_OPTIONS}}</select>
-      <select id="fl" onchange="fl()"><option value="">所有语言</option>{{LANGUAGE_OPTIONS}}</select>
-      <select id="fe" onchange="fl()"><option value="">所有生态</option>{{ECOLOGY_OPTIONS}}</select>
-      <select id="fr" onchange="fl()"><option value="">所有角色</option>{{ROLE_OPTIONS}}</select>
-      <select id="fs" onchange="fl()"><option value="">所有分析状态</option>{{STATUS_OPTIONS}}</select>
+      <select id="fp" onchange="fl()"><option value="">所有平台</option>{% for opt in platform_options %}<option value="{{ opt|e }}">{{ opt|e }}</option>{% endfor %}</select>
+      <select id="ft" onchange="fl()"><option value="">所有类型</option>{% for opt in type_options %}<option value="{{ opt|e }}">{{ opt|e }}</option>{% endfor %}</select>
+      <select id="fl" onchange="fl()"><option value="">所有语言</option>{% for opt in language_options %}<option value="{{ opt|e }}">{{ opt|e }}</option>{% endfor %}</select>
+      <select id="fe" onchange="fl()"><option value="">所有生态</option>{% for opt in ecology_options %}<option value="{{ opt|e }}">{{ opt|e }}</option>{% endfor %}</select>
+      <select id="fr" onchange="fl()"><option value="">所有角色</option>{% for opt in role_options %}<option value="{{ opt|e }}">{{ opt|e }}</option>{% endfor %}</select>
+      <select id="fs" onchange="fl()"><option value="">所有分析状态</option>{% for opt in status_options %}<option value="{{ opt|e }}">{{ opt|e }}</option>{% endfor %}</select>
       <input type="text" id="fsearch" placeholder="🔍 搜索项目名、描述、标签..." oninput="fl()" style="flex:1;min-width:180px;background:var(--bg-input);color:var(--text-primary);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:12px;">
     </div>
     <table>
       <thead><tr><th>项目</th><th>生态</th><th>角色</th><th>平台</th><th>类型</th><th>语言</th><th>支持平台</th><th>Stars</th></tr></thead>
-      <tbody id="lb">{{ROWS}}</tbody>
+      <tbody id="lb">
+        {% for row in rows %}
+        <tr data-p="{{ row.platform|e }}" data-t="{{ row.type|e }}" data-l="{{ row.language|e }}" data-e="{{ row.ecology|e }}" data-r="{{ row.ecology_role|e }}" data-s="{{ row.llm_status|e }}">
+          <td>
+            <a class="rn" href="{{ row.url|e }}" target="_blank">{{ row.owner|e }}/{{ row.name|e }}</a>
+            {% if row.manual_override %} 🔒{% endif %}{{ row.llm_icon }}
+            {% if row.feedback_url %}<a href="{{ row.feedback_url|e }}" target="_blank" style="color:#8b949e;font-size:11px;text-decoration:none;margin-left:6px" title="报告分类错误">📝</a>{% endif %}
+            <div class="rd">{{ row.description|e }}</div>
+            <div class="tg">
+              {% for tag in row.ai_tags %}<span class="btg">{{ tag|e }}</span>{% endfor %}
+            </div>
+            <div class="tc">
+              {% for topic in row.topics %}<span class="tt">{{ topic|e }}</span>{% endfor %}
+            </div>
+          </td>
+          <td>{% if row.has_eco_badge %}<span class="be">{{ row.ecology|e }}</span>{% else %}<span style="color:#484f58;font-size:11px">-</span>{% endif %}</td>
+          <td>{% if row.has_role_badge %}<span class="br">{{ row.ecology_role|e }}</span>{% else %}<span style="color:#484f58;font-size:11px">-</span>{% endif %}</td>
+          <td><span class="bp">{{ row.platform|e }}</span></td>
+          <td><span class="bt">{{ row.type|e }}</span></td>
+          <td><span class="bl">{{ row.language|e }}</span></td>
+          <td>{% for plat in row.ai_platforms %}<span class="bpl">{{ plat|e }}</span>{% endfor %}</td>
+          <td class="st">⭐ {{ "{:,}".format(row.stars) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
     <div id="le" class="es" style="display:none;">没有匹配的项目</div>
   </div>
@@ -186,20 +302,79 @@ tr:hover td{background:var(--bg-hover)}
   <div class="sn">
     💡 <strong>生态视图</strong>按项目族谱分组。🔒=手动保护 🤖=LLM增强
   </div>
-  {{ECOLOGY_GROUPS}}
+  {% for group in ecology_groups %}
+  <div class="eg">
+    <div class="eh" onclick="te(this)">
+      <div class="et" {% if group.is_standalone %}style="color:#8b949e"{% endif %}>{% if group.is_standalone %}📦{% else %}🌿{% endif %} {{ group.name|e }}</div>
+      <span class="ec" {% if group.is_standalone %}style="background:#30363d;color:#8b949e"{% endif %}>{{ group.count }} 个项目</span>
+    </div>
+    <div class="eb {% if group.is_standalone %}collapsed{% endif %}">
+      {% for role in group.roles %}
+      {% if role.name %}
+      <div class="rs">
+        <div class="rh">🔸 {{ role.name|e }} <span style="color:#8b949e;font-weight:400">({{ role.count }})</span></div>
+        <div class="rl">
+      {% endif %}
+          {% for item in role.entries %}
+          <div class="ri">
+            <div class="rii">
+              <a class="rin" href="{{ item.url|e }}" target="_blank">{{ item.owner|e }}/{{ item.name|e }}</a>
+              {% if item.manual_override %} 🔒{% endif %}
+              {% if item.feedback_url %}<a href="{{ item.feedback_url|e }}" target="_blank" style="color:#8b949e;font-size:11px;text-decoration:none;margin-left:4px" title="报告分类错误">📝</a>{% endif %}
+              <div class="rid">{{ item.description|e }}</div>
+            </div>
+            <div class="rim"><span class="bl">{{ item.language|e }}</span><span class="st">⭐ {{ "{:,}".format(item.stars) }}</span></div>
+          </div>
+          {% endfor %}
+      {% if role.name %}
+        </div>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
 </div>
 <div id="t-forks" class="tc">
   <div class="sn">
     💡 <strong>Fork 视图</strong>显示你 Fork 的仓库及其上游更新状态。点击 Sync 按钮可跳转到 GitHub 同步页面。
   </div>
-  {{FORK_GROUPS}}
+  {% if fork_groups %}
+  <div class="eg">
+    <div class="eh">
+      <div class="et">🔱 我的 Forks</div>
+      <span class="ec">{{ fork_groups.count }} 个</span>
+    </div>
+    <div class="eb">
+      <div class="rs">
+        <div class="rl">
+          {% for f in fork_groups.entries %}
+          <div class="ri">
+            <div class="rii">
+              <a class="rin" href="{{ f.url|e }}" target="_blank">{{ f.owner|e }}/{{ f.name|e }}</a>
+              <a href="https://github.com/{{ f.full_name|e }}/sync" target="_blank" style="color:#58a6ff;font-size:11px;text-decoration:none">[Sync]</a>
+              <div class="rid">{{ f.description|e }}</div>
+              {% if f.parent_full_name %}
+              <div style="color:#8b949e;font-size:11px">← {{ f.parent_full_name|e }} (上游更新: {{ f.parent_pushed_at|e }})</div>
+              {% endif %}
+            </div>
+            <div class="rim"><span class="bl">{{ f.language|e }}</span><span class="st">⭐ {{ "{:,}".format(f.stars) }}</span></div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="sn">暂无 Fork 仓库数据，使用 --check-forks 可检测上游更新。</div>
+  {% endif %}
 </div>
 <div id="t-stats" class="tc">
   <div class="sg">
-    <div class="sc"><h3>📦 平台分布</h3>{{PLATFORM_BARS}}</div>
-    <div class="sc"><h3>🏷️ 类型分布</h3>{{TYPE_BARS}}</div>
-    <div class="sc"><h3>💻 语言分布</h3>{{LANGUAGE_BARS}}</div>
-    <div class="sc"><h3>🌿 生态分布</h3>{{ECOLOGY_BARS}}</div>
+    <div class="sc"><h3>📦 平台分布</h3>{% for bar in platform_bars %}<div class="si"><span>{{ bar.name|e }}</span><span style="font-weight:600">{{ bar.count }}</span></div><div class="sbg"><div class="sf" style="width:{{ "%.1f"|format(bar.pct) }}%;background:linear-gradient(90deg,#58a6ff,#79c0ff)"></div></div>{% endfor %}</div>
+    <div class="sc"><h3>🏷️ 类型分布</h3>{% for bar in type_bars %}<div class="si"><span>{{ bar.name|e }}</span><span style="font-weight:600">{{ bar.count }}</span></div><div class="sbg"><div class="sf" style="width:{{ "%.1f"|format(bar.pct) }}%;background:linear-gradient(90deg,#3fb950,#56d364)"></div></div>{% endfor %}</div>
+    <div class="sc"><h3>💻 语言分布</h3>{% for bar in language_bars %}<div class="si"><span>{{ bar.name|e }}</span><span style="font-weight:600">{{ bar.count }}</span></div><div class="sbg"><div class="sf" style="width:{{ "%.1f"|format(bar.pct) }}%;background:linear-gradient(90deg,#a371f7,#bc8cff)"></div></div>{% endfor %}</div>
+    <div class="sc"><h3>🌿 生态分布</h3>{% for bar in ecology_bars %}<div class="si"><span>{{ bar.name|e }}</span><span style="font-weight:600">{{ bar.count }}</span></div><div class="sbg"><div class="sf" style="width:{{ "%.1f"|format(bar.pct) }}%;background:linear-gradient(90deg,#f85149,#ff7b72)"></div></div>{% endfor %}</div>
   </div>
 </div>
 <div class="ft">Generated by GitHub Stars Classifier v3</div>

@@ -45,9 +45,13 @@ class EmailNotifier:
     def send(self, title: str, message: str) -> None:
         from config import EMAIL_CONFIG
         cfg = EMAIL_CONFIG
+        if not cfg.get("smtp_user"):
+            raise ValueError("邮件配置不完整: smtp_user 未设置")
+        if not cfg.get("to_addrs"):
+            raise ValueError("邮件配置不完整: to_addrs 未设置")
         msg = MIMEMultipart("alternative")
         msg["Subject"] = title
-        msg["From"] = cfg["from_addr"] or cfg["smtp_user"]
+        msg["From"] = cfg.get("from_addr") or cfg["smtp_user"]
         msg["To"] = ", ".join(cfg["to_addrs"])
 
         msg.attach(MIMEText(message, "plain", "utf-8"))
@@ -85,7 +89,9 @@ class TelegramNotifier:
             "text": text,
             "parse_mode": "Markdown"
         }
-        self.client.post_json(url, payload, timeout=10)
+        code, body = self.client.post_json(url, payload, timeout=10)
+        if code != 200:
+            raise RuntimeError(f"Telegram API 错误 {code}: {body[:200]}")
         log("Telegram 通知已发送", "OK")
 
 
@@ -102,7 +108,9 @@ class WeComNotifier:
                 "content": f"**{title}**\n> {message.replace(chr(10), chr(10)+'> ')}"
             }
         }
-        self.client.post_json(cfg["webhook_url"], payload, timeout=10)
+        code, body = self.client.post_json(cfg["webhook_url"], payload, timeout=10)
+        if code != 200:
+            raise RuntimeError(f"企业微信 API 错误 {code}: {body[:200]}")
         log("企业微信通知已发送", "OK")
 
 
@@ -130,5 +138,7 @@ class QQNotifier:
         else:
             raise ValueError("QQ 通知需要设置 group_id 或 user_id")
 
-        self.client.post_json(url, payload, headers=headers, timeout=10)
+        code, body = self.client.post_json(url, payload, headers=headers, timeout=10)
+        if code != 200:
+            raise RuntimeError(f"QQ API 错误 {code}: {body[:200]}")
         log("QQ 通知已发送", "OK")

@@ -123,19 +123,29 @@ class TestReportGeneratorWithStarItem(unittest.TestCase):
 
     def test_html_with_fork_and_llm_fields(self):
         """HTML 报告：含 Fork、LLM 字段的 StarItem 正确渲染"""
+        from ai_database import AIDatabase, AIResult
+
         db = StarsDB(self.db_path)
         db.set("owner/repo", self._make_item(
             is_fork=True,
             parent_full_name="upstream/original",
             parent_pushed_at="2024-06-01T00:00:00Z",
+        ))
+        db.save()
+
+        # AI 字段通过独立 AI 数据库提供
+        ai_db_path = os.path.join(self.tmpdir, "stars_ai.json")
+        ai_db = AIDatabase(ai_db_path)
+        ai_db.set("owner/repo", AIResult(
+            full_name="owner/repo",
             llm_status="success",
             ai_summary="AI generated summary",
             ai_tags=["tag1", "tag2"],
             ai_platforms=["linux", "mac"],
         ))
-        db.save()
+        ai_db.save()
 
-        report = ReportGenerator(db)
+        report = ReportGenerator(db, ai_db=ai_db)
         output_dir = os.path.join(self.tmpdir, "docs")
         path = report.generate_html(output_dir)
 

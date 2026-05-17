@@ -85,9 +85,8 @@ def _build_system_prompt() -> str:
     platforms = ", ".join(PLATFORM_RULES.keys())
     types = ", ".join(TYPE_RULES.keys())
     roles = ", ".join(ECOLOGY_ROLES.keys())
-    # 生态规则较多，取前 30 个 + 省略提示（避免超出 token 限制）
-    ecology_subset = ECOLOGY_STANDARD_NAMES[:30]
-    ecologies = ", ".join(ecology_subset) + ", ...等"
+    # P1-27: 输出全部生态名称（YAML 重构后生态数量可控，避免截断导致生态漂移）
+    ecologies = ", ".join(ECOLOGY_STANDARD_NAMES)
 
     return f"""你是 GitHub 项目分类专家。根据项目信息直接输出严格 JSON，不要任何其他内容（不要思考过程、不要解释、不要 markdown 代码块）。
 

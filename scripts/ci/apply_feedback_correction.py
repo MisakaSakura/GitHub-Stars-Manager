@@ -18,8 +18,39 @@ from config_rules import RULES_VERSION
 
 
 def parse_field(body: str, label: str) -> str:
-    m = re.search(rf"{re.escape(label)}\s*\n\s*([^\n]+)", body)
-    return m.group(1).strip() if m else ""
+    """解析单行字段值（支持多行匹配，取第一个非空行）。"""
+    m = re.search(rf"{re.escape(label)}\s*\n\s*(.+?)(?=\n\s*\n|\n[A-Z]|$)", body, re.DOTALL)
+    if not m:
+        return ""
+    # 取第一个非空行作为值（兼容旧版单行格式）
+    for line in m.group(1).strip().splitlines():
+        stripped = line.strip()
+        if stripped:
+            return stripped
+    return ""
+
+
+def parse_multi_field(body: str, label: str) -> dict[str, str]:
+    """解析多字段独立输入，格式为每行 '字段名: 值'。
+
+    示例:
+        建议分类（正确）
+        platform: macOS
+        type: GUI 工具
+        ecology: 独立项目 / Standalone
+    """
+    m = re.search(rf"{re.escape(label)}\s*\n\s*(.+?)(?=\n\s*\n|\n[A-Z]|$)", body, re.DOTALL)
+    if not m:
+        return {}
+    result: dict[str, str] = {}
+    for line in m.group(1).strip().splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        if ":" in line:
+            key, val = line.split(":", 1)
+            result[key.strip().lower()] = val.strip()
+    return result
 
 
 def main() -> int:
@@ -29,6 +60,8 @@ def main() -> int:
     full_name = parse_field(body, "项目地址")
     field_type = parse_field(body, "修正字段")
     expected = parse_field(body, "建议分类（正确）")
+    # P1-78: 支持多字段独立输入
+    multi_expected = parse_multi_field(body, "建议分类（正确）")
 
     if not full_name or not expected:
         print("无法解析 Issue 内容，跳过")
@@ -60,25 +93,32 @@ def main() -> int:
         "ecology_role": target.get("ecology_role", ""),
     }
 
-    # 应用修正（P1-55: 根据实际修改的字段动态设置 override_fields）
+    # 应用修正（P1-55: 根据实际修改的字段动态设置 override_fields；P1-78: 支持多字段独立输入）
     updated = False
     changed_fields: list[str] = []
 
-    if "生态归属" in field_type or "多个字段" in field_type:
-        if expected and target.get("ecology") != expected:
-            target["ecology"] = expected
+    # 多字段模式下使用独立解析的字典；单字段模式使用传统 expected 字符串
+    use_multi = "多个字段" in field_type and multi_expected
+
+    def _apply(field: str, val: str) -> None:
+        nonlocal updated
+        if val and target.get(field) != val:
+            target[field] = val
             updated = True
-            changed_fields.append("ecology")
-    if "平台" in field_type or "多个字段" in field_type:
-        if expected and target.get("platform") != expected:
-            target["platform"] = expected
-            updated = True
-            changed_fields.append("platform")
-    if "类型" in field_type or "多个字段" in field_type:
-        if expected and target.get("type") != expected:
-            target["type"] = expected
-            updated = True
-            changed_fields.append("type")
+            changed_fields.append(field)
+
+    if "生态归属" in field_type or ("多个字段" in field_type and not use_multi):
+        _apply("ecology", expected)
+    if "平台" in field_type or ("多个字段" in field_type and not use_multi):
+        _apply("platform", expected)
+    if "类型" in field_type or ("多个字段" in field_type and not use_multi):
+        _apply("type", expected)
+
+    # P1-78: 多字段独立输入（每行 "字段名: 值"）
+    if use_multi:
+        for field in ("platform", "type", "ecology", "ecology_role"):
+            if field in multi_expected:
+                _apply(field, multi_expected[field])
 
     if not updated:
         print("没有需要应用的修正")

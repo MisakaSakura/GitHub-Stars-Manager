@@ -52,14 +52,16 @@ class TestStarItem(unittest.TestCase):
             full_name="a/b",
             name="b",
             owner="a",
-            ai_summary="test",
-            ai_tags=["tag1"],
+            description="test desc",
+            language="Python",
+            stars=42,
         )
         d = star.to_dict()
         star2 = StarItem.from_dict(d)
         self.assertEqual(star2.full_name, "a/b")
-        self.assertEqual(star2.ai_summary, "test")
-        self.assertEqual(star2.ai_tags, ["tag1"])
+        self.assertEqual(star2.description, "test desc")
+        self.assertEqual(star2.language, "Python")
+        self.assertEqual(star2.stars, 42)
 
     def test_from_dict_ignores_unknown_fields(self):
         d = {"full_name": "a/b", "name": "b", "owner": "a", "unknown_field": 123}

@@ -7,8 +7,10 @@ import json
 import os
 from collections import Counter
 from datetime import datetime, timedelta, timezone
+from functools import lru_cache
 from html import escape
 
+from jinja2 import Template
 from utils import log
 
 
@@ -38,12 +40,13 @@ class ReportGenerator:
             result.append(d)
         return result
 
-    def _repo_slug(self) -> str:
-        """获取当前仓库的 owner/repo，用于生成反馈链接"""
+    @staticmethod
+    @lru_cache(maxsize=1)
+    def _repo_slug_cached() -> str:
+        """获取当前仓库的 owner/repo（缓存结果，避免重复执行子进程）。"""
         repo = os.environ.get("GITHUB_REPOSITORY", "")
         if repo and "/" in repo:
             return repo
-        # 兜底：尝试从 git remote 推断
         try:
             import subprocess
             result = subprocess.run(
@@ -51,15 +54,17 @@ class ReportGenerator:
                 capture_output=True, text=True, timeout=5
             )
             url = result.stdout.strip()
-            if url:
-                # 处理 https://github.com/owner/repo.git 或 git@github.com:owner/repo.git
-                if "github.com" in url:
-                    parts = url.replace(":", "/").split("/")
-                    if len(parts) >= 2:
-                        return f"{parts[-2]}/{parts[-1].replace('.git', '')}"
+            if url and "github.com" in url:
+                parts = url.replace(":", "/").split("/")
+                if len(parts) >= 2:
+                    return f"{parts[-2]}/{parts[-1].replace('.git', '')}"
         except Exception:
             pass
         return ""
+
+    def _repo_slug(self) -> str:
+        """获取当前仓库的 owner/repo（兼容旧接口，实际调用缓存版本）。"""
+        return self._repo_slug_cached()
 
     def _feedback_url(self, full_name: str, current_eco: str) -> str:
         """生成预填充的 GitHub Issue 反馈链接"""
@@ -205,21 +210,21 @@ class ReportGenerator:
         if not iso_str:
             return ""
         from datetime import datetime, timezone
-        try:
-            dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
-            now = datetime.now(timezone.utc)
-            delta = now - dt
-            if delta.days >= 1:
-                return f"{delta.days}天前"
-            hours = delta.seconds // 3600
-            if hours >= 1:
-                return f"{hours}小时前"
-            minutes = delta.seconds // 60
-            if minutes >= 1:
-                return f"{minutes}分钟前"
-            return "刚刚"
-        except Exception:
+        from utils import parse_iso
+        dt = parse_iso(iso_str)
+        if dt is None:
             return ""
+        now = datetime.now(timezone.utc)
+        delta = now - dt
+        if delta.days >= 1:
+            return f"{delta.days}天前"
+        hours = delta.seconds // 3600
+        if hours >= 1:
+            return f"{hours}小时前"
+        minutes = delta.seconds // 60
+        if minutes >= 1:
+            return f"{minutes}分钟前"
+        return "刚刚"
 
     @staticmethod
     def _render_release_body(text: str) -> str:
@@ -280,314 +285,298 @@ class ReportGenerator:
 
         return '<br>'.join(result)
 
+    @staticmethod
+    def _bar(name, count, total, cs="#58a6ff", ce="#a371f7") -> str:
+        pct = (count / total * 100) if total else 0
+        return f'<div class="si"><span>{escape(str(name))}</span><span style="font-weight:600">{count}</span></div><div class="sbg"><div class="sf" style="width:{pct:.1f}%;background:linear-gradient(90deg,{cs},{ce})"></div></div>'
+
+    @staticmethod
+    def _opts(items_list) -> str:
+        return "\n".join([f'<option value="{escape(str(x))}">{escape(str(x))}</option>' for x in sorted(set(items_list))])
+
+    @staticmethod
+    def _tag_badges(tags) -> str:
+        if not tags:
+            return ""
+        return "".join([f'<span class="btg">{escape(str(t))}</span>' for t in tags[:5]])
+
     def _build_html(self, items: list, total: int, timestamp: str, stats: dict, weekly_data: dict | None = None) -> str:
-        def bar(name, count, total, cs="#58a6ff", ce="#a371f7"):
-            pct = (count / total * 100) if total else 0
-            return f'<div class="si"><span>{escape(str(name))}</span><span style="font-weight:600">{count}</span></div><div class="sbg"><div class="sf" style="width:{pct:.1f}%;background:linear-gradient(90deg,{cs},{ce})"></div></div>'
+        context = self._prepare_template_context(items, total, timestamp, stats, weekly_data)
 
-        def opts(items_list):
-            return "\n".join([f'<option value="{escape(str(x))}">{escape(str(x))}</option>' for x in sorted(set(items_list))])
+        with open(self.template_path, "r", encoding="utf-8") as f:
+            template = Template(f.read())
 
-        def tag_badges(tags):
-            if not tags:
-                return ""
-            return "".join([f'<span class="btg">{escape(str(t))}</span>' for t in tags[:5]])
+        return template.render(**context)
 
-        pb = "\n".join([bar(k, v, total, "#58a6ff", "#79c0ff") for k, v in stats["platform"].most_common()])
-        tb = "\n".join([bar(k, v, total, "#3fb950", "#56d364") for k, v in stats["type"].most_common()])
-        lb = "\n".join([bar(k, v, total, "#a371f7", "#bc8cff") for k, v in stats["language"].most_common()])
-        eb = "\n".join([bar(k, v, total, "#f85149", "#ff7b72") for k, v in stats["ecology"].most_common()])
+    def _prepare_template_context(self, items: list, total: int, timestamp: str, stats: dict, weekly_data: dict | None = None) -> dict:
+        """准备 Jinja2 模板渲染所需的纯数据上下文。"""
 
-        rows_parts = []
-        for r in sorted(items, key=lambda x: x["stars"], reverse=True):
-            stars = f"⭐ {r['stars']:,}"
-            # P1 fix: 防御 topics 为字符串时逐字符渲染
-            raw_topics = r.get("topics", [])
-            if isinstance(raw_topics, str):
-                raw_topics = [raw_topics]
-            topics = "".join([f'<span class="tt">{escape(str(t))}</span>' for t in raw_topics])
-            eco_badge = f'<span class="be">{escape(r["ecology"])}</span>' if r["ecology"] != "独立项目 / Standalone" else '<span style="color:#484f58;font-size:11px">-</span>'
-            role_badge = f'<span class="br">{escape(r["ecology_role"])}</span>' if r["ecology_role"] != "-" else '<span style="color:#484f58;font-size:11px">-</span>'
-            lock = ' 🔒' if r.get("manual_override") else ''
-            llm_status = r.get("llm_status", "")
-            if llm_status == "success":
-                llm_icon = ' 🤖'
-            elif llm_status == "failed":
-                llm_icon = ' ⚠️'
-            elif llm_status == "skipped":
-                llm_icon = ' ✏️'
-            else:
-                llm_icon = ''
-            display_desc = r.get("ai_summary") or r["description"]
-            # P1 fix: 防御 ai_tags 为字符串时逐字符渲染
-            raw_ai_tags = r.get("ai_tags") or []
-            if isinstance(raw_ai_tags, str):
-                raw_ai_tags = [raw_ai_tags]
-            tags_html = tag_badges(raw_ai_tags)
-            # P1 fix: 防御 ai_platforms 为字符串时逐字符渲染
-            raw_plat = r.get("ai_platforms") or []
-            if isinstance(raw_plat, str):
-                raw_plat = [raw_plat]
-            plat_html = "".join([f'<span class="bpl">{escape(str(p))}</span>' for p in raw_plat])
-            fb_url = self._feedback_url(r["full_name"], r["ecology"])
-            fb_link = f'<a href="{fb_url}" target="_blank" style="color:#8b949e;font-size:11px;text-decoration:none;margin-left:6px" title="报告分类错误">📝</a>' if fb_url else ''
-            rows_parts.append(f'<tr data-p="{escape(r["platform"])}" data-t="{escape(r["type"])}" data-l="{escape(r["language"])}" data-e="{escape(r["ecology"])}" data-r="{escape(r["ecology_role"])}" data-s="{escape(llm_status)}"><td><a class="rn" href="{escape(r["url"])}" target="_blank">{escape(r["owner"])}/{escape(r["name"])}</a>{lock}{llm_icon}{fb_link}<div class="rd">{escape(display_desc)}</div><div class="tg">{tags_html}</div><div class="tc">{topics}</div></td><td>{eco_badge}</td><td>{role_badge}</td><td><span class="bp">{escape(r["platform"])}</span></td><td><span class="bt">{escape(r["type"])}</span></td><td><span class="bl">{escape(r["language"])}</span></td><td>{plat_html}</td><td class="st">{stars}</td></tr>')
-        rows = "".join(rows_parts)
+        def _bar_data(counter, total_count: int) -> list[dict]:
+            """将 Counter 转为条形图数据列表。"""
+            return [
+                {"name": name, "count": count, "pct": (count / total_count * 100) if total_count else 0}
+                for name, count in counter.most_common()
+            ]
 
-        eco_group_parts = []
+        return {
+            "total": total,
+            "timestamp": timestamp,
+            "rows": [self._row_data(r) for r in sorted(items, key=lambda x: x["stars"], reverse=True)],
+            "platform_options": sorted({r["platform"] for r in items}),
+            "type_options": sorted({r["type"] for r in items}),
+            "language_options": sorted({r["language"] for r in items}),
+            "ecology_options": sorted({r["ecology"] for r in items}),
+            "role_options": sorted({r["ecology_role"] for r in items if r["ecology_role"] != "-"}),
+            "status_options": sorted({r.get("llm_status", "") for r in items if r.get("llm_status")}),
+            "ecology_groups": self._build_ecology_data(items, stats),
+            "fork_groups": self._build_fork_data(items),
+            "weekly_digest": self._build_weekly_data(weekly_data),
+            "platform_bars": _bar_data(stats["platform"], total),
+            "type_bars": _bar_data(stats["type"], total),
+            "language_bars": _bar_data(stats["language"], total),
+            "ecology_bars": _bar_data(stats["ecology"], total),
+        }
+
+    def _row_data(self, r: dict) -> dict:
+        """准备单行数据（供 Jinja2 模板渲染）。"""
+        raw_topics = r.get("topics", [])
+        if isinstance(raw_topics, str):
+            raw_topics = [raw_topics]
+        raw_ai_tags = r.get("ai_tags") or []
+        if isinstance(raw_ai_tags, str):
+            raw_ai_tags = [raw_ai_tags]
+        raw_plat = r.get("ai_platforms") or []
+        if isinstance(raw_plat, str):
+            raw_plat = [raw_plat]
+        llm_status = r.get("llm_status", "")
+        return {
+            "platform": r["platform"],
+            "type": r["type"],
+            "language": r["language"],
+            "ecology": r["ecology"],
+            "ecology_role": r["ecology_role"],
+            "stars": r["stars"],
+            "url": r["url"],
+            "owner": r["owner"],
+            "name": r["name"],
+            "description": r.get("ai_summary") or r["description"],
+            "topics": raw_topics,
+            "manual_override": r.get("manual_override"),
+            "llm_status": llm_status,
+            "llm_icon": {"success": " 🤖", "failed": " ⚠️", "skipped": " ✏️"}.get(llm_status, ""),
+            "ai_tags": raw_ai_tags[:5],
+            "ai_platforms": raw_plat,
+            "feedback_url": self._feedback_url(r["full_name"], r["ecology"]),
+            "has_eco_badge": r["ecology"] != "独立项目 / Standalone",
+            "has_role_badge": r["ecology_role"] != "-",
+        }
+
+    def _build_ecology_data(self, items: list, stats: dict) -> list[dict]:
+        """准备生态分组数据（供 Jinja2 模板渲染）。"""
+        result = []
         for eco_name, count in stats["ecology"].most_common():
             if eco_name == "独立项目 / Standalone":
                 continue
             eco_items = [r for r in items if r["ecology"] == eco_name]
             roles = Counter([r["ecology_role"] for r in eco_items])
-            rs_parts = []
+            role_data = []
             for role_name, rc in roles.most_common():
-                ri = sorted([r for r in eco_items if r["ecology_role"] == role_name], key=lambda x: x["stars"], reverse=True)
-                ih_parts = []
-                for item in ri:
-                    stars = f"⭐ {item['stars']:,}"
-                    lock = ' 🔒' if item.get("manual_override") else ''
-                    fb_url = self._feedback_url(item["full_name"], item["ecology"])
-                    fb_link = f'<a href="{fb_url}" target="_blank" style="color:#8b949e;font-size:11px;text-decoration:none;margin-left:4px" title="报告分类错误">📝</a>' if fb_url else ''
-                    ih_parts.append(f'<div class="ri"><div class="rii"><a class="rin" href="{escape(item["url"])}" target="_blank">{escape(item["owner"])}/{escape(item["name"])}</a>{lock}{fb_link}<div class="rid">{escape(item.get("ai_summary") or item["description"])}</div></div><div class="rim"><span class="bl">{escape(item["language"])}</span><span class="st">{stars}</span></div></div>')
-                rs_parts.append(f'<div class="rs"><div class="rh">🔸 {escape(role_name)} <span style="color:#8b949e;font-weight:400">({rc})</span></div><div class="rl">{"".join(ih_parts)}</div></div>')
-            eco_group_parts.append(f'<div class="eg"><div class="eh" onclick="te(this)"><div class="et">🌿 {escape(eco_name)}</div><span class="ec">{count} 个项目</span></div><div class="eb">{"".join(rs_parts)}</div></div>')
+                ri = sorted([r for r in eco_items if r["ecology_role"] == role_name],
+                           key=lambda x: x["stars"], reverse=True)
+                role_data.append({
+                    "name": role_name,
+                    "count": rc,
+                    "entries": [self._eco_item_data(item) for item in ri],
+                })
+            result.append({
+                "name": eco_name,
+                "count": count,
+                "roles": role_data,
+                "is_standalone": False,
+            })
 
-        standalone = sorted([r for r in items if r["ecology"] == "独立项目 / Standalone"], key=lambda x: x["stars"], reverse=True)
+        standalone = sorted([r for r in items if r["ecology"] == "独立项目 / Standalone"],
+                           key=lambda x: x["stars"], reverse=True)
         if standalone:
-            ih_parts = []
-            for item in standalone:
-                stars = f"⭐ {item['stars']:,}"
-                lock = ' 🔒' if item.get("manual_override") else ''
-                fb_url = self._feedback_url(item["full_name"], item["ecology"])
-                fb_link = f'<a href="{fb_url}" target="_blank" style="color:#8b949e;font-size:11px;text-decoration:none;margin-left:4px" title="报告分类错误">📝</a>' if fb_url else ''
-                ih_parts.append(f'<div class="ri"><div class="rii"><a class="rin" href="{escape(item["url"])}" target="_blank">{escape(item["owner"])}/{escape(item["name"])}</a>{lock}{fb_link}<div class="rid">{escape(item.get("ai_summary") or item["description"])}</div></div><div class="rim"><span class="bp">{escape(item["platform"])}</span><span class="bt">{escape(item["type"])}</span><span class="bl">{escape(item["language"])}</span><span class="st">{stars}</span></div></div>')
-            eco_group_parts.append(f'<div class="eg"><div class="eh" onclick="te(this)"><div class="et" style="color:#8b949e">📦 独立项目 / Standalone</div><span class="ec" style="background:#30363d;color:#8b949e">{len(standalone)} 个项目</span></div><div class="eb collapsed"><div class="rs"><div class="rl">{"".join(ih_parts)}</div></div></div></div>')
-        eco_groups = "".join(eco_group_parts)
+            result.append({
+                "name": "独立项目 / Standalone",
+                "count": len(standalone),
+                "roles": [{"name": None, "count": len(standalone),
+                          "items": [self._eco_item_data(item) for item in standalone]}],
+                "is_standalone": True,
+            })
+        return result
 
-        fork_items = [r for r in items if r.get("is_fork")]
-        if fork_items:
-            fh_parts = []
-            for f in sorted(fork_items, key=lambda x: x["stars"], reverse=True):
-                stars = f"⭐ {f['stars']:,}"
-                parent_info = ""
-                if f.get("parent_full_name"):
-                    # P1 fix: 防御 parent_pushed_at 为 None 时切片崩溃
-                    ppa = (f.get("parent_pushed_at") or "未知")[:10]
-                    parent_info = f'<div style="color:#8b949e;font-size:11px">← {escape(f["parent_full_name"])} (上游更新: {escape(ppa)})</div>'
-                sync_btn = f'<a href="https://github.com/{escape(f["full_name"])}/sync" target="_blank" style="color:#58a6ff;font-size:11px;text-decoration:none">[Sync]</a>'
-                fh_parts.append(f'<div class="ri"><div class="rii"><a class="rin" href="{escape(f["url"])}" target="_blank">{escape(f["owner"])}/{escape(f["name"])}</a>{sync_btn}<div class="rid">{escape(f.get("ai_summary") or f["description"])}</div>{parent_info}</div><div class="rim"><span class="bl">{escape(f["language"])}</span><span class="st">{stars}</span></div></div>')
-            fork_groups = f'<div class="eg"><div class="eh"><div class="et">🔱 我的 Forks</div><span class="ec">{len(fork_items)} 个</span></div><div class="eb"><div class="rs"><div class="rl">{"".join(fh_parts)}</div></div></div></div>'
-        else:
-            fork_groups = '<div class="sn">暂无 Fork 仓库数据，使用 --check-forks 可检测上游更新。</div>'
-
-        weekly_digest = self._build_weekly_digest(weekly_data)
-
-        try:
-            with open(self.template_path, "r", encoding="utf-8") as f:
-                template = f.read()
-        except FileNotFoundError:
-            log(f"模板文件不存在: {self.template_path}", "ERROR")
-            raise
-
-        replacements = {
-            "{{TOTAL}}": str(total),
-            "{{TIMESTAMP}}": timestamp,
-            "{{PLATFORM_OPTIONS}}": opts([r["platform"] for r in items]),
-            "{{TYPE_OPTIONS}}": opts([r["type"] for r in items]),
-            "{{LANGUAGE_OPTIONS}}": opts([r["language"] for r in items]),
-            "{{ECOLOGY_OPTIONS}}": opts([r["ecology"] for r in items]),
-            "{{ROLE_OPTIONS}}": opts([r["ecology_role"] for r in items if r["ecology_role"] != "-"]),
-            "{{STATUS_OPTIONS}}": opts([r.get("llm_status", "") for r in items if r.get("llm_status")]),
-            "{{ROWS}}": rows,
-            "{{ECOLOGY_GROUPS}}": eco_groups,
-            "{{FORK_GROUPS}}": fork_groups,
-            "{{WEEKLY_DIGEST}}": weekly_digest,
-            "{{PLATFORM_BARS}}": pb,
-            "{{TYPE_BARS}}": tb,
-            "{{LANGUAGE_BARS}}": lb,
-            "{{ECOLOGY_BARS}}": eb,
+    def _eco_item_data(self, item: dict) -> dict:
+        return {
+            "url": item["url"],
+            "owner": item["owner"],
+            "name": item["name"],
+            "description": item.get("ai_summary") or item["description"],
+            "language": item["language"],
+            "stars": item["stars"],
+            "manual_override": item.get("manual_override"),
+            "feedback_url": self._feedback_url(item["full_name"], item["ecology"]),
         }
-        for placeholder, value in replacements.items():
-            template = template.replace(placeholder, value)
-        return template
 
-    def _build_weekly_digest(self, weekly_data: dict | None) -> str:
-        """构建周报 HTML 区块（含 Tabs：新收录/热门/分类变更/Release/Fork）"""
+    def _build_fork_data(self, items: list) -> dict | None:
+        """准备 Fork 分组数据。"""
+        fork_items = [r for r in items if r.get("is_fork")]
+        if not fork_items:
+            return None
+        return {
+            "count": len(fork_items),
+            "entries": [
+                {
+                    "url": f["url"],
+                    "full_name": f["full_name"],
+                    "owner": f["owner"],
+                    "name": f["name"],
+                    "description": f.get("ai_summary") or f["description"],
+                    "language": f["language"],
+                    "stars": f["stars"],
+                    "parent_full_name": f.get("parent_full_name"),
+                    "parent_pushed_at": (f.get("parent_pushed_at") or "未知")[:10],
+                }
+                for f in sorted(fork_items, key=lambda x: x["stars"], reverse=True)
+            ],
+        }
+
+    def _build_weekly_data(self, weekly_data: dict | None) -> dict | None:
+        """准备周报数据。"""
         if not weekly_data:
-            return ""
-
-        new_items = weekly_data.get("new_items", [])
-        release_updates = weekly_data.get("release_updates", [])
-        star_changes = weekly_data.get("star_changes", {})
-        fork_updates = weekly_data.get("fork_updates", [])
-        classification_changes = weekly_data.get("classification_changes", {})
-        ai_summary = weekly_data.get("ai_summary", "")
+            return None
 
         def _item_dict(item):
-            """统一将 StarItem / dict 转为 dict，避免类型不匹配"""
             return item.to_dict() if hasattr(item, "to_dict") else dict(item)
 
-        tabs_html: list[str] = []
-        contents_html: list[str] = []
-        first_tab = True
-
-        def add_tab(tab_id: str, label: str, content: str) -> None:
-            nonlocal first_tab
-            active = "active" if first_tab else ""
-            tabs_html.append(f'<button class="wd-tab {active}" onclick="wst(this,\'{tab_id}\')">{label}</button>')
-            contents_html.append(f'<div id="wd-tab-{tab_id}" class="wd-tab-content {active}">{content}</div>')
-            first_tab = False
+        tabs = []
 
         # 新收录
+        new_items = weekly_data.get("new_items", [])
         if new_items:
-            ni_parts: list[str] = []
-            ni_parts.append(f'<div class="wd-section"><h3>🆕 新收录 ({len(new_items)})</h3><div class="wd-list">')
-            for it in new_items:
-                d = _item_dict(it)
-                url = d.get("url") or d.get("html_url", "#")
-                ni_parts.append(f'<div class="wd-item"><a href="{url}" target="_blank">{d["full_name"]}</a><span class="wd-eco">{d["ecology"]}</span></div>')
-            ni_parts.append('</div></div>')
-            add_tab("new", f"🆕 新收录 ({len(new_items)})", "".join(ni_parts))
+            tabs.append({
+                "id": "new",
+                "label": f"🆕 新收录 ({len(new_items)})",
+                "entries": [_item_dict(it) for it in new_items],
+                "type": "new_items",
+            })
 
         # 本周热门
+        star_changes = weekly_data.get("star_changes", {})
         if star_changes:
-            sc_parts: list[str] = []
             top_changes = sorted(star_changes.items(), key=lambda x: x[1], reverse=True)[:10]
-            sc_parts.append(f'<div class="wd-section"><h3>🔥 本周热门 (Stars +)</h3><div class="wd-list">')
+            hot_items = []
             for key, delta in top_changes:
                 raw = self.db.get(key)
                 if raw:
                     d = _item_dict(raw)
-                    url = d.get("url") or "#"
-                    sc_parts.append(f'<div class="wd-item"><a href="{url}" target="_blank">{d["full_name"]}</a><span class="wd-tag">+{delta:,} ⭐</span></div>')
-            sc_parts.append('</div></div>')
-            add_tab("hot", f"🔥 热门 ({len(star_changes)})", "".join(sc_parts))
+                    hot_items.append({"full_name": d["full_name"], "url": d.get("url", "#"), "delta": delta})
+            tabs.append({
+                "id": "hot",
+                "label": f"🔥 热门 ({len(star_changes)})",
+                "entries": hot_items,
+                "type": "hot",
+            })
 
         # 分类变更
+        classification_changes = weekly_data.get("classification_changes", {})
         if classification_changes:
-            cc_parts: list[str] = []
             all_changes = list(classification_changes.items())
             visible = all_changes[:10]
             hidden = all_changes[10:]
-            cc_parts.append(f'<div class="wd-section"><h3>📝 分类变更 ({len(classification_changes)})</h3><div class="wd-list">')
+            change_items = []
             for key, changes in visible:
                 raw = self.db.get(key)
                 if raw:
                     d = _item_dict(raw)
-                    url = d.get("url") or "#"
                     change_str = ", ".join([f"{k}: {v['from']} → {v['to']}" for k, v in changes.items()])
-                    cc_parts.append(f'<div class="wd-item"><a href="{url}" target="_blank">{d["full_name"]}</a><span class="wd-tag">{change_str}</span></div>')
-            if hidden:
-                cc_parts.append('<div class="wd-list-hidden" style="display:none;flex-direction:column;gap:6px">')
-                for key, changes in hidden:
-                    raw = self.db.get(key)
-                    if raw:
-                        d = _item_dict(raw)
-                        url = d.get("url") or "#"
-                        change_str = ", ".join([f"{k}: {v['from']} → {v['to']}" for k, v in changes.items()])
-                        cc_parts.append(f'<div class="wd-item"><a href="{url}" target="_blank">{d["full_name"]}</a><span class="wd-tag">{change_str}</span></div>')
-                cc_parts.append('</div>')
-                cc_parts.append(f'<span class="wd-expand-toggle" onclick="wet(this)">展开全部 ({len(hidden)} 个) ▼</span>')
-            cc_parts.append('</div></div>')
-            add_tab("classify", f"📝 分类变更 ({len(classification_changes)})", "".join(cc_parts))
+                    change_items.append({"full_name": d["full_name"], "url": d.get("url", "#"), "change": change_str})
+            hidden_items = []
+            for key, changes in hidden:
+                raw = self.db.get(key)
+                if raw:
+                    d = _item_dict(raw)
+                    change_str = ", ".join([f"{k}: {v['from']} → {v['to']}" for k, v in changes.items()])
+                    hidden_items.append({"full_name": d["full_name"], "url": d.get("url", "#"), "change": change_str})
+            tabs.append({
+                "id": "classify",
+                "label": f"📝 分类变更 ({len(classification_changes)})",
+                "entries": change_items,
+                "hidden_entries": hidden_items,
+                "type": "classify",
+            })
 
         # 新 Release
+        release_updates = weekly_data.get("release_updates", [])
         if release_updates:
-            ru_parts: list[str] = []
             new_repo_count = sum(1 for ru in release_updates if ru.get("is_new_repo"))
             regular_count = len(release_updates) - new_repo_count
+            release_items = []
+            for ru in release_updates:
+                full_name = ru.get("full_name", "")
+                owner, _, _ = full_name.partition("/")
+                release_items.append({
+                    "full_name": full_name,
+                    "owner": owner,
+                    "avatar_url": f"https://github.com/{owner}.png?size=48" if owner else "",
+                    "new_tag": ru.get("new_tag", "未知"),
+                    "html_url": ru.get("html_url", "#"),
+                    "is_new_repo": ru.get("is_new_repo", False),
+                    "published_at": ru.get("published_at", ""),
+                    "rel_time": self._relative_time(ru.get("published_at", "")),
+                    "body": ru.get("body", ""),
+                    "body_html": self._render_release_body(ru.get("body", "")) if ru.get("body") else None,
+                    "ai_digest": ru.get("ai_digest", ""),
+                })
             title_parts = []
             if new_repo_count:
                 title_parts.append(f"🆕 新收录动态 ({new_repo_count})")
             if regular_count:
                 title_parts.append(f"🚀 新 Release ({regular_count})")
-            title_html = ' | '.join(title_parts)
-            ru_parts.append(f'<div class="wd-section"><h3>{title_html}</h3>')
-            for ru in release_updates:
-                owner = ru["full_name"].split("/")[0]
-                avatar_url = f"https://github.com/{owner}.png?size=48"
-                rel_time = self._relative_time(ru.get("published_at", ""))
-                version_url = ru["html_url"]
-                is_new_repo = ru.get("is_new_repo", False)
-                new_badge = '<span class="wd-new-badge">🆕 新收录</span>' if is_new_repo else ''
-                action_text = "收录于" if is_new_repo else "released"
-                ru_parts.append(
-                    f'<div class="wd-release-card">'
-                    f'  <div class="wd-release-header">'
-                    f'    <img class="wd-release-avatar" src="{avatar_url}" alt="{owner}" loading="lazy" onerror="this.style.display=\'none\'">'
-                    f'    <div class="wd-release-meta">'
-                    f'      <a href="https://github.com/{ru["full_name"]}" target="_blank">{ru["full_name"]}</a> {action_text}'
-                    f'      <span class="wd-release-time">{rel_time}</span>{new_badge}'
-                    f'    </div>'
-                    f'  </div>'
-                    f'  <div class="wd-release-version">'
-                    f'    <a href="{version_url}" target="_blank">{ru["new_tag"]}</a>'
-                    f'  </div>'
-                )
-                body = ru.get("body", "")
-                if body:
-                    body_html = self._render_release_body(body)
-                    ru_parts.append(
-                        f'  <div class="wd-release-body">{body_html}</div>'
-                        f'  <span class="wd-release-toggle" onclick="wtn(this)">展开</span>'
-                    )
-                else:
-                    ru_parts.append(f'  <div class="wd-release-empty">无更新日志</div>')
-                ai_digest = ru.get("ai_digest", "")
-                if ai_digest:
-                    ru_parts.append(f'  <div class="wd-ai-digest">🤖 {escape(ai_digest)}</div>')
-                ru_parts.append('</div>')
-            ru_parts.append(f'<div style="margin-top:10px;text-align:right"><a href="releases.html" target="_blank" style="color:#58a6ff;font-size:12px;text-decoration:none">查看完整 Release 日志 →</a></div>')
-            ru_parts.append('</div>')
-            tab_label = f"🚀 Release ({len(release_updates)})" if not new_repo_count else f"🚀 Release ({regular_count}) + 🆕 ({new_repo_count})"
-            add_tab("release", tab_label, "".join(ru_parts))
+            tab_label = f"🚀 Release ({len(release_updates)})"
+            if new_repo_count:
+                tab_label = f"🚀 Release ({regular_count}) + 🆕 ({new_repo_count})"
+            tabs.append({
+                "id": "release",
+                "label": tab_label,
+                "entries": release_items,
+                "type": "release",
+                "title_html": " | ".join(title_parts),
+            })
 
-        # 生态候选池
+        # 生态候选
         ecology_candidates = weekly_data.get("ecology_candidates", [])
         if ecology_candidates:
-            eco_parts: list[str] = []
-            eco_parts.append(f'<div class="wd-section"><h3>🌱 生态候选 ({len(ecology_candidates)})</h3><div class="wd-list">')
             for c in ecology_candidates:
-                status_icon = {
+                c["status_icon"] = {
                     "candidate": "🔍",
                     "watchlist": "👀",
                     "ai_reviewed": "🤖",
                     "trusted": "✅",
-                }.get(c["status"], "❓")
-                eco_parts.append(
-                    f'<div class="wd-item">'
-                    f'<span>{status_icon} {escape(c["name"])}</span>'
-                    f'<span class="wd-tag">{c["count"]} 个项目</span>'
-                    f'<span style="color:var(--text-muted);font-size:11px">{escape(c["progress"])}</span>'
-                    f'</div>'
-                )
-            eco_parts.append('</div></div>')
-            add_tab("eco", f"🌱 候选 ({len(ecology_candidates)})", "".join(eco_parts))
+                }.get(c.get("status"), "❓")
+            tabs.append({
+                "id": "eco",
+                "label": f"🌱 候选 ({len(ecology_candidates)})",
+                "entries": ecology_candidates,
+                "type": "eco_candidates",
+            })
 
         # Fork 上游更新
+        fork_updates = weekly_data.get("fork_updates", [])
         if fork_updates:
-            fu_parts: list[str] = []
-            fu_parts.append(f'<div class="wd-section"><h3>🔱 Fork 上游更新 ({len(fork_updates)})</h3><div class="wd-list">')
-            for fu in fork_updates:
-                parent_url = f"https://github.com/{fu['parent_full_name']}"
-                ppa = (fu.get("parent_pushed_at") or "")[:10]
-                fu_parts.append(f'<div class="wd-item"><a href="{parent_url}" target="_blank">{fu["full_name"]}</a><span class="wd-tag">← {fu["parent_full_name"]} ({ppa})</span></div>')
-            fu_parts.append('</div></div>')
-            add_tab("fork", f"🔱 Fork ({len(fork_updates)})", "".join(fu_parts))
+            tabs.append({
+                "id": "fork",
+                "label": f"🔱 Fork ({len(fork_updates)})",
+                "entries": fork_updates,
+                "type": "fork_updates",
+            })
 
-        if not tabs_html:
-            return ""
+        if not tabs:
+            return None
 
-        wd_parts: list[str] = ['<div class="weekly-digest" id="wd-main">']
-        wd_parts.append('<div class="wd-header"><h2>📅 本周摘要</h2><button class="wd-toggle" onclick="tw()">收起 ▲</button></div>')
-        wd_parts.append('<div id="wd-body">')
-        if ai_summary:
-            wd_parts.append(f'<div class="wd-summary-card"><div class="wd-summary-title">🤖 本周动态总结</div><div class="wd-summary-body">{escape(ai_summary)}</div></div>')
-        wd_parts.append('<div class="wd-tabs">')
-        wd_parts.extend(tabs_html)
-        wd_parts.append('</div>')
-        wd_parts.extend(contents_html)
-        wd_parts.append('</div></div>')
-        return "".join(wd_parts)
+        return {
+            "tabs": tabs,
+            "ai_summary": weekly_data.get("ai_summary", ""),
+        }
 

@@ -36,14 +36,6 @@ class StarItem:
     manual_override: bool = False
     override_fields: List[str] = field(default_factory=list)
     override_rules_version: str = ""  # 设置 manual_override 时的规则版本
-    # 注意：AI 相关字段已迁移到独立的 AI 数据库 (stars_ai.json)
-    # 保留以下字段仅用于向后兼容加载旧数据，新代码不再写入
-    llm_status: str = LLMStatus.NOT_ANALYZED
-    llm_confidence: Optional[float] = None
-    llm_reason: Optional[str] = None
-    ai_summary: Optional[str] = None
-    ai_tags: Optional[List[str]] = None
-    ai_platforms: Optional[List[str]] = None
     subscribe_releases: bool = False
     last_release_tag: Optional[str] = None
     last_release_checked: Optional[str] = None
@@ -72,8 +64,8 @@ class StarItem:
         )
 
     def to_dict(self) -> Dict[str, Any]:
-        """转换为字典（用于 JSON 序列化）"""
-        return asdict(self)
+        """转换为字典（用于 JSON 序列化）。返回浅拷贝，避免 asdict 深拷贝开销。"""
+        return {k: getattr(self, k) for k in self.__dataclass_fields__}
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "StarItem":

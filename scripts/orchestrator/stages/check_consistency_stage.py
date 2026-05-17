@@ -25,7 +25,8 @@ def check_consistency_stage(ctx: PipelineContext) -> None:
         ctx.db.save()
 
     md = checker.generate_report()
-    out_path = os.path.join(ctx.args.output, "consistency_report.md")
+    output_dir = getattr(ctx.args, 'output', './docs')
+    out_path = os.path.join(output_dir, "consistency_report.md")
     try:
         os.makedirs(ctx.args.output, exist_ok=True)
         with open(out_path, "w", encoding="utf-8") as f:

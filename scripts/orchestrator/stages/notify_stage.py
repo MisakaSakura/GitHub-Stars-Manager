@@ -15,7 +15,7 @@ def notify_stage(ctx: PipelineContext) -> None:
     from config import NOTIFY_CONFIG
     notify_cfg = dict(NOTIFY_CONFIG)
     notify_cfg["enabled"] = True
-    raw_channels = ctx.args.notify_channels.split(",") if ctx.args.notify_channels else []
+    raw_channels = getattr(ctx.args, 'notify_channels', '').split(",") if getattr(ctx.args, 'notify_channels', None) else []
     notify_cfg["channels"] = [c.strip() for c in raw_channels if c.strip()]
     notifier = Notifier(notify_cfg)
 

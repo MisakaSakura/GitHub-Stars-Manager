@@ -43,8 +43,8 @@ def atomic_write(path: str, write_fn) -> None:
     try:
         lock_fd = open(_lock_file, "w")
         _acquire_file_lock(lock_fd)
-    except Exception:
-        pass
+    except OSError as e:
+        log(f"文件锁获取失败（将继续无锁写入）: {e}", "WARN")
 
     try:
         with open(tmp_path, "w", encoding="utf-8") as f:
@@ -54,7 +54,7 @@ def atomic_write(path: str, write_fn) -> None:
         if os.path.exists(tmp_path):
             try:
                 os.remove(tmp_path)
-            except Exception:
+            except OSError:
                 pass
         raise
     finally:
@@ -62,12 +62,12 @@ def atomic_write(path: str, write_fn) -> None:
             _release_file_lock(lock_fd)
             try:
                 lock_fd.close()
-            except Exception:
+            except OSError:
                 pass
 
 
 def _acquire_file_lock(fd) -> bool:
-    """跨平台获取文件锁（独占锁）。"""
+    """跨平台获取文件锁（独占锁）。P1-41: Windows 使用非阻塞模式 + 重试，避免无限阻塞。"""
     try:
         import fcntl
         fcntl.flock(fd, fcntl.LOCK_EX)
@@ -76,9 +76,17 @@ def _acquire_file_lock(fd) -> bool:
         pass
     try:
         import msvcrt
+        import time
         fd.seek(0)
-        msvcrt.locking(fd.fileno(), msvcrt.LK_LOCK, 1)
-        return True
+        # 使用 LK_NBLCK 非阻塞模式，配合重试避免无限阻塞
+        for _attempt in range(10):
+            try:
+                msvcrt.locking(fd.fileno(), msvcrt.LK_NBLCK, 1)
+                return True
+            except OSError:
+                time.sleep(0.05)
+        log("Windows 文件锁获取超时（10次重试）", "WARN")
+        return False
     except (ImportError, OSError):
         pass
     return False
@@ -97,3 +105,30 @@ def _release_file_lock(fd) -> None:
         msvcrt.locking(fd.fileno(), msvcrt.LK_UNLCK, 1)
     except (ImportError, OSError):
         pass
+
+
+# ═══════════════════════════════════════════════════════════════
+# GC-12: 统一时间解析函数
+# ═══════════════════════════════════════════════════════════════
+
+def parse_iso(ts: str) -> "datetime | None":
+    """解析 ISO 8601 时间字符串为 aware datetime 对象。
+
+    统一处理以下变体：
+    - 带 Z 后缀: "2024-01-01T00:00:00Z"
+    - 带 +00:00 后缀: "2024-01-01T00:00:00+00:00"
+    - 无 tz 后缀（旧数据）: "2024-01-01T00:00:00" → 自动附加 timezone.utc
+
+    Returns:
+        aware datetime 对象，解析失败时返回 None
+    """
+    if not ts:
+        return None
+    from datetime import datetime, timezone
+    try:
+        dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt
+    except (ValueError, TypeError):
+        return None

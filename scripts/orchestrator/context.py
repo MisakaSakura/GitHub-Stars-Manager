@@ -2,9 +2,21 @@
 # -*- coding: utf-8 -*-
 """Pipeline 共享上下文：替代旧 Pipeline 的 self.* 属性，解耦各阶段"""
 
+from __future__ import annotations
+
 import argparse
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ai_database import AIDatabase
+    from database import StarsDB
+    from engine import IncrementalEngine
+    from fork_tracker import ForkTracker
+    from github_api import GitHubAPI
+    from llm_classifier import LLMClassifier
+    from release_tracker import ReleaseTracker
+    from rule_classifier import RuleClassifier
 
 
 @dataclass
@@ -13,12 +25,12 @@ class PipelineContext:
 
     args: argparse.Namespace
 
-    db: Any = None
-    ai_db: Any = None
-    gh: Any = None
-    rule: Any = None
-    llm: Any = None
-    engine: Any = None
+    db: Optional["StarsDB"] = None
+    ai_db: Optional["AIDatabase"] = None
+    gh: Optional["GitHubAPI"] = None
+    rule: Optional["RuleClassifier"] = None
+    llm: Optional["LLMClassifier"] = None
+    engine: Optional["IncrementalEngine"] = None
 
     is_first_run: bool = False
     did_full_refresh: bool = False
@@ -32,8 +44,8 @@ class PipelineContext:
     release_updates: list[dict] = field(default_factory=list)
     fork_updates: list[dict] = field(default_factory=list)
 
-    release_tracker: Any = None
-    fork_tracker: Any = None
+    release_tracker: Optional["ReleaseTracker"] = None
+    fork_tracker: Optional["ForkTracker"] = None
 
     ecology_candidate_summary: list[dict] = field(default_factory=list)
 

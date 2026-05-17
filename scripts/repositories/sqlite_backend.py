@@ -3,6 +3,7 @@
 """SQLite Repository 实现 —— 替代 JSON 文件存储"""
 
 import json
+import re
 import sqlite3
 from typing import Iterator, Any
 from datetime import datetime, timezone
@@ -12,7 +13,7 @@ from models import StarItem
 from utils import log
 
 
-SCHEMA = """
+SCHEMA_TABLES = """
 CREATE TABLE IF NOT EXISTS stars (
     full_name TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -73,11 +74,16 @@ CREATE TABLE IF NOT EXISTS releases_history (
     ai_digest TEXT,
     detected_at TEXT
 );
+"""
 
+SCHEMA_INDEXES = """
 CREATE INDEX IF NOT EXISTS idx_stars_ecology ON stars(ecology);
 CREATE INDEX IF NOT EXISTS idx_stars_platform ON stars(platform);
 CREATE INDEX IF NOT EXISTS idx_stars_type ON stars(type);
 """
+
+# 保留完整 SCHEMA 供 _parse_schema_columns 使用
+SCHEMA = SCHEMA_TABLES + SCHEMA_INDEXES
 
 
 def _json_dumps(obj: list) -> str:
@@ -96,21 +102,55 @@ class SQLiteStarsRepository(Repository):
 
     def __init__(self, db_path: str):
         self.db_path = db_path
-        self._conn = sqlite3.connect(db_path)
+        self._conn = sqlite3.connect(db_path, check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
         self._ensure_schema()
         self._meta: dict[str, str] = {}
         self._load_meta()
 
+    @staticmethod
+    def _parse_schema_columns(schema_sql: str) -> dict[str, str]:
+        """从 CREATE TABLE 语句中提取列名和类型定义（P1-13: 用于自动同步）。
+        过滤 ALTER TABLE ADD COLUMN 不支持的约束（PRIMARY KEY、NOT NULL）。"""
+        columns = {}
+        in_table = False
+        for line in schema_sql.split('\n'):
+            line = line.strip().rstrip(',')
+            if 'CREATE TABLE' in line:
+                in_table = True
+                continue
+            if in_table and line.startswith(')'):
+                break
+            if in_table and line and not line.startswith('--'):
+                parts = line.split(None, 1)
+                if len(parts) == 2:
+                    col_name, col_def = parts
+                    # ALTER TABLE ADD COLUMN 不支持 PRIMARY KEY / NOT NULL
+                    col_def = col_def.replace('PRIMARY KEY', '').replace('NOT NULL', '').strip()
+                    columns[col_name] = col_def
+        return columns
+
+    # P0-4: 列名白名单，防止 SQL 注入
+    _VALID_COL_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
     def _ensure_schema(self) -> None:
-        self._conn.executescript(SCHEMA)
-        # Schema 迁移：为旧数据库添加 override_rules_version 列
-        try:
-            self._conn.execute("ALTER TABLE stars ADD COLUMN override_rules_version TEXT DEFAULT ''")
-            self._conn.commit()
-        except sqlite3.OperationalError:
-            pass  # 列已存在
+        # 先创建表（IF NOT EXISTS 不会失败）
+        self._conn.executescript(SCHEMA_TABLES)
+        # P1-13: 自动同步缺失的列
+        expected = self._parse_schema_columns(SCHEMA_TABLES)
+        existing = {row[1] for row in self._conn.execute("PRAGMA table_info(stars)")}
+        for col_name, col_def in expected.items():
+            if col_name not in existing:
+                if not self._VALID_COL_NAME.match(col_name):
+                    log(f"跳过非法列名: {col_name}", "WARN")
+                    continue
+                try:
+                    self._conn.execute(f"ALTER TABLE stars ADD COLUMN {col_name} {col_def}")
+                except sqlite3.OperationalError:
+                    pass  # 列已存在或其他错误
         self._conn.commit()
+        # 最后创建索引（需要所有列都已存在）
+        self._conn.executescript(SCHEMA_INDEXES)
 
     def _load_meta(self) -> None:
         cur = self._conn.execute("SELECT key, value FROM meta")
@@ -144,19 +184,36 @@ class SQLiteStarsRepository(Repository):
             github_list_source=row["github_list_source"],
         )
 
+    # GC-10: 列名与属性名的映射表（单一来源）
+    _COLUMN_MAP: list[tuple[str, str]] = [
+        ("full_name", "full_name"), ("name", "name"), ("owner", "owner"),
+        ("description", "description"), ("language", "language"),
+        ("platform", "platform"), ("type", "type"),
+        ("ecology", "ecology"), ("ecology_role", "ecology_role"),
+        ("topics", "topics"), ("stars", "stars"), ("url", "url"),
+        ("first_seen", "first_seen"), ("last_updated", "last_updated"),
+        ("manual_override", "manual_override"),
+        ("override_fields", "override_fields"),
+        ("override_rules_version", "override_rules_version"),
+        ("subscribe_releases", "subscribe_releases"),
+        ("last_release_tag", "last_release_tag"),
+        ("is_fork", "is_fork"), ("parent_full_name", "parent_full_name"),
+        ("parent_pushed_at", "parent_pushed_at"),
+        ("imported", "imported"), ("github_list_source", "github_list_source"),
+    ]
+
     def _item_to_tuple(self, item: StarItem) -> tuple:
-        return (
-            item.full_name, item.name, item.owner,
-            item.description, item.language, item.platform, item.type,
-            item.ecology, item.ecology_role,
-            _json_dumps(item.topics), item.stars, item.url,
-            item.first_seen, item.last_updated,
-            int(item.manual_override), _json_dumps(item.override_fields),
-            item.override_rules_version,
-            int(item.subscribe_releases), item.last_release_tag,
-            int(item.is_fork), item.parent_full_name, item.parent_pushed_at,
-            int(item.imported), item.github_list_source,
-        )
+        # GC-10: 通过映射表自动生成 tuple，避免列名与顺序人工同步
+        result = []
+        for col_name, attr_name in self._COLUMN_MAP:
+            val = getattr(item, attr_name)
+            if col_name in ("topics", "override_fields"):
+                result.append(_json_dumps(val))
+            elif col_name in ("manual_override", "subscribe_releases", "is_fork", "imported"):
+                result.append(int(val))
+            else:
+                result.append(val)
+        return tuple(result)
 
     def get(self, key: str) -> StarItem | None:
         row = self._conn.execute(
@@ -168,22 +225,16 @@ class SQLiteStarsRepository(Repository):
         if isinstance(value, dict):
             value = StarItem.from_dict(value)
         t = self._item_to_tuple(value)
-        self._conn.execute("""
-            INSERT INTO stars VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-            ON CONFLICT(full_name) DO UPDATE SET
-                name=excluded.name, owner=excluded.owner,
-                description=excluded.description, language=excluded.language,
-                platform=excluded.platform, type=excluded.type,
-                ecology=excluded.ecology, ecology_role=excluded.ecology_role,
-                topics=excluded.topics, stars=excluded.stars, url=excluded.url,
-                first_seen=excluded.first_seen, last_updated=excluded.last_updated,
-                manual_override=excluded.manual_override, override_fields=excluded.override_fields,
-                override_rules_version=excluded.override_rules_version,
-                subscribe_releases=excluded.subscribe_releases, last_release_tag=excluded.last_release_tag,
-                is_fork=excluded.is_fork, parent_full_name=excluded.parent_full_name,
-                parent_pushed_at=excluded.parent_pushed_at, imported=excluded.imported,
-                github_list_source=excluded.github_list_source
-        """, t)
+        # GC-10: 列名从 _COLUMN_MAP 自动生成，避免人工同步
+        col_names = [c for c, _ in self._COLUMN_MAP]
+        placeholders = ",".join(["?"] * len(col_names))
+        updates = ",".join([f"{c}=excluded.{c}" for c in col_names[1:]])  # 排除主键 full_name
+        sql = f"""
+            INSERT INTO stars ({','.join(col_names)})
+            VALUES ({placeholders})
+            ON CONFLICT(full_name) DO UPDATE SET {updates}
+        """
+        self._conn.execute(sql, t)
 
     def delete(self, key: str) -> bool:
         cur = self._conn.execute("DELETE FROM stars WHERE full_name = ?", (key,))
@@ -226,6 +277,10 @@ class SQLiteStarsRepository(Repository):
         self._conn.commit()
 
     def close(self) -> None:
+        try:
+            self._conn.commit()
+        except Exception:
+            pass
         self._conn.close()
 
     def migrate_from_json(self, json_path: str) -> int:

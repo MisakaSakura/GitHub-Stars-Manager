@@ -46,7 +46,7 @@ class FirstRunHelper:
             if not key:
                 continue
             parts = key.split("/")
-            if len(parts) == 2:
+            if len(parts) >= 2 and all(parts):
                 item.setdefault("name", parts[1])
                 item.setdefault("owner", parts[0])
             item["manual_override"] = True
@@ -73,10 +73,11 @@ class FirstRunHelper:
                 if not key or "/" not in key:
                     continue
 
+                parts = key.split("/")
                 item = {
                     "full_name": key,
-                    "name": row.get("name", key.split("/")[1]),
-                    "owner": row.get("owner", key.split("/")[0]),
+                    "name": row.get("name", parts[1] if len(parts) >= 2 else ""),
+                    "owner": row.get("owner", parts[0] if len(parts) >= 1 else ""),
                     "description": row.get("description", ""),
                     "language": row.get("language", "文档 / 无代码"),
                     "platform": row.get("platform", "其他 / 未分类"),

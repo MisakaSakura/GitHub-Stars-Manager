@@ -117,8 +117,9 @@ class RuleClassifier:
         # 否定规则：匹配黑名单特征的项目，直接排除该生态
         neg = learned.get("negative", {}).get(eco_name, {})
         if neg:
+            topic_blacklist = [p.lower() for p in neg.get("topic_blacklist", [])]
             for t in topics:
-                if t in [p.lower() for p in neg.get("topic_blacklist", [])]:
+                if t in topic_blacklist:
                     return 0
             for p in neg.get("desc_blacklist", []):
                 if p.lower() in desc:
@@ -130,11 +131,12 @@ class RuleClassifier:
         # 正向规则：匹配 boost 特征的项目，额外加分
         pos = learned.get("positive", {}).get(eco_name, {})
         if pos:
+            topic_boost = [p.lower() for p in pos.get("topic_boost", [])]
             for p in pos.get("desc_boost", []):
                 if p.lower() in desc:
                     score += 5
             for t in topics:
-                if t in [p.lower() for p in pos.get("topic_boost", [])]:
+                if t in topic_boost:
                     score += 5
 
         return score
@@ -223,14 +225,11 @@ class RuleClassifier:
             if any(pattern_lower == t for t in topics):
                 score += 4 * RuleClassifier.TOPIC_WEIGHT_MULTIPLIER
                 continue
-            # 子串匹配：短 pattern（<=4字符）需要词边界
+            # 子串匹配：短 pattern（<=4字符）需要词边界，复用 _has_word_boundary
             for t in topics:
                 if pattern_lower in t:
                     if len(pattern_lower) <= 4:
-                        idx = t.find(pattern_lower)
-                        before_ok = idx == 0 or not t[idx - 1].isalnum()
-                        after_ok = idx + len(pattern_lower) == len(t) or not t[idx + len(pattern_lower)].isalnum()
-                        if before_ok and after_ok:
+                        if RuleClassifier._has_word_boundary(t, pattern_lower):
                             score += 4
                     else:
                         score += 4

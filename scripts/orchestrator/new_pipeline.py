@@ -45,8 +45,20 @@ class Pipeline:
     def _build_registry(self):
         import importlib
         for name, module_path, fn_name, deps in self._STAGE_REGISTRY:
-            module = importlib.import_module(module_path, __package__)
-            fn = getattr(module, fn_name)
+            try:
+                module = importlib.import_module(module_path, __package__)
+            except ImportError as e:
+                raise ImportError(
+                    f"Pipeline 阶段 '{name}' 依赖的模块 '{module_path}' 导入失败: {e}. "
+                    f"请检查 stages/ 目录下是否存在对应的模块文件。"
+                ) from e
+            try:
+                fn = getattr(module, fn_name)
+            except AttributeError as e:
+                raise AttributeError(
+                    f"Pipeline 阶段 '{name}' 在模块 '{module_path}' 中找不到函数 '{fn_name}'. "
+                    f"请检查模块是否正确定义了该函数。"
+                ) from e
             self.registry.register(name, fn, deps)
 
     def run(self) -> None:

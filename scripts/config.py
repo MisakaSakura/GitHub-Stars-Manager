@@ -12,7 +12,7 @@ GitHub Stars 分类器配置（统一入口）
 如需修改，可直接编辑对应子模块；本文件会自动聚合导出。
 """
 
-from config_rules import (
+from .config_rules import (
     PLATFORM_RULES,
     TYPE_RULES,
     ECOLOGY_RULES,
@@ -20,16 +20,16 @@ from config_rules import (
     LOCKED_ECOLOGIES,
 )
 
-from config_llm import (
+from .config_llm import (
     LLM_CONFIG,
     LLM_SYSTEM_PROMPT,
 )
 
-from config_notion import (
+from .config_notion import (
     NOTION_CONFIG,
 )
 
-from config_notify import (
+from .config_notify import (
     NOTIFY_CONFIG,
     EMAIL_CONFIG,
     TELEGRAM_CONFIG,

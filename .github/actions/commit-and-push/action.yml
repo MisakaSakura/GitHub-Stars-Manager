@@ -1,0 +1,41 @@
+name: 'Commit and Push'
+description: '通用 Git 提交并推送，支持冲突回退到 merge 策略'
+inputs:
+  repository:
+    description: 'Git 仓库路径（相对工作区根目录）'
+    required: true
+  branch:
+    description: '目标分支名'
+    required: true
+  message:
+    description: '提交信息'
+    required: true
+  user-name:
+    description: 'Git 用户名'
+    required: false
+    default: 'github-actions[bot]'
+  user-email:
+    description: 'Git 邮箱'
+    required: false
+    default: 'github-actions[bot]@users.noreply.github.com'
+runs:
+  using: 'composite'
+  steps:
+    - run: |
+        cd "${{ inputs.repository }}"
+        git config user.name "${{ inputs.user-name }}"
+        git config user.email "${{ inputs.user-email }}"
+        git add -A
+        if git diff --cached --quiet; then
+          echo "No changes to commit."
+        else
+          git commit -m "${{ inputs.message }}"
+          if ! git pull --rebase origin "${{ inputs.branch }}"; then
+            echo "::warning::Rebase conflict, falling back to merge strategy"
+            git rebase --abort 2>/dev/null || true
+            git pull origin "${{ inputs.branch }}" --no-rebase || true
+          fi
+          git push origin "${{ inputs.branch }}" || git push -u origin "${{ inputs.branch }}"
+          echo "Changes pushed to ${{ inputs.branch }}"
+        fi
+      shell: bash

@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
 from base_tracker import BaseTracker
-from utils import log
+from utils import log, parse_iso
 
 
 def _get_field(obj, key: str, default=None):
@@ -17,20 +17,10 @@ def _get_field(obj, key: str, default=None):
     return getattr(obj, key, default)
 
 
-def _parse_iso(s: str) -> datetime | None:
-    """解析 ISO 8601 时间字符串为 datetime 对象，统一处理 Z 和 +00:00"""
-    if not s:
-        return None
-    try:
-        return datetime.fromisoformat(s.replace("Z", "+00:00"))
-    except Exception:
-        return None
-
-
 def _is_within_window(published_at: str, window_start: str) -> bool:
     """判断 published_at 是否在 window_start 之后（使用 datetime 比较，避免字符串比较误差）"""
-    pub_dt = _parse_iso(published_at)
-    win_dt = _parse_iso(window_start)
+    pub_dt = parse_iso(published_at)
+    win_dt = parse_iso(window_start)
     if not pub_dt or not win_dt:
         return False
     return pub_dt >= win_dt
@@ -41,7 +31,7 @@ def _is_newly_starred(item) -> bool:
     first_seen = _get_field(item, "first_seen", "")
     if not first_seen:
         return False
-    fs_dt = _parse_iso(first_seen)
+    fs_dt = parse_iso(first_seen)
     if not fs_dt:
         return False
     from datetime import timedelta
@@ -68,7 +58,10 @@ class ReleaseTracker(BaseTracker):
         def check_one(item: dict) -> tuple[dict | None, tuple[dict, dict] | None]:
             """返回 (update_dict, (item, fields_to_update))。不在并发中就地修改 item。"""
             try:
-                owner, repo = _get_field(item, "full_name", "").split("/")
+                full_name = _get_field(item, "full_name", "")
+                if "/" not in full_name:
+                    return None, None
+                owner, _, repo = full_name.partition("/")
                 releases = self.gh.list_releases(owner, repo, per_page=30)
                 # 防御：API 可能返回非列表或包含 None 的列表
                 if not isinstance(releases, list):

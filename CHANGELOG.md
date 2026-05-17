@@ -2,6 +2,34 @@
 
 所有重要变更均记录于此。格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [v4.2.0] - 2026-05-17
+
+### 🆕 新增
+
+- **`docs/conventions.md` 全局一致性规范** — 涵盖数据模型、存储接口、分类器接口、异常处理、Pipeline 阶段、命名与导入、配置、日志等 9 大规范领域
+- **生态规则 YAML 化** — 73 个重复结构的 Python 生态文件迁移到 `data/ecologies.yaml`，新增生态只需修改 YAML，无需新建 .py 文件
+- **Jinja2 模板引擎** — `report.py` 内嵌 300+ 行 HTML 字符串改为 `report_template.html` 模板渲染，代码-视图分离
+- **Pipeline 拓扑排序** — `StageRegistry` 使用 Kahn 算法按依赖关系排序执行，新增/调整阶段顺序不再破坏依赖
+- **通用 Git 提交 Action** — `.github/actions/commit-and-push/action.yml`，多 workflow 共用
+
+### 🔧 改进
+
+- **Repository 接口统一** — `Repository` ABC 新增 `close()` 方法；`AIDatabase` 补齐 `delete/keys/values/items/__len__`；`JSONAIRepository` 添加独立 meta 存储
+- **异常处理链修复** — `HTTPClientError`（底层）→ `GitHubServerError`（中层）分层转换，调用方始终收到语义清晰的异常
+- **时间解析统一** — 提取 `utils.parse_iso()` 统一处理 ISO 8601 / Z 后缀 / naive datetime，替换 4 处重复代码
+- **序列化方式统一** — `StarItem` 与 `AIResult` 的 `to_dict()` 统一为浅拷贝 `getattr`；`from_dict()` 统一添加默认值兜底
+- **LLM 重试统一** — Provider 层抛 `RuntimeError` 表示 HTTP 错误，Client 层统一捕获并重试（覆盖 429/5xx/网络错误）
+- **SQLite 列名解耦** — `_COLUMN_MAP` 映射表替代人工同步的列名列表和 tuple 顺序，新增字段零风险
+- **apply_preset 无副作用** — 使用 `copy.copy(args)` 避免修改原始参数对象
+- **config.py 相对导入** — 绝对导入改为相对导入，支持从任意目录导入
+- **219 个测试通过** — 新增 `test_correct_command.py`（8 用例）、SQLite 后端测试（8 用例）、Pipeline 依赖验证测试等
+
+### 🏗 架构
+
+- **存储层完整性** — 全部 4 个 Repository 实现（StarsDB / AIDatabase / JSONStarsRepository / JSONAIRepository / SQLiteStarsRepository）接口对齐，支持 `close()` 统一释放
+
+---
+
 ## [v4.1.0] - 2026-05-14
 
 ### 🆕 新增

@@ -114,13 +114,19 @@ class LLMClient:
             self._fb_ctx = "\n".join(lines)
             self._fb_ctx_ts = time.time()
             return self._fb_ctx
-        except Exception:
+        except (OSError, json.JSONDecodeError) as e:
+            log(f"反馈上下文加载失败: {e}", "WARN")
             self._fb_ctx = ""
             self._fb_ctx_ts = time.time()
             return self._fb_ctx
 
     def call(self, prompt: str, system_prompt: str | None = None, max_tokens: int | None = None) -> str | None:
-        """通用文本调用，返回原始响应文本。支持指数退避重试（3次）。"""
+        """通用文本调用，返回原始响应文本。支持指数退避重试（3次）。
+
+        GC-11: 重试策略统一在本层处理：
+        - 网络错误（ConnectionError/TimeoutError）和 HTTP 错误（RuntimeError）均重试
+        - 解析错误（返回值 None）不重试，因为再次调用结果通常相同
+        """
         from config import LLM_CONFIG, LLM_SYSTEM_PROMPT
         import time
         sp = LLM_SYSTEM_PROMPT if system_prompt is None else system_prompt
@@ -144,13 +150,21 @@ class LLMClient:
         last_error = None
         for attempt in range(retries):
             try:
-                return self.provider.call(messages, mt, self.get_temperature())
-            except Exception as e:
+                result = self.provider.call(messages, mt, self.get_temperature())
+                # 200 OK 但解析失败：返回 None，不重试（再次调用结果相同）
+                return result
+            except (ConnectionError, TimeoutError, RuntimeError) as e:
+                # GC-11: 网络和 HTTP 错误统一重试
                 last_error = e
                 if attempt < retries - 1:
                     delay = 1.0 * (2 ** attempt)
                     log(f"LLM 调用失败（尝试 {attempt + 1}/{retries}）: {e}，{delay:.1f}s 后重试...", "WARN")
                     time.sleep(delay)
                 else:
-                    log(f"LLM 调用失败（尝试 {attempt + 1}/{retries}）: {e}，放弃重试", "ERROR")
+                    log(f"LLM 调用失败（尝试 {attempt + 1}/{retries}）: {e}，重试耗尽", "ERROR")
+            except Exception as e:
+                # 其他未知异常不重试
+                last_error = e
+                log(f"LLM 调用失败（尝试 {attempt + 1}/{retries}）: {e}，放弃重试", "ERROR")
+                break
         return None

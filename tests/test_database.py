@@ -18,13 +18,14 @@ class TestStarsDB(unittest.TestCase):
         self.db_path = os.path.join(self.tmpdir, "test_db.json")
 
     def tearDown(self):
+        import shutil
         meta_path = os.path.splitext(self.db_path)[0] + ".meta.json"
         lock_path = self.db_path + ".lock"
         for f in [self.db_path, self.db_path + ".tmp", meta_path, lock_path]:
             if os.path.exists(f):
                 os.remove(f)
         if os.path.exists(self.tmpdir):
-            os.rmdir(self.tmpdir)
+            shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def test_load_nonexistent(self):
         db = StarsDB(self.db_path)

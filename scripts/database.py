@@ -90,8 +90,12 @@ class StarsDB:
         return False
 
     def set(self, key: str, value: StarItem | dict) -> None:
-        if isinstance(value, dict) and {"full_name", "name", "owner"}.issubset(value):
+        if isinstance(value, dict):
+            if not {"full_name", "name", "owner"}.issubset(value):
+                raise TypeError(f"set() 要求 dict 至少包含 full_name, name, owner 字段，实际: {list(value.keys())}")
             value = StarItem.from_dict(value)
+        elif not isinstance(value, StarItem):
+            raise TypeError(f"set() 只接受 StarItem 或完整 dict，实际: {type(value).__name__}")
         self.data[key] = value
 
     def keys(self):
@@ -106,12 +110,10 @@ class StarsDB:
     def __len__(self) -> int:
         return len(self.data)
 
-    # AI 字段已迁移到独立 AI 数据库 (stars_ai.json)，主数据库不再保存
-    _AI_FIELDS = ("llm_status", "llm_confidence", "llm_reason", "ai_summary", "ai_tags", "ai_platforms")
+    def close(self) -> None:
+        self.save()
+        self.save_meta()
 
     @staticmethod
     def _serialize(item: StarItem | dict) -> dict:
-        d = item.to_dict() if isinstance(item, StarItem) else dict(item)
-        for field in StarsDB._AI_FIELDS:
-            d.pop(field, None)
-        return d
+        return item.to_dict() if isinstance(item, StarItem) else dict(item)

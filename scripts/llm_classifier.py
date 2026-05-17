@@ -180,8 +180,12 @@ class LLMClassifier:
 
     def _classify_batch(self, items, fallback=False):
         """对一批项目执行单次 LLM 调用"""
-        from config import LLM_CONFIG
-        readme_max = LLM_CONFIG.get("batch_readme_max_length", 150)
+        # P1-51: 从 ModelProfile 读取 README 截断长度
+        readme_max = (
+            self.client.profile.batch_readme_max_length
+            if self.client.profile
+            else 150
+        )
         lines = []
         for idx, item in enumerate(items, 1):
             topics = ", ".join(item.get("topics", []))

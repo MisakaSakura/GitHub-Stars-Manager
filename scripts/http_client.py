@@ -15,6 +15,23 @@ except ImportError:
     HAS_REQUESTS = False
 
 
+import re
+
+
+def _sanitize_error(msg: str) -> str:
+    """脱敏错误消息，移除可能泄露的 token/API key。"""
+    # 移除 URL 中可能包含的 token 参数
+    msg = re.sub(r'(token|key|api[_-]?key|access[_-]?token)=[^&\s]+', r'\1=***', msg, flags=re.IGNORECASE)
+    # 移除 Bearer token
+    msg = re.sub(r'Bearer\s+\S+', 'Bearer ***', msg)
+    return msg
+
+
+class HTTPClientError(Exception):
+    """HTTP 请求失败异常（含重试耗尽后的错误）"""
+    pass
+
+
 class HTTPClient:
     """统一 HTTP 请求封装，优先使用 requests（带连接池），回退到 urllib"""
 
@@ -56,7 +73,8 @@ class HTTPClient:
             # 指数退避：0.5s, 1s, 2s...
             if attempt < retries:
                 time.sleep(0.5 * (2 ** attempt))
-        return -1 if last_error else 0, last_error
+        # P1-38: 重试耗尽后抛出异常而非返回 (-1, error)，避免调用方遗漏处理
+        raise HTTPClientError(f"HTTP 请求失败（已重试 {retries} 次）: {last_error}")
 
     @staticmethod
     def _request_requests(url: str, headers, method: str, data, timeout: int) -> tuple[int, str]:
@@ -71,7 +89,9 @@ class HTTPClient:
                 resp = session.request(method, url, **kwargs)
             return resp.status_code, resp.text
         except requests.RequestException as e:
-            return -1, str(e)
+            # P1-39: 脱敏，避免 token 泄露到错误消息
+            msg = _sanitize_error(str(e))
+            return -1, msg
 
     @staticmethod
     def _request_urllib(url: str, headers, method: str, data, timeout: int) -> tuple[int, str]:
@@ -91,7 +111,9 @@ class HTTPClient:
                 body = ""
             return e.code, body
         except Exception as e:
-            return -1, str(e)
+            # P1-39: 脱敏，避免 token 泄露到错误消息
+            msg = _sanitize_error(str(e))
+            return -1, msg
 
     @staticmethod
     def post_json(url: str, payload: dict, headers: dict | None = None, timeout: int = 30) -> tuple[int, str]:

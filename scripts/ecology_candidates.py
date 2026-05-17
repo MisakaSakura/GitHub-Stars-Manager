@@ -83,7 +83,9 @@ class EcologyCandidatePool:
             old_status = state.status
             if name in discovered_names:
                 # 本次被发现
-                cand = next(c for c in discovered if c.name == name)
+                cand = next((c for c in discovered if c.name == name), None)
+                if cand is None:
+                    continue
                 state.last_seen = now
                 state.appear_count += 1
                 state.consecutive_runs += 1

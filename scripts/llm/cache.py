@@ -91,8 +91,5 @@ class TTLCache:
         """显式保存缓存到磁盘（建议在批量操作后调用）。"""
         self._save()
 
-    def __del__(self):
-        self._save()
-
     def __len__(self) -> int:
         return len([k for k in self._data if not k.startswith("_")])

@@ -21,7 +21,11 @@ def _save_release_history(ctx: PipelineContext) -> None:
         try:
             with open(history_path, "r", encoding="utf-8") as f:
                 existing = json.load(f)
-        except Exception:
+        except json.JSONDecodeError:
+            log(f"Release 历史 JSON 损坏，将重建: {history_path}", "WARN")
+            existing = []
+        except OSError as e:
+            log(f"Release 历史读取失败: {e}", "WARN")
             existing = []
     if not isinstance(existing, list):
         existing = []

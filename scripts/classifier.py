@@ -181,30 +181,35 @@ def _parse_env_presets() -> dict:
 
 
 def _apply_preset(args: argparse.Namespace) -> argparse.Namespace:
-    """根据 --llm-preset 自动填充 provider / base / model"""
+    """根据 --llm-preset 自动填充 provider / base / model。
+
+    GC-16: 为避免修改原始 args 的副作用，创建浅拷贝后修改并返回。
+    """
+    import copy
+    result = copy.copy(args)  # 浅拷贝，保留原始对象
 
     # 三层预设合并：环境变量 > 代码自定义 > 内置（同名后者覆盖前者）
     env_presets = _parse_env_presets()
     all_presets = {**config_llm.PROVIDER_PRESETS, **config_llm.CUSTOM_PRESETS, **env_presets}
 
-    preset_name = args.llm_preset or os.environ.get("LLM_PRESET", "")
+    preset_name = result.llm_preset or os.environ.get("LLM_PRESET", "")
     if not preset_name:
-        return args
+        return result
 
     preset = all_presets.get(preset_name)
     if not preset:
         print(f"[警告] 未知 LLM preset: {preset_name}，可用: {', '.join(all_presets.keys())}")
-        return args
+        return result
 
     # preset 填充默认值；CLI 显式参数优先级高于 preset
-    if not args.llm_provider:
-        args.llm_provider = preset["provider"]
-    if not args.llm_base:
-        args.llm_base = preset["api_base"]
-    if not args.llm_model:
-        args.llm_model = preset["model"]
-    print(f"[Preset] {preset_name} → provider={args.llm_provider}, base={args.llm_base}, model={args.llm_model}")
-    return args
+    if not result.llm_provider:
+        result.llm_provider = preset["provider"]
+    if not result.llm_base:
+        result.llm_base = preset["api_base"]
+    if not result.llm_model:
+        result.llm_model = preset["model"]
+    print(f"[Preset] {preset_name} → provider={result.llm_provider}, base={result.llm_base}, model={result.llm_model}")
+    return result
 
 
 def _ensure_defaults(args: argparse.Namespace) -> argparse.Namespace:

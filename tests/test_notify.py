@@ -81,6 +81,7 @@ class TestTelegramNotifier(unittest.TestCase):
     @patch("config.TELEGRAM_CONFIG", {"bot_token": "bot123", "chat_id": "chat456"})
     def test_send_telegram(self):
         client = MagicMock()
+        client.post_json.return_value = (200, "{}")
         notifier = TelegramNotifier(client)
         notifier.send("Title", "Body")
         client.post_json.assert_called_once()
@@ -94,6 +95,7 @@ class TestWeComNotifier(unittest.TestCase):
     @patch("config.WECOM_CONFIG", {"webhook_url": "https://wecom.hook"})
     def test_send_wecom(self):
         client = MagicMock()
+        client.post_json.return_value = (200, "{}")
         notifier = WeComNotifier(client)
         notifier.send("Title", "Line1\nLine2")
         client.post_json.assert_called_once()
@@ -107,6 +109,7 @@ class TestQQNotifier(unittest.TestCase):
     @patch("config.QQ_CONFIG", {"api_url": "http://127.0.0.1:5700", "group_id": "12345"})
     def test_send_qq_group(self):
         client = MagicMock()
+        client.post_json.return_value = (200, "{}")
         notifier = QQNotifier(client)
         notifier.send("Title", "Hello")
         client.post_json.assert_called_once()
@@ -119,6 +122,7 @@ class TestQQNotifier(unittest.TestCase):
     @patch("config.QQ_CONFIG", {"api_url": "http://127.0.0.1:5700", "user_id": "98765"})
     def test_send_qq_user(self):
         client = MagicMock()
+        client.post_json.return_value = (200, "{}")
         notifier = QQNotifier(client)
         notifier.send("Title", "Hello")
         args, kwargs = client.post_json.call_args
@@ -135,6 +139,7 @@ class TestQQNotifier(unittest.TestCase):
     @patch("config.QQ_CONFIG", {"api_url": "http://127.0.0.1:5700", "group_id": "1", "access_token": "tok"})
     def test_send_qq_escapes_cq(self):
         client = MagicMock()
+        client.post_json.return_value = (200, "{}")
         notifier = QQNotifier(client)
         notifier.send("Title", "[CQ:at,qq=123]")
         args, kwargs = client.post_json.call_args

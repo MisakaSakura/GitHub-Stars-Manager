@@ -41,11 +41,22 @@ def enrich_stage(ctx: PipelineContext) -> None:
     llm_interval = getattr(ctx.args, 'llm_interval_days', 30)
     force_llm = getattr(ctx.args, 'force_llm', False)
     retry_failed = ctx.args.retry_failed
+
+    # P1-7: 预加载所有 existing 记录，避免 N+1 查询
+    existing_map: dict[str, Any] = {}
+    if hasattr(ctx.db, 'items') and callable(ctx.db.items):
+        try:
+            for key, val in ctx.db.items():
+                existing_map[key] = val
+        except Exception:
+            pass
+
     candidates = []
     for item in ctx.items:
         key = f"{item['owner']['login']}/{item['name']}"
-        existing = ctx.db.get(key)
-        if IncrementalEngine.needs_llm(key, existing, ctx.ai_db, force_llm, retry_failed, llm_interval):
+        existing = existing_map.get(key)
+        # GC-6: 统一参数语义 — force_llm 对应 needs_llm 的 force_refresh
+        if IncrementalEngine.needs_llm(key, existing, ctx.ai_db, force_refresh=force_llm, retry_failed=retry_failed, llm_interval_days=llm_interval):
             candidates.append(item)
     from config import LLM_CONFIG
     readme_max_candidates = LLM_CONFIG.get("enrich_readme_max_candidates", 50)
@@ -55,8 +66,8 @@ def enrich_stage(ctx: PipelineContext) -> None:
             readme = ctx.gh.get_readme(item["owner"]["login"], item["name"], max_length=1500)
             if readme:
                 item["readme_excerpt"] = readme
-        except Exception:
-            pass
+        except Exception as e:
+            log(f"README 获取失败 {item.get('full_name', '?')}: {e}", "WARN")
     log("README 摘要获取完成", "OK")
 
 
@@ -94,6 +105,7 @@ def classify_stage(ctx: PipelineContext) -> None:
     ctx.classification_changes = ctx.engine.classification_changes
 
     if ctx.llm and ctx.ai_db:
-        for key, result in ctx.engine.llm_results.items():
+        llm_results = getattr(ctx.engine, 'llm_results', {})
+        for key, result in llm_results.items():
             if result:
                 ctx.ai_db.update_from_llm_result(key, result, status="success")

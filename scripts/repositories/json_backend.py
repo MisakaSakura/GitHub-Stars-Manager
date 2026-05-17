@@ -47,6 +47,9 @@ class JSONStarsRepository(Repository):
     def meta_set(self, key: str, value) -> None:
         self._backend.meta[key] = value
 
+    def close(self) -> None:
+        self._backend.close()
+
     def meta_save(self) -> None:
         self._backend.save_meta()
 
@@ -62,6 +65,12 @@ class JSONAIRepository(Repository):
 
     def __init__(self, db_path: str):
         self._backend = AIDatabase(db_path)
+        # GC-4: 独立的 meta 存储（与数据文件同目录）
+        import os
+        base, _ = os.path.splitext(db_path)
+        self._meta_path = base + ".meta.json"
+        self._meta: dict[str, str] = {}
+        self._load_meta()
 
     def get(self, key: str) -> Any | None:
         return self._backend.get(key)
@@ -70,10 +79,7 @@ class JSONAIRepository(Repository):
         self._backend.set(key, value)
 
     def delete(self, key: str) -> bool:
-        if self._backend.get(key) is not None:
-            del self._backend.data[key]
-            return True
-        return False
+        return self._backend.delete(key)
 
     def keys(self) -> Iterator[str]:
         return iter(self._backend.data.keys())
@@ -90,15 +96,30 @@ class JSONAIRepository(Repository):
     def __len__(self) -> int:
         return len(self._backend.data)
 
+    def _load_meta(self) -> None:
+        import json, os
+        if os.path.exists(self._meta_path):
+            try:
+                with open(self._meta_path, "r", encoding="utf-8") as f:
+                    self._meta = json.load(f)
+            except Exception:
+                self._meta = {}
+
     def meta_get(self, key: str, default=None):
-        # AI DB 无独立 meta，使用 data 中的特殊键
-        return default
+        return self._meta.get(key, default)
 
     def meta_set(self, key: str, value) -> None:
-        pass
+        self._meta[key] = value
 
     def meta_save(self) -> None:
-        pass
+        import json, os
+        os.makedirs(os.path.dirname(self._meta_path) or ".", exist_ok=True)
+        with open(self._meta_path, "w", encoding="utf-8") as f:
+            json.dump(self._meta, f, ensure_ascii=False, indent=2)
+
+    def close(self) -> None:
+        self._backend.save()
+        self.meta_save()
 
     @property
     def backend(self) -> AIDatabase:

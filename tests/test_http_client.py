@@ -13,6 +13,10 @@ from http_client import HTTPClient
 
 
 class TestHTTPClient(unittest.TestCase):
+    def tearDown(self):
+        # P1-54: 重置 _session，避免影响后续测试
+        HTTPClient.close()
+
     @patch("http_client.HAS_REQUESTS", False)
     @patch("urllib.request.urlopen")
     def test_urllib_get_success(self, mock_urlopen):

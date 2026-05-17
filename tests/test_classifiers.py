@@ -75,6 +75,22 @@ class TestRuleClassifier(unittest.TestCase):
         self.assertEqual(platform, "其他 / 未分类")
         self.assertEqual(ptype, "其他 / 未分类")
 
+    def test_from_item_missing_fields(self):
+        """P1-64: from_item() 对缺失字段的容错处理"""
+        from rule_classifier import ItemFeatures
+        item = {"name": "test-repo", "owner": {"login": "user"}}
+        features = ItemFeatures.from_item(item)
+        self.assertEqual(features.name, "test-repo")
+        self.assertEqual(features.desc, "")
+        self.assertEqual(features.topics, ())
+
+    def test_has_word_boundary(self):
+        """P1-64: _has_word_boundary() 边界条件"""
+        self.assertTrue(RuleClassifier._has_word_boundary("react-hooks", "react"))
+        self.assertTrue(RuleClassifier._has_word_boundary("react", "react"))
+        self.assertFalse(RuleClassifier._has_word_boundary("reactive", "react"))
+        self.assertFalse(RuleClassifier._has_word_boundary("myreact", "react"))
+
 
 if __name__ == "__main__":
     unittest.main()

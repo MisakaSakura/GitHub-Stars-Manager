@@ -77,9 +77,19 @@ class NotionExporter:
             "parent": {"database_id": self.database_id},
             "properties": properties
         }
-        code, body = self.client.post_json(url, payload, headers=self.headers)
-        if code != 200:
-            raise Exception(f"{code}: {body[:200]}")
+        # P1-49: 429 指数退避重试
+        import time
+        max_retries = 3
+        for attempt in range(max_retries):
+            code, body = self.client.post_json(url, payload, headers=self.headers)
+            if code == 200:
+                return
+            if code == 429 and attempt < max_retries - 1:
+                wait = 0.5 * (2 ** attempt)
+                log(f"Notion 429 限流，等待 {wait}s 后重试...", "WARN")
+                time.sleep(wait)
+            else:
+                raise Exception(f"{code}: {body[:200]}")
 
     def _clear_database(self) -> None:
         """清空数据库（通过归档所有页面）"""
