@@ -1,5 +1,44 @@
 [
   {
+    "full_name": "jxxghp/MoviePilot",
+    "name": "MoviePilot",
+    "owner": "jxxghp",
+    "old_tag": "v2.12.0",
+    "new_tag": "v2.12.1",
+    "published_at": "2026-05-17T23:30:58Z",
+    "html_url": "https://github.com/jxxghp/MoviePilot/releases/tag/v2.12.1",
+    "body": "### 🐛 修复\n\n- stop best-version per-episode redownload loop (#5781) by @InfinityPacer\n- correctly filter unread messages by icon class and attributes by @jxxghp\n- remove fallback to TMDB website scraping when API search fails by @jxxghp\n- improve error reporting for subprocess failures and add tests for output handling by @jxxghp\n\n**完整更新记录**: https://github.com/jxxghp/MoviePilot/compare/v2.12.0...v2.12.1",
+    "ai_digest": "",
+    "is_new_repo": false,
+    "detected_at": "2026-05-17T23:54:26.710203+00:00"
+  },
+  {
+    "full_name": "HenryChiao/MIHOMO_YAMLS",
+    "name": "MIHOMO_YAMLS",
+    "owner": "HenryChiao",
+    "old_tag": "backup-2026-05-15_15-25",
+    "new_tag": "backup-2026-05-17_23-30",
+    "published_at": "2026-05-17T23:30:50Z",
+    "html_url": "https://github.com/HenryChiao/MIHOMO_YAMLS/releases/tag/backup-2026-05-17_23-30",
+    "body": "## 📦 Auto Backup\n> 🕒 **Time:** 2026-05-17_23-30\n> 💾 **This release contains configs from:** THEYAMLS, THEINI, THEOPENCLASH\n\n### 📁 YAML 配置目录 (THEYAMLS)\n| Path | Size |\n| :--- | :--- |\n| `Smart_Mode/edison/OneSmartProMCX.yaml` | 38.2 KB |\n| `Smart_Mode/HenryChiao/MihomoSmartAIO.yaml` | 32.1 KB |\n| `Smart_Mode/HenryChiao/MihomoSmartProMax.yaml` | 25.1 KB |\n| `Smart_Mode/HenryChiao/MihomoSmartProPlus.yaml` | 25.7 KB |\n| `Smart_Mode/HenryChiao/THESmart.yaml` | 24.9 KB |\n| `Smart_Mode/qichiyuhub/smart.yaml` | 13.0 KB |\n| `Smart_Mode/666OS/OneSmart_Config.yaml` | 20.1 KB |\n| `Smart_Mode/666OS/OneSmart_Lite_Config.yaml` | 12.5 KB |\n| `Smart_Mode/liandu2024/clash-all-fallback-smart.yaml` | 18.2 KB |\n| `Smart_Mode/liandu2024/clash-all-smart.yaml` | 15.1 KB |\n| `Smart_Mode/liandu2024/clash-fallback-smart-std.yaml` | 17.7 KB |\n| `Smart_Mode/echs-top/mihomo_smart.yaml` | 16.4 KB |\n| `General_Config/wanswu/config.yaml` | 22.7 KB |\n| `General_Config/liuran001/config.yaml` | 13.8 KB |\n| `General_Config/fufu/ConfigForClash.yaml` | 49.3 KB |\n| `General_Config/ameyukisora/mihomo.yaml` | 5.9 KB |\n| `General_Config/bgpeer/Clashmi-fx.yaml` | 18.2 KB |\n| `General_Config/bgpeer/Clashmi.yaml` | 18.9 KB |\n| `General_Config/Pililink/2-subscription-clash-rule-set.yaml` | 13.4 KB |\n| `General_Config/Pililink/3-subscription-clash-rule-set.yaml` | 13.9 KB |\n| `General_Config/Pililink/base-clash-ruleset.yaml` | 11.5 KB |\n| `General_Config/iKeLee/Clash_Sample.yaml` | 8.4 KB |\n| `General_Config/iKeLee/backup.yaml` | 12.5 KB |\n| `General_Config/HenryChiao/MihomoAIO.yaml` | 30.1 KB |\n| `General_Config/HenryChiao/MihomoProMax.yaml` | 27.4 KB |\n| `General_Config/HenryChiao/MihomoProPlus.yaml` | 27.9 KB |\n| `General_Config/Mitchell/config.yaml` | 28.5 KB |\n| `General_Config/Mitchell/config_version2.yaml` | 30.9 KB |\n| `General_Config/qichiyuhub/config.yaml` | 12.8 KB |\n| `General_Config/Kerronex/config.yaml` | 18.7 KB |\n| `General_Config/SHICHUNHUI88/Clash-Airport.yaml` | 17.5 KB |\n| `General_Config/SHIC",
+    "ai_digest": "",
+    "is_new_repo": false,
+    "detected_at": "2026-05-17T23:54:26.710194+00:00"
+  },
+  {
+    "full_name": "Loyalsoldier/clash-rules",
+    "name": "clash-rules",
+    "owner": "Loyalsoldier",
+    "old_tag": "202605162327",
+    "new_tag": "202605172330",
+    "published_at": "2026-05-17T23:30:28Z",
+    "html_url": "https://github.com/Loyalsoldier/clash-rules/releases/tag/202605172330",
+    "body": "",
+    "ai_digest": "",
+    "is_new_repo": false,
+    "detected_at": "2026-05-17T23:54:26.710207+00:00"
+  },
+  {
     "full_name": "zly2006/zhihu-plus-plus",
     "name": "zhihu-plus-plus",
     "owner": "zly2006",
