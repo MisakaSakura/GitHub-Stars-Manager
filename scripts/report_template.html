@@ -239,6 +239,12 @@ tr:hover td{background:var(--bg-hover)}
           <div style="margin-top:4px;font-size:11px;color:var(--text-muted)">
             {% for ex in c.examples[:3] %}<a href="https://github.com/{{ ex|e }}" target="_blank" style="color:var(--text-secondary);text-decoration:none;margin-right:10px">{{ ex|e }}</a>{% endfor %}
           </div>
+          {% if c.examples|length > 3 %}
+          <div style="margin-top:4px;font-size:11px;color:var(--text-muted);display:none;flex-wrap:wrap;gap:10px">
+            {% for ex in c.examples[3:] %}<a href="https://github.com/{{ ex|e }}" target="_blank" style="color:var(--text-secondary);text-decoration:none;margin-right:10px">{{ ex|e }}</a>{% endfor %}
+          </div>
+          <span onclick="wet(this)" style="cursor:pointer;color:var(--accent);font-size:11px;margin-top:4px">展开全部 ({{ c.examples|length - 3 }}) ▼</span>
+          {% endif %}
           {% endif %}
         </div>
         {% endfor %}
