@@ -30,6 +30,8 @@
 - **清理未使用导入** — `sys`（utils.py）、`asdict`（models.py、ai_database.py）、`Counter`（engine.py）
 - **更新过时注释** — config_rules.py（生态 YAML 化说明）、rule_classifier.py（移除 .py 回退说明）
 - **统一 re 导入位置** — github_api.py 中 `import re` 从方法内部移至模块顶部
+- **删除过时 V1 审查报告** — 5 个文件已被 V2 完全替代
+- **为 `06_ecologies_v2.md` 添加 YAML 化历史注明**
 
 ### 🏗 架构
 
