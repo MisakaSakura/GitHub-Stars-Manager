@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-17T11:35:04.815938+00:00",
+  "updated_at": "2026-05-17T12:11:34.110719+00:00",
   "candidates": {
     "Android": {
       "status": "ai_reviewed",
@@ -8,7 +8,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         1.0,
         1.0,
@@ -44,7 +44,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         1.0,
         1.0,
@@ -80,7 +80,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.7,
         0.7,
@@ -115,8 +115,8 @@
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
-      "consecutive_runs": 3,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.4,
         0.4,
@@ -146,8 +146,8 @@
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
-      "consecutive_runs": 3,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.4,
         0.4,
@@ -175,16 +175,18 @@
     "Payload": {
       "status": "candidate",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-17T11:35:01.472286+00:00",
-      "appear_count": 3,
-      "consecutive_runs": 3,
+      "last_seen": "2026-05-17T12:11:34.110410+00:00",
+      "appear_count": 4,
+      "consecutive_runs": 4,
       "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3,
         0.3,
         0.3
       ],
       "project_count_history": [
+        3,
         3,
         3,
         3
@@ -210,16 +212,18 @@
     "Moonlight": {
       "status": "candidate",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-17T11:35:01.472286+00:00",
-      "appear_count": 3,
-      "consecutive_runs": 3,
+      "last_seen": "2026-05-17T12:11:34.110410+00:00",
+      "appear_count": 4,
+      "consecutive_runs": 4,
       "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3,
         0.3,
         0.3
       ],
       "project_count_history": [
+        3,
         3,
         3,
         3
@@ -250,8 +254,8 @@
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
-      "consecutive_runs": 3,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3,
         0.3,
@@ -279,15 +283,17 @@
     "Audio": {
       "status": "candidate",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-16T15:43:23.582131+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 0,
-      "missed_runs": 2,
+      "last_seen": "2026-05-17T12:11:34.110410+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
       "confidence_history": [
-        0.3
+        0.3,
+        0.4
       ],
       "project_count_history": [
-        3
+        3,
+        4
       ],
       "suggested_patterns": {
         "name_patterns": [],
@@ -306,15 +312,17 @@
     "Android-application": {
       "status": "candidate",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-16T15:43:23.582131+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 0,
-      "missed_runs": 2,
+      "last_seen": "2026-05-17T12:11:34.110410+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
       "confidence_history": [
-        0.3
+        0.3,
+        0.4
       ],
       "project_count_history": [
-        3
+        3,
+        4
       ],
       "suggested_patterns": {
         "name_patterns": [],
@@ -335,8 +343,8 @@
       "first_seen": "2026-05-17T10:44:11.195657+00:00",
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 2,
-      "consecutive_runs": 2,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.8,
         0.8
@@ -364,8 +372,8 @@
       "first_seen": "2026-05-17T10:44:11.195657+00:00",
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 2,
-      "consecutive_runs": 2,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3,
         0.3
@@ -381,6 +389,141 @@
         ],
         "topic_patterns": [
           "cli"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Clipboard-manager": {
+      "status": "candidate",
+      "first_seen": "2026-05-17T12:11:34.110410+00:00",
+      "last_seen": "2026-05-17T12:11:34.110410+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "clipboard-manager"
+        ],
+        "topic_patterns": [
+          "clipboard-manager"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Jetpack-compose": {
+      "status": "candidate",
+      "first_seen": "2026-05-17T12:11:34.110410+00:00",
+      "last_seen": "2026-05-17T12:11:34.110410+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "jetpack-compose"
+        ],
+        "topic_patterns": [
+          "jetpack-compose"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Chrome-extension": {
+      "status": "candidate",
+      "first_seen": "2026-05-17T12:11:34.110410+00:00",
+      "last_seen": "2026-05-17T12:11:34.110410+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "chrome-extension"
+        ],
+        "topic_patterns": [
+          "chrome-extension"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Python": {
+      "status": "candidate",
+      "first_seen": "2026-05-17T12:11:34.110410+00:00",
+      "last_seen": "2026-05-17T12:11:34.110410+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "python"
+        ],
+        "topic_patterns": [
+          "python"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Dotnet": {
+      "status": "candidate",
+      "first_seen": "2026-05-17T12:11:34.110410+00:00",
+      "last_seen": "2026-05-17T12:11:34.110410+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "dotnet"
+        ],
+        "topic_patterns": [
+          "dotnet"
         ],
         "related_types": [],
         "core_projects": []

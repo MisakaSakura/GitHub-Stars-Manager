@@ -1,5 +1,31 @@
 [
   {
+    "full_name": "AaronFeng753/Waifu2x-Extension-GUI",
+    "name": "Waifu2x-Extension-GUI",
+    "owner": "AaronFeng753",
+    "old_tag": "v3.137.01",
+    "new_tag": "v3.137.11-beta",
+    "published_at": "2026-05-17T11:58:00Z",
+    "html_url": "https://github.com/AaronFeng753/Waifu2x-Extension-GUI/releases/tag/v3.137.11-beta",
+    "body": "### [➡This is a BETA version, click here to get Stable version | 此为测试版, 点此获取稳定版](https://github.com/AaronFeng753/Waifu2x-Extension-GUI/releases/latest)\r\n\r\n---\r\n\r\nDownload FULL Package | 下载完整安装包:\r\n\r\n[🔗💾Github.com](https://github.com/AaronFeng753/Waifu2x-Extension-GUI/releases/download/v3.137.11-beta/Waifu2x-Extension-GUI-v3.137.11-beta-Win64.7z) | [🔗💾sourceforge.net](https://sourceforge.net/projects/waifu2x-extension-gui/files/v3.137.11-beta/Waifu2x-Extension-GUI-v3.137.11-beta-Win64.7z/download)\r\n\r\n[🔗💾(PRC) OneDrive  (不限速🚀)](https://aaronfeng-my.sharepoint.cn/:u:/g/personal/admin_aaronfeng_partner_onmschina_cn/IQBXLMJjCykHSJUUEaGh-Wt7AWE2ktTmXJzkvR9swnrqJ0w?e=XIhTuZ) | [🔗💾(PRC) 百度网盘](https://pan.baidu.com/s/1AJWJ92wp4GNHJL-5o8-r4A?pwd=1v4a)\r\n\r\n`因本软件属于独立开发的项目, 没有给某些杀毒软件交过保护费, 所以会被某些杀毒软件误报病毒.`\r\n\r\n---\r\n\r\n### ✨ NUEVO: Paquete de idioma español (BETA). Generado automáticamente y perfeccionado mediante software de traducción automática.\r\n### 🔧 Actívalo en: Additional Settings > Language (esquina inferior derecha).\r\n\r\n---\r\n\r\n[🔗📜User Guide](https://github.com/AaronFeng753/Waifu2x-Extension-GUI/wiki)  |  [使用教程📜🔗](https://github.com/AaronFeng753/Waifu2x-Extension-GUI/wiki/%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B)\r\n\r\n---\r\n\r\nUpdate Package | 增量更新包:\r\n\r\n`Update package for v3.137.01 and later versions | 适用于 v3.137.01 及以后版本 的更新包`\r\n\r\n[🔗💾Github.com](https://github.com/AaronFeng753/Waifu2x-Extension-GUI/releases/download/v3.137.11-beta/Update-W2xEX-v3.137.11-beta-FROM-v3.137.01.7z) | [🔗💾sourceforge.net](https://sourceforge.net/projects/waifu2x-extension-gui/files/v3.137.11-beta/Update-W2xEX-v3.137.11-beta-FROM-v3.137.01.7z/download)\r\n\r\n[🔗💾(PRC) OneDrive (不限速🚀)](https://aaronfeng-my.sharepoint.cn/:u:/g/personal/admin_aaronfeng_partner_onmschina_cn/IQBKJAszVOVOS5Cy-GpmyVwJATa5cbPi-xFos_uzn2ZUr4g?e=Im8XKQ) | [🔗💾(PRC) 百度网盘](https://pan.baidu.com/s/1tVuy500OE_l4yvmhc3UNZA?pwd=yf5h)\r\n\r\n```\r\nSHA256\r\n\r\nWaifu2x-Extension-GUI-v3.137.11-beta-Win64.7z\r\n60cbaf727599a9a7e5949a66b728e1ac7c5255e75cb3500",
+    "ai_digest": "",
+    "is_new_repo": false,
+    "detected_at": "2026-05-17T12:11:34.102635+00:00"
+  },
+  {
+    "full_name": "HK560/ControllerMeta",
+    "name": "ControllerMeta",
+    "owner": "HK560",
+    "old_tag": "0.19.2",
+    "new_tag": "0.20.0",
+    "published_at": "2026-05-17T11:56:50Z",
+    "html_url": "https://github.com/HK560/ControllerMeta/releases/tag/0.20.0",
+    "body": "🌟ControllerMeta现已在Steam上发行，欢迎支持！🌟\r\n🌟ControllerMeta is now available on Steam! Please have a look! 🌟\r\n[ZH]\r\n- 优化 Steam Input 支持，提升 Steam 控制器数据采集与调试信息的稳定性。\r\n- 曲线工具支持通过文本框导入曲线，优化 DSE 配置器曲线导入，并支持导出贝塞尔曲线时自动转换为折线。\r\n- 修复 Leadjoy 曲线死区失效、DualShock/DualSense 输入居中异常，以及 Nintendo Switch Pro 手柄校准问题。\r\n- 优化设备详情和历史日志等界面显示，并支持根据系统环境自动选择界面语言。\r\n\r\n[EN]\r\n- Improved Steam Input support for more stable controller data collection and diagnostic logging.\r\n- Added curve import from text, improved DSE Configurator curve import, and allowed Bezier exports to be converted to polylines automatically.\r\n- Fixed Leadjoy curve deadzone handling, DualShock/DualSense input centering, and Nintendo Switch Pro calibration.\r\n- Polished device details and history log displays, and added automatic UI language detection based on the system environment.",
+    "ai_digest": "",
+    "is_new_repo": false,
+    "detected_at": "2026-05-17T12:11:34.102624+00:00"
+  },
+  {
     "full_name": "darrylmorley/whatcable",
     "name": "whatcable",
     "owner": "darrylmorley",
