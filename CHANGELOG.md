@@ -14,6 +14,7 @@
 - **统一「独立项目」生态名称** — 消除 `独立项目 / Standalone` 与 `独立项目` 的重复。`StarItem` 默认值、`ECOLOGY_ALIASES` 目标值、`ECOLOGY_STANDARD_NAMES` 全部统一为 `独立项目`，涉及 14 个文件
 - **生态发现噪声过滤** — `ecology_discovery.py` 的 `NOISE_TOPICS` 从硬编码改为自动推导：从 `PLATFORM_RULES`、`TYPE_RULES`、`ecology_rules`、`ECOLOGY_STANDARD_NAMES`、`ECOLOGY_ALIASES` 自动提取关键词。Android / Dart / Cli 等平台/类型/已有生态不再被误识别为候选生态
 - **生态发现手动 blocklist** — 新增 `scripts/ecology_blocklist.yaml`，支持手动补充排除特定 topic/前缀。修改后随代码提交，Actions 自动生效
+- **候选池 blocklist 清理** — `ecology_candidates.py` 的持久化候选池 `ecology_candidates.json` 也加载 blocklist，初始化时自动将历史遗留的误识别候选（Android / Dart / Cli 等）标记为 `rejected`，不再出现在报告中
 
 ---
 
