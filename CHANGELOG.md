@@ -16,6 +16,19 @@
 - **项目版本号去 V4** — README 标题、CLI 描述、User-Agent、模板页脚等去掉显式 v4 标注，保留 CHANGELOG 历史记录
 - **计划文档状态修正** — `classification_optimization.md` 从虚假"全部完成"修正为各子项真实状态
 
+### 🐛 修复
+
+- **`ecology_candidates.py` 重复定义** — `save()` / `load()` 各定义两次，第二个覆盖第一个导致 `proposed_blocklist` 持久化逻辑丢失。合并为单一实现
+- **`EcologyCandidateState` 序列化规范** — 缺少 `to_dict()` / `from_dict()`，`save()` 直接使用 `asdict()` 违反 §1.2。添加标准序列化方法，改用 `v.to_dict()`
+- **时间戳 naive/aware 比较** — `_was_recently_proposed` 和 `_cleanup_expired` 解析 ISO 时间戳后未检查 `tzinfo is None`，与 `datetime.now(timezone.utc)` 做减法会抛出 `TypeError`。统一添加 `tzinfo is None → replace(tzinfo=timezone.utc)` 处理
+- **异常捕获过于宽泛** — 多处 `except Exception: pass` 和 `except Exception as e` 未细分异常类型，违反 §8.2。细分为 `OSError` / `json.JSONDecodeError` / `ValueError` / `TypeError`
+- **局部导入清理** — `_load_blocklist` / `_load_manual_blocklist` / `_row_data` 中的局部 `import os` 和 `from config_rules import ...` 移到模块顶部
+- **`check_consistency` 逻辑错误** — 使用不存在的 platform 值 `"桌面端"`（PLATFORM_RULES 中无此值）。删除该值，仅保留有效 platform
+
+### 🏗 架构
+
+- **生态候选反馈闭环** — 周报 HTML 和 `ecology_discovery.md` 中每个候选添加 🚫 反馈图标，点击直达 `ecology-blocklist.yml` Issue 模板
+
 ---
 
 ## [v4.2.1] - 2026-05-17
