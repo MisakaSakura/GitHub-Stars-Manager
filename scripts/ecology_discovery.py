@@ -243,12 +243,15 @@ class EcologyDiscovery:
         ]
 
         for c in candidates:
+            example_links = "\n".join(
+                f"  - [{ex}](https://github.com/{ex})" for ex in c.examples
+            )
             lines.extend([
                 f"### {c.name}",
                 f"- **发现方式**: {c.indicator_type} (`{c.indicator_value}`)",
                 f"- **项目数量**: {c.project_count}",
                 f"- **置信度**: {c.confidence:.0%}",
-                f"- **示例项目**: {', '.join(c.examples)}",
+                f"- **示例项目**:\n{example_links}",
                 f"- **建议规则配置**:",
                 "```json",
                 json.dumps(c.suggested_patterns, ensure_ascii=False, indent=2),

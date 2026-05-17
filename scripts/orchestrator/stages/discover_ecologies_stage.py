@@ -62,8 +62,12 @@ def _generate_discovery_report(ctx: PipelineContext, candidates: list, summary: 
     discovery = EcologyDiscovery(ctx.db, ECOLOGY_RULES)
     md = discovery.generate_report(candidates) if candidates else ""
     md += "\n\n## 🌱 生态候选池状态\n\n"
-    md += "| 生态 | 状态 | 项目数 | 置信度 | 进度 |\n"
-    md += "|------|------|--------|--------|------|\n"
+    # 构建 name -> examples 映射（从 candidates 中获取示例项目）
+    name_to_examples: dict[str, list[str]] = {}
+    for c in candidates:
+        name_to_examples[c.name] = c.examples
+    md += "| 生态 | 状态 | 项目数 | 示例项目 | 置信度 | 进度 |\n"
+    md += "|------|------|--------|----------|--------|------|\n"
     for s in summary:
         status_icon = {
             "candidate": "🔍",
@@ -71,7 +75,9 @@ def _generate_discovery_report(ctx: PipelineContext, candidates: list, summary: 
             "ai_reviewed": "🤖",
             "trusted": "✅",
         }.get(s["status"], "❓")
-        md += f"| {s['name']} | {status_icon} {s['status']} | {s['count']} | {s['confidence']:.0%} | {s['progress']} |\n"
+        examples = name_to_examples.get(s["name"], [])
+        example_text = ", ".join(examples[:3]) if examples else "-"
+        md += f"| {s['name']} | {status_icon} {s['status']} | {s['count']} | {example_text} | {s['confidence']:.0%} | {s['progress']} |\n"
     return md
 
 
@@ -238,5 +244,9 @@ def discover_ecologies_stage(ctx: PipelineContext) -> None:
         except Exception as e:
             log(f"生态发现报告写入失败: {e}", "WARN")
 
-    # 把候选池摘要存入 ctx 供周报使用
+    # 把候选池摘要存入 ctx 供周报使用（附加示例项目）
+    if summary and candidates:
+        name_to_examples = {c.name: c.examples for c in candidates}
+        for s in summary:
+            s["examples"] = name_to_examples.get(s["name"], [])
     ctx.ecology_candidate_summary = summary

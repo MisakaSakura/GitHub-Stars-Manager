@@ -228,11 +228,18 @@ tr:hover td{background:var(--bg-hover)}
       {% elif tab.type == 'eco_candidates' %}
       <div class="wd-section"><h3>🌱 生态候选 ({{ tab.entries|length }})</h3><div class="wd-list">
         {% for c in tab.entries %}
-        <div class="wd-item">
-          <span>{{ c.status_icon }} {{ c.name|e }}</span>
-          <span class="wd-tag">{{ c.count }} 个项目</span>
-          <span style="color:var(--text-muted);font-size:11px">{{ c.progress|e }}</span>
-          {% if c.blocklist_url %}<a href="{{ c.blocklist_url|e }}" target="_blank" style="color:#8b949e;font-size:11px;text-decoration:none;margin-left:6px" title="提议加入 blocklist">🚫</a>{% endif %}
+        <div class="wd-item" style="flex-direction:column;align-items:flex-start">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span>{{ c.status_icon }} {{ c.name|e }}</span>
+            <span class="wd-tag">{{ c.count }} 个项目</span>
+            <span style="color:var(--text-muted);font-size:11px">{{ c.progress|e }}</span>
+            {% if c.blocklist_url %}<a href="{{ c.blocklist_url|e }}" target="_blank" style="color:#8b949e;font-size:11px;text-decoration:none;margin-left:6px" title="提议加入 blocklist">🚫</a>{% endif %}
+          </div>
+          {% if c.examples %}
+          <div style="margin-top:4px;font-size:11px;color:var(--text-muted)">
+            {% for ex in c.examples[:3] %}<a href="https://github.com/{{ ex|e }}" target="_blank" style="color:var(--text-secondary);text-decoration:none;margin-right:10px">{{ ex|e }}</a>{% endfor %}
+          </div>
+          {% endif %}
         </div>
         {% endfor %}
       </div></div>
