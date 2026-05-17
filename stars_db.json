@@ -31,7 +31,7 @@
       "typescript",
       "wsl-support"
     ],
-    "stars": 73161,
+    "stars": 73174,
     "url": "https://github.com/farion1231/cc-switch",
     "first_seen": "2026-05-14T19:49:34.071163+00:00",
     "last_updated": "2026-05-16T12:20:24Z",
@@ -533,7 +533,7 @@
       "terminal",
       "tui"
     ],
-    "stars": 30930,
+    "stars": 30942,
     "url": "https://github.com/Hmbown/DeepSeek-TUI",
     "first_seen": "2026-05-14T19:49:34.074678+00:00",
     "last_updated": "2026-05-17T10:15:55Z",
@@ -861,7 +861,7 @@
       "zsh-prompt",
       "zsh-theme"
     ],
-    "stars": 57517,
+    "stars": 57520,
     "url": "https://github.com/starship/starship",
     "first_seen": "2026-05-14T19:49:34.077165+00:00",
     "last_updated": "2026-05-17T09:29:44Z",
@@ -1319,7 +1319,7 @@
       "btrfs",
       "windows"
     ],
-    "stars": 7435,
+    "stars": 7436,
     "url": "https://github.com/maharmstone/btrfs",
     "first_seen": "2026-05-14T19:49:34.080379+00:00",
     "last_updated": "2025-09-24T09:50:22Z",
@@ -1899,7 +1899,7 @@
       "webscraping",
       "xpath"
     ],
-    "stars": 50561,
+    "stars": 50564,
     "url": "https://github.com/D4Vinci/Scrapling",
     "first_seen": "2026-05-14T19:49:34.084492+00:00",
     "last_updated": "2026-05-16T00:42:13Z",
@@ -1953,7 +1953,7 @@
     "ecology": "独立项目",
     "ecology_role": "-",
     "topics": [],
-    "stars": 3371,
+    "stars": 3372,
     "url": "https://github.com/HapeLee/legado-with-MD3",
     "first_seen": "2026-05-14T19:49:34.084743+00:00",
     "last_updated": "2026-05-16T22:05:19Z",
@@ -2349,7 +2349,7 @@
       "openclaw",
       "openclaw-skills"
     ],
-    "stars": 48832,
+    "stars": 48833,
     "url": "https://github.com/VoltAgent/awesome-openclaw-skills",
     "first_seen": "2026-05-14T19:49:34.087369+00:00",
     "last_updated": "2026-05-15T16:33:39Z",
@@ -2637,7 +2637,7 @@
       "open-source-project",
       "windows"
     ],
-    "stars": 13544,
+    "stars": 13546,
     "url": "https://github.com/OpenHub-Store/GitHub-Store",
     "first_seen": "2026-05-14T19:49:34.089621+00:00",
     "last_updated": "2026-05-17T08:48:40Z",
@@ -2781,7 +2781,7 @@
     "ecology": "独立项目",
     "ecology_role": "-",
     "topics": [],
-    "stars": 16925,
+    "stars": 16926,
     "url": "https://github.com/pranshuparmar/witr",
     "first_seen": "2026-05-14T19:49:34.090693+00:00",
     "last_updated": "2026-05-16T17:41:39Z",
@@ -2999,7 +2999,7 @@
       "shell",
       "uninstall"
     ],
-    "stars": 51624,
+    "stars": 51625,
     "url": "https://github.com/tw93/Mole",
     "first_seen": "2026-05-14T19:49:34.092420+00:00",
     "last_updated": "2026-05-17T00:22:42Z",
@@ -3263,7 +3263,7 @@
       "linux",
       "reverse-engineering"
     ],
-    "stars": 27005,
+    "stars": 27006,
     "url": "https://github.com/kavishdevar/librepods",
     "first_seen": "2026-05-14T19:49:34.094137+00:00",
     "last_updated": "2026-05-16T04:40:06Z",
@@ -3501,7 +3501,7 @@
       "rust",
       "shell"
     ],
-    "stars": 39513,
+    "stars": 39514,
     "url": "https://github.com/nushell/nushell",
     "first_seen": "2026-05-14T19:49:34.095642+00:00",
     "last_updated": "2026-05-17T02:04:19Z",
@@ -3594,7 +3594,7 @@
     "ecology": "独立项目",
     "ecology_role": "其他 / Other",
     "topics": [],
-    "stars": 4166,
+    "stars": 4165,
     "url": "https://github.com/misaka10032w/Han1meViewer",
     "first_seen": "2026-05-14T19:49:34.096223+00:00",
     "last_updated": "2026-05-07T18:05:10Z",
@@ -3909,7 +3909,7 @@
       "tutorial-exercises",
       "tutorials"
     ],
-    "stars": 501949,
+    "stars": 501951,
     "url": "https://github.com/codecrafters-io/build-your-own-x",
     "first_seen": "2026-05-14T19:49:34.098502+00:00",
     "last_updated": "2026-02-21T09:34:54Z",
@@ -4113,7 +4113,7 @@
     "ecology": "独立项目",
     "ecology_role": "其他 / Other",
     "topics": [],
-    "stars": 8145,
+    "stars": 8147,
     "url": "https://github.com/LiveContainer/LiveContainer",
     "first_seen": "2026-05-14T19:49:34.099617+00:00",
     "last_updated": "2026-05-15T11:34:18Z",
@@ -4534,7 +4534,7 @@
       "nipaplay",
       "video"
     ],
-    "stars": 1495,
+    "stars": 1496,
     "url": "https://github.com/AimesSoft/NipaPlay-Reload",
     "first_seen": "2026-05-14T19:49:34.102058+00:00",
     "last_updated": "2026-05-17T11:29:47Z",
@@ -4638,7 +4638,7 @@
       "telegram",
       "telegram-client"
     ],
-    "stars": 5802,
+    "stars": 5803,
     "url": "https://github.com/AyuGram/AyuGramDesktop",
     "first_seen": "2026-05-14T19:49:34.102745+00:00",
     "last_updated": "2026-04-27T16:35:21Z",
@@ -4988,7 +4988,7 @@
       "baidupan",
       "openlist"
     ],
-    "stars": 22557,
+    "stars": 22558,
     "url": "https://github.com/OpenListTeam/OpenList",
     "first_seen": "2026-05-14T19:49:34.105279+00:00",
     "last_updated": "2026-05-16T15:05:22Z",
@@ -5683,7 +5683,7 @@
       "pytorch",
       "stable-diffusion"
     ],
-    "stars": 113254,
+    "stars": 113256,
     "url": "https://github.com/Comfy-Org/ComfyUI",
     "first_seen": "2026-05-14T19:49:34.109896+00:00",
     "last_updated": "2026-05-17T03:55:47Z",
@@ -6263,7 +6263,7 @@
     "ecology": "独立项目",
     "ecology_role": "-",
     "topics": [],
-    "stars": 103557,
+    "stars": 103556,
     "url": "https://github.com/deepseek-ai/DeepSeek-V3",
     "first_seen": "2026-05-14T19:49:34.113777+00:00",
     "last_updated": "2025-08-28T03:24:37Z",
@@ -6633,7 +6633,7 @@
       "remote-desktop",
       "streaming"
     ],
-    "stars": 9436,
+    "stars": 9437,
     "url": "https://github.com/ClassicOldSong/Apollo",
     "first_seen": "2026-05-14T19:49:34.116329+00:00",
     "last_updated": "2026-05-14T08:31:17Z",
@@ -7084,7 +7084,7 @@
       "mpv-android",
       "mpv-player"
     ],
-    "stars": 1351,
+    "stars": 1352,
     "url": "https://github.com/abdallahmehiz/mpvKt",
     "first_seen": "2026-05-14T19:49:34.119882+00:00",
     "last_updated": "2026-02-14T07:26:20Z",
@@ -7515,7 +7515,7 @@
     "ecology": "独立项目",
     "ecology_role": "其他 / Other",
     "topics": [],
-    "stars": 10098,
+    "stars": 10099,
     "url": "https://github.com/breezy-weather/breezy-weather",
     "first_seen": "2026-05-14T19:49:34.123028+00:00",
     "last_updated": "2026-05-16T04:13:58Z",
@@ -7687,7 +7687,7 @@
       "vless",
       "vpn"
     ],
-    "stars": 38945,
+    "stars": 38946,
     "url": "https://github.com/chen08209/FlClash",
     "first_seen": "2026-05-14T19:49:34.124351+00:00",
     "last_updated": "2026-05-17T11:49:23Z",
@@ -7733,7 +7733,7 @@
       "wireguard",
       "xray"
     ],
-    "stars": 29706,
+    "stars": 29707,
     "url": "https://github.com/hiddify/hiddify-app",
     "first_seen": "2026-05-14T19:49:34.124825+00:00",
     "last_updated": "2026-04-01T20:57:52Z",
@@ -8341,7 +8341,7 @@
       "rtd",
       "winget-pkg"
     ],
-    "stars": 37015,
+    "stars": 37016,
     "url": "https://github.com/LizardByte/Sunshine",
     "first_seen": "2026-05-14T19:49:34.129340+00:00",
     "last_updated": "2026-05-17T11:47:07Z",
@@ -8523,7 +8523,7 @@
     "ecology": "Clash / Mihomo",
     "ecology_role": "GUI 前端 / Client",
     "topics": [],
-    "stars": 39574,
+    "stars": 39573,
     "url": "https://github.com/MetaCubeX/ClashMetaForAndroid",
     "first_seen": "2026-05-14T19:49:34.130347+00:00",
     "last_updated": "2026-05-17T09:55:54Z",
@@ -9489,7 +9489,7 @@
       "tauri-app",
       "windows"
     ],
-    "stars": 118679,
+    "stars": 118683,
     "url": "https://github.com/clash-verge-rev/clash-verge-rev",
     "first_seen": "2026-05-14T19:49:34.136757+00:00",
     "last_updated": "2026-05-17T10:24:40Z",
@@ -9562,7 +9562,7 @@
       "tun",
       "vpn"
     ],
-    "stars": 21018,
+    "stars": 21019,
     "url": "https://github.com/apernet/hysteria",
     "first_seen": "2026-05-14T19:49:34.137324+00:00",
     "last_updated": "2026-05-16T21:06:04Z",
@@ -10065,7 +10065,7 @@
       "dishes",
       "recipes"
     ],
-    "stars": 100127,
+    "stars": 100129,
     "url": "https://github.com/Anduin2017/HowToCook",
     "first_seen": "2026-05-14T19:49:34.140662+00:00",
     "last_updated": "2026-05-15T06:37:13Z",
@@ -11570,7 +11570,7 @@
       "youtube-downloader",
       "yt-dlp"
     ],
-    "stars": 162730,
+    "stars": 162734,
     "url": "https://github.com/yt-dlp/yt-dlp",
     "first_seen": "2026-05-14T19:49:34.150980+00:00",
     "last_updated": "2026-05-16T20:30:45Z",
@@ -11820,7 +11820,7 @@
       "team-collaboration",
       "wiki"
     ],
-    "stars": 70635,
+    "stars": 70636,
     "url": "https://github.com/AppFlowy-IO/AppFlowy",
     "first_seen": "2026-05-14T19:49:34.152625+00:00",
     "last_updated": "2026-05-12T04:32:49Z",
@@ -12054,7 +12054,7 @@
       "source-han",
       "variable-fonts"
     ],
-    "stars": 16668,
+    "stars": 16669,
     "url": "https://github.com/adobe-fonts/source-han-sans",
     "first_seen": "2026-05-14T19:49:34.154252+00:00",
     "last_updated": "2025-06-25T03:30:03Z",
@@ -12397,7 +12397,7 @@
       "youtube-downloader",
       "yt-dlp"
     ],
-    "stars": 26268,
+    "stars": 26270,
     "url": "https://github.com/JunkFood02/Seal",
     "first_seen": "2026-05-14T19:49:34.156769+00:00",
     "last_updated": "2026-04-25T15:44:33Z",
@@ -13077,7 +13077,7 @@
       "vmess",
       "vpn"
     ],
-    "stars": 40458,
+    "stars": 40459,
     "url": "https://github.com/freefq/free",
     "first_seen": "2026-05-14T19:49:34.161098+00:00",
     "last_updated": "2024-08-20T09:43:55Z",
@@ -13540,7 +13540,7 @@
       "surge",
       "v2ray"
     ],
-    "stars": 26468,
+    "stars": 26469,
     "url": "https://github.com/Loyalsoldier/clash-rules",
     "first_seen": "2026-05-14T19:49:34.164362+00:00",
     "last_updated": "2026-05-16T23:27:51Z",
@@ -13761,7 +13761,7 @@
       "bittorrent",
       "bittorrent-client"
     ],
-    "stars": 25729,
+    "stars": 25730,
     "url": "https://github.com/c0re100/qBittorrent-Enhanced-Edition",
     "first_seen": "2026-05-14T19:49:34.165714+00:00",
     "last_updated": "2026-05-10T17:05:50Z",
@@ -13875,7 +13875,7 @@
       "screen",
       "sdl2"
     ],
-    "stars": 141805,
+    "stars": 141806,
     "url": "https://github.com/Genymobile/scrcpy",
     "first_seen": "2026-05-14T19:49:34.166641+00:00",
     "last_updated": "2026-05-17T10:43:55Z",
@@ -13967,7 +13967,7 @@
       "vue3",
       "windows"
     ],
-    "stars": 6256,
+    "stars": 6257,
     "url": "https://github.com/gaozhangmin/boxplayer",
     "first_seen": "2026-05-16T09:53:37.452169+00:00",
     "last_updated": "2026-05-15T13:25:53Z",
@@ -13994,7 +13994,7 @@
     "ecology": "独立项目",
     "ecology_role": "-",
     "topics": [],
-    "stars": 194638,
+    "stars": 194651,
     "url": "https://github.com/obra/superpowers",
     "first_seen": "2026-05-16T13:37:48.758257+00:00",
     "last_updated": "2026-05-14T23:32:25Z",

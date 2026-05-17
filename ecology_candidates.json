@@ -1,14 +1,14 @@
 {
   "version": 1,
-  "updated_at": "2026-05-17T12:11:34.110719+00:00",
+  "updated_at": "2026-05-17T12:22:30.971424+00:00",
   "candidates": {
     "Android": {
-      "status": "ai_reviewed",
+      "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 1,
+      "missed_runs": 2,
       "confidence_history": [
         1.0,
         1.0,
@@ -36,15 +36,15 @@
         "llm_confidence": 0.9,
         "llm_reason": "Android作为移动操作系统生态，其边界由官方定义和社区共识清晰界定，topic_patterns=['android']能有效匹配相关项目。"
       },
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Ai": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 1,
+      "missed_runs": 2,
       "confidence_history": [
         1.0,
         1.0,
@@ -72,15 +72,15 @@
         "llm_confidence": 0.8,
         "llm_reason": "生态候选名称过于宽泛，缺乏明确的边界和稳定特征，不适合作为正式生态规则。"
       },
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Dart": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 1,
+      "missed_runs": 2,
       "confidence_history": [
         0.7,
         0.7,
@@ -108,15 +108,15 @@
         "llm_confidence": 0.8,
         "llm_reason": "Dart 作为明确的编程语言，其生态边界清晰且稳定，适合作为正式生态规则。"
       },
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Acg": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 1,
+      "missed_runs": 2,
       "confidence_history": [
         0.4,
         0.4,
@@ -139,15 +139,15 @@
         "core_projects": []
       },
       "ai_review": null,
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Apk": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 1,
+      "missed_runs": 2,
       "confidence_history": [
         0.4,
         0.4,
@@ -170,22 +170,24 @@
         "core_projects": []
       },
       "ai_review": null,
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Payload": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-17T12:11:34.110410+00:00",
-      "appear_count": 4,
-      "consecutive_runs": 4,
+      "last_seen": "2026-05-17T12:22:30.971288+00:00",
+      "appear_count": 5,
+      "consecutive_runs": 5,
       "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3,
         0.3,
         0.3,
         0.3
       ],
       "project_count_history": [
+        3,
         3,
         3,
         3,
@@ -207,22 +209,24 @@
         "core_projects": []
       },
       "ai_review": null,
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Moonlight": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-17T12:11:34.110410+00:00",
-      "appear_count": 4,
-      "consecutive_runs": 4,
+      "last_seen": "2026-05-17T12:22:30.971288+00:00",
+      "appear_count": 5,
+      "consecutive_runs": 5,
       "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3,
         0.3,
         0.3,
         0.3
       ],
       "project_count_history": [
+        3,
         3,
         3,
         3,
@@ -247,15 +251,15 @@
         "core_projects": []
       },
       "ai_review": null,
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Anime": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 1,
+      "missed_runs": 2,
       "confidence_history": [
         0.3,
         0.3,
@@ -278,15 +282,15 @@
         "core_projects": []
       },
       "ai_review": null,
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Audio": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 2,
-      "consecutive_runs": 1,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3,
         0.4
@@ -307,15 +311,15 @@
         "core_projects": []
       },
       "ai_review": null,
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Android-application": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 2,
-      "consecutive_runs": 1,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3,
         0.4
@@ -336,15 +340,15 @@
         "core_projects": []
       },
       "ai_review": null,
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Bilibili": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-17T10:44:11.195657+00:00",
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 1,
+      "missed_runs": 2,
       "confidence_history": [
         0.8,
         0.8
@@ -365,15 +369,15 @@
         "core_projects": []
       },
       "ai_review": null,
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Cli": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-17T10:44:11.195657+00:00",
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 1,
+      "missed_runs": 2,
       "confidence_history": [
         0.3,
         0.3
@@ -394,15 +398,15 @@
         "core_projects": []
       },
       "ai_review": null,
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Clipboard-manager": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-17T12:11:34.110410+00:00",
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
-      "consecutive_runs": 1,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3
       ],
@@ -421,15 +425,15 @@
         "core_projects": []
       },
       "ai_review": null,
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Jetpack-compose": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-17T12:11:34.110410+00:00",
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
-      "consecutive_runs": 1,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3
       ],
@@ -448,15 +452,15 @@
         "core_projects": []
       },
       "ai_review": null,
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Chrome-extension": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-17T12:11:34.110410+00:00",
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
-      "consecutive_runs": 1,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3
       ],
@@ -475,15 +479,15 @@
         "core_projects": []
       },
       "ai_review": null,
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Python": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-17T12:11:34.110410+00:00",
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
-      "consecutive_runs": 1,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3
       ],
@@ -502,15 +506,15 @@
         "core_projects": []
       },
       "ai_review": null,
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Dotnet": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-17T12:11:34.110410+00:00",
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
-      "consecutive_runs": 1,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3
       ],
@@ -524,6 +528,33 @@
         ],
         "topic_patterns": [
           "dotnet"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": "blocklist"
+    },
+    "Desktop-app": {
+      "status": "candidate",
+      "first_seen": "2026-05-17T12:22:30.971288+00:00",
+      "last_seen": "2026-05-17T12:22:30.971288+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "desktop-app"
+        ],
+        "topic_patterns": [
+          "desktop-app"
         ],
         "related_types": [],
         "core_projects": []
