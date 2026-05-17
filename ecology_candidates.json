@@ -1,19 +1,21 @@
 {
   "version": 1,
-  "updated_at": "2026-05-16T15:43:23.582353+00:00",
+  "updated_at": "2026-05-17T10:44:11.195887+00:00",
   "candidates": {
     "Android": {
       "status": "candidate",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-16T15:43:23.582131+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 1,
+      "last_seen": "2026-05-17T10:44:11.195657+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 2,
       "missed_runs": 0,
       "confidence_history": [
+        1.0,
         1.0
       ],
       "project_count_history": [
-        40
+        40,
+        41
       ],
       "suggested_patterns": {
         "name_patterns": [],
@@ -32,15 +34,17 @@
     "Ai": {
       "status": "candidate",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-16T15:43:23.582131+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 1,
+      "last_seen": "2026-05-17T10:44:11.195657+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 2,
       "missed_runs": 0,
       "confidence_history": [
+        1.0,
         1.0
       ],
       "project_count_history": [
-        12
+        12,
+        13
       ],
       "suggested_patterns": {
         "name_patterns": [],
@@ -59,14 +63,16 @@
     "Dart": {
       "status": "candidate",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-16T15:43:23.582131+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 1,
+      "last_seen": "2026-05-17T10:44:11.195657+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 2,
       "missed_runs": 0,
       "confidence_history": [
+        0.7,
         0.7
       ],
       "project_count_history": [
+        7,
         7
       ],
       "suggested_patterns": {
@@ -86,14 +92,16 @@
     "Acg": {
       "status": "candidate",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-16T15:43:23.582131+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 1,
+      "last_seen": "2026-05-17T10:44:11.195657+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 2,
       "missed_runs": 0,
       "confidence_history": [
+        0.4,
         0.4
       ],
       "project_count_history": [
+        4,
         4
       ],
       "suggested_patterns": {
@@ -113,14 +121,16 @@
     "Apk": {
       "status": "candidate",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-16T15:43:23.582131+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 1,
+      "last_seen": "2026-05-17T10:44:11.195657+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 2,
       "missed_runs": 0,
       "confidence_history": [
+        0.4,
         0.4
       ],
       "project_count_history": [
+        4,
         4
       ],
       "suggested_patterns": {
@@ -140,14 +150,16 @@
     "Payload": {
       "status": "candidate",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-16T15:43:23.582131+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 1,
+      "last_seen": "2026-05-17T10:44:11.195657+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 2,
       "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3
       ],
       "project_count_history": [
+        3,
         3
       ],
       "suggested_patterns": {
@@ -171,14 +183,16 @@
     "Moonlight": {
       "status": "candidate",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-16T15:43:23.582131+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 1,
+      "last_seen": "2026-05-17T10:44:11.195657+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 2,
       "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3
       ],
       "project_count_history": [
+        3,
         3
       ],
       "suggested_patterns": {
@@ -205,14 +219,16 @@
     "Anime": {
       "status": "candidate",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-16T15:43:23.582131+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 1,
+      "last_seen": "2026-05-17T10:44:11.195657+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 2,
       "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3
       ],
       "project_count_history": [
+        3,
         3
       ],
       "suggested_patterns": {
@@ -234,8 +250,8 @@
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
       "last_seen": "2026-05-16T15:43:23.582131+00:00",
       "appear_count": 1,
-      "consecutive_runs": 1,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3
       ],
@@ -261,8 +277,8 @@
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
       "last_seen": "2026-05-16T15:43:23.582131+00:00",
       "appear_count": 1,
-      "consecutive_runs": 1,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3
       ],
@@ -276,6 +292,60 @@
         ],
         "topic_patterns": [
           "android-application"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Bilibili": {
+      "status": "candidate",
+      "first_seen": "2026-05-17T10:44:11.195657+00:00",
+      "last_seen": "2026-05-17T10:44:11.195657+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.8
+      ],
+      "project_count_history": [
+        8
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "bilibili"
+        ],
+        "topic_patterns": [
+          "bilibili"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Cli": {
+      "status": "candidate",
+      "first_seen": "2026-05-17T10:44:11.195657+00:00",
+      "last_seen": "2026-05-17T10:44:11.195657+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "cli"
+        ],
+        "topic_patterns": [
+          "cli"
         ],
         "related_types": [],
         "core_projects": []
