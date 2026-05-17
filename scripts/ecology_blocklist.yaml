@@ -1,0 +1,32 @@
+# 生态发现 blocklist —— 手动排除不应被识别为生态的 topic/前缀
+# 修改后随代码提交，GitHub Actions 自动生效
+#
+# 说明：
+# - topics: 排除的 topics，对应 topic_cluster 发现方式
+# - name_prefixes: 排除的命名前缀，对应 name_prefix 发现方式
+# - 备注仅用于文档，不影响逻辑
+#
+# 大部分平台和类型关键词已由代码自动从 PLATFORM_RULES / TYPE_RULES 推导，
+# 此处只补充自动推导未覆盖的边缘情况。
+
+topics:
+  # 编程语言（自动推导可能未覆盖的小众语言）
+  - dart
+  - kotlin
+  - swift
+
+  # 过于宽泛的泛称
+  - acg
+  - anime
+  - manga
+
+name_prefixes:
+  # 文件格式/通用前缀
+  - apk
+  - ipa
+
+notes:
+  dart: "编程语言，非生态"
+  acg: "过于宽泛的文化泛称，不适合作为生态"
+  anime: "同上"
+  apk: "Android 安装包格式，非生态"

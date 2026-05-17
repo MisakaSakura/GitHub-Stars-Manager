@@ -37,10 +37,9 @@ class EcologyDiscovery:
         "plugin", "ext", "extension", "addon", "module", "package",
     }
 
-    # 常见通用 topics，不应作为生态聚类依据
-    NOISE_TOPICS = {
-        "python", "javascript", "typescript", "java", "rust", "go", "cpp", "c",
-        "html", "css", "shell", "dockerfile", "viml",
+    # 基础噪声 topics（无法从规则自动推导的通用词）
+    # 平台/类型关键词由 _build_noise_topics() 自动从 PLATFORM_RULES / TYPE_RULES 推导
+    BASE_NOISE_TOPICS = {
         "github", "opensource", "awesome", "tutorial", "example",
         "hacktoberfest", "good-first-issue", "help-wanted",
     }
@@ -49,6 +48,8 @@ class EcologyDiscovery:
         self.db = db
         self.ecology_rules = ecology_rules
         self.existing_names = {name.lower() for name in ecology_rules.keys()}
+        self.noise_topics = self._build_noise_topics(ecology_rules)
+        self.noise_prefixes = self._build_noise_prefixes()
 
     def _get_standalone_items(self) -> list[dict]:
         """获取所有未被归入已知生态的项目"""
@@ -59,8 +60,47 @@ class EcologyDiscovery:
                 items.append(item.to_dict() if hasattr(item, "to_dict") else dict(item))
         return items
 
+    def _build_noise_topics(self, ecology_rules: dict) -> set[str]:
+        """构建噪声 topics：自动从规则推导 + 手动 blocklist"""
+        from config_rules import PLATFORM_RULES, TYPE_RULES, ECOLOGY_STANDARD_NAMES, ECOLOGY_ALIASES
+
+        noise = set(self.BASE_NOISE_TOPICS)
+        for keywords in PLATFORM_RULES.values():
+            noise.update(k.lower() for k in keywords)
+        for keywords in TYPE_RULES.values():
+            noise.update(k.lower() for k in keywords)
+        noise.update(name.lower() for name in ecology_rules.keys())
+        noise.update(name.lower() for name in ECOLOGY_STANDARD_NAMES)
+        noise.update(k.lower() for k in ECOLOGY_ALIASES.keys())
+        noise.update(v.lower() for v in ECOLOGY_ALIASES.values())
+
+        blocklist = self._load_blocklist()
+        noise.update(k.lower() for k in blocklist.get("topics", []))
+        return noise
+
+    def _build_noise_prefixes(self) -> set[str]:
+        """构建噪声前缀：基础前缀 + 手动 blocklist"""
+        noise = set(self.NOISE_PREFIXES)
+        blocklist = self._load_blocklist()
+        noise.update(k.lower() for k in blocklist.get("name_prefixes", []))
+        return noise
+
+    @staticmethod
+    def _load_blocklist() -> dict:
+        """加载 ecology_blocklist.yaml"""
+        import os
+        blocklist_path = os.path.join(os.path.dirname(__file__), "ecology_blocklist.yaml")
+        if os.path.exists(blocklist_path):
+            try:
+                import yaml
+                with open(blocklist_path, "r", encoding="utf-8") as f:
+                    return yaml.safe_load(f) or {}
+            except Exception:
+                pass
+        return {}
+
     def _is_noise_prefix(self, prefix: str) -> bool:
-        return prefix.lower() in self.NOISE_PREFIXES or len(prefix) <= 2
+        return prefix.lower() in self.noise_prefixes or len(prefix) <= 2
 
     def _discover_by_name_prefix(self, items: list[dict], min_count: int = 3) -> List[EcologyCandidate]:
         """通过命名前缀发现生态"""
@@ -122,7 +162,7 @@ class EcologyDiscovery:
         # 找出每个项目的主导 topic（排除噪声）
         topic_groups: dict[str, list[dict]] = {}
         for item in items:
-            topics = [t.lower() for t in item.get("topics", []) if t.lower() not in self.NOISE_TOPICS]
+            topics = [t.lower() for t in item.get("topics", []) if t.lower() not in self.noise_topics]
             if len(topics) >= 2:
                 # 取最常见的两个 topics 作为聚类键
                 for t in topics[:2]:
