@@ -14,11 +14,23 @@ topics:
   - dart
   - kotlin
   - swift
+  - dotnet
+  - python
 
-  # 过于宽泛的泛称
+  # 过于宽泛的泛称/功能描述
   - acg
   - anime
   - manga
+  - audio
+  - clipboard-manager
+
+  # 平台+类型组合（不应作为独立生态）
+  - android-application
+  - chrome-extension
+  - jetpack-compose
+
+  # 技术术语/文件格式
+  - payload
 
 name_prefixes:
   # 文件格式/通用前缀
@@ -30,3 +42,10 @@ notes:
   acg: "过于宽泛的文化泛称，不适合作为生态"
   anime: "同上"
   apk: "Android 安装包格式，非生态"
+  audio: "功能描述，非生态"
+  android-application: "平台+类型组合，非生态"
+  chrome-extension: "平台+类型组合，非生态"
+  jetpack-compose: "Android UI 框架，非生态"
+  payload: "技术术语，非生态"
+  dotnet: "编程框架，非生态"
+  clipboard-manager: "功能描述，非生态"

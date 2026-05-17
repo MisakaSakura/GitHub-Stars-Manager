@@ -41,7 +41,52 @@ class EcologyCandidatePool:
     def __init__(self, pool_path: str):
         self.path = pool_path
         self.candidates: dict[str, EcologyCandidateState] = {}
+        self.blocklist: set[str] = self._load_blocklist()
         self.load()
+        # 初始化时清理已被 blocklist 的历史候选
+        self._cleanup_blocklisted()
+
+    @staticmethod
+    def _load_blocklist() -> set[str]:
+        """加载 blocklist： ecology_blocklist.yaml + 自动从规则推导"""
+        import os
+        from config_rules import PLATFORM_RULES, TYPE_RULES, ECOLOGY_STANDARD_NAMES, ECOLOGY_ALIASES
+        from ecologies import ECOLOGY_RULES
+
+        noise: set[str] = set()
+
+        # 1. 从平台/类型/生态规则自动推导
+        for keywords in PLATFORM_RULES.values():
+            noise.update(k.lower() for k in keywords)
+        for keywords in TYPE_RULES.values():
+            noise.update(k.lower() for k in keywords)
+        noise.update(name.lower() for name in ECOLOGY_RULES.keys())
+        noise.update(name.lower() for name in ECOLOGY_STANDARD_NAMES)
+        noise.update(k.lower() for k in ECOLOGY_ALIASES.keys())
+        noise.update(v.lower() for v in ECOLOGY_ALIASES.values())
+
+        # 2. 手动 blocklist
+        blocklist_path = os.path.join(os.path.dirname(__file__), "ecology_blocklist.yaml")
+        if os.path.exists(blocklist_path):
+            try:
+                import yaml
+                with open(blocklist_path, "r", encoding="utf-8") as f:
+                    data = yaml.safe_load(f) or {}
+                noise.update(k.lower() for k in data.get("topics", []))
+                noise.update(k.lower() for k in data.get("name_prefixes", []))
+            except Exception:
+                pass
+
+        return noise
+
+    def _cleanup_blocklisted(self) -> None:
+        """将已被 blocklist 的候选标记为 rejected"""
+        for name, state in list(self.candidates.items()):
+            if name.lower() in self.blocklist and state.status not in ("rejected", "expired"):
+                state.status = "rejected"
+                state.rejected_reason = "blocklist"
+                log(f"  [{name}] 被 blocklist 排除，标记为 rejected", "OK")
+        self.save()
 
     def load(self) -> None:
         if not os.path.exists(self.path):
@@ -108,8 +153,19 @@ class EcologyCandidatePool:
                     state.status = "expired"
                     changes.append((name, old_status, "expired"))
 
-        # 2. 添加新发现的候选
+        # 2. 添加新发现的候选（blocklist 中的直接拒绝）
         for cand in discovered:
+            if cand.name.lower() in self.blocklist:
+                if cand.name not in self.candidates:
+                    self.candidates[cand.name] = EcologyCandidateState(
+                        status="rejected",
+                        first_seen=now,
+                        last_seen=now,
+                        appear_count=1,
+                        rejected_reason="blocklist",
+                    )
+                    log(f"  [{cand.name}] 新发现但被 blocklist 排除，直接标记为 rejected", "OK")
+                continue
             if cand.name not in self.candidates:
                 self.candidates[cand.name] = EcologyCandidateState(
                     status="candidate",
