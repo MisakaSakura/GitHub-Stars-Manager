@@ -109,20 +109,50 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # ========== 2. checkout 数据分支 (data) 到 data/ 目录 ==========
+      # ========== 2. 判断运行模式（schedule 时按日期选择）==========
+      - name: Determine run mode
+        id: mode
+        run: |
+          MODE="${{ github.event.inputs.mode }}"
+          SHOULD_RUN="true"
+          if [ -z "$MODE" ]; then
+            if [ "${{ github.event_name }}" = "schedule" ]; then
+              DAY=$(date -u +%d)
+              MONTH=$(date -u +%m)
+              DOW=$(date -u +%u)
+              if [ "$DAY" = "01" ] && { [ "$MONTH" = "01" ] || [ "$MONTH" = "04" ] || [ "$MONTH" = "07" ] || [ "$MONTH" = "10" ]; }; then
+                MODE="full"
+                echo "📅 季度全量刷新 ($MONTH/$DAY)"
+              elif [ "$DAY" = "01" ]; then
+                MODE="deep"
+                echo "📅 月度深度整理 ($MONTH/$DAY)"
+              elif [ "$DOW" = "1" ]; then
+                MODE="incremental"
+                echo "📅 日常增量更新 (周一)"
+              else
+                echo "📅 今天不是运行日，跳过"
+                SHOULD_RUN="false"
+                MODE=""
+              fi
+            else
+              MODE="incremental"
+            fi
+          fi
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "should_run=$SHOULD_RUN" >> "$GITHUB_OUTPUT"
+
+      # ========== 3. checkout 数据分支 (data) 到 data/ 目录 ==========
       - name: Checkout data branch
+        if: steps.mode.outputs.should_run == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_URL: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
         run: |
-          # 清理旧 data 目录（如果有）
           rm -rf data
-          # 尝试拉取已存在的 data 分支
           if git ls-remote --heads "$REPO_URL" data | grep -q data; then
             git clone --branch data --single-branch "$REPO_URL" data
             echo "✅ 已拉取现有 data 分支"
           else
-            # data 分支不存在，初始化空分支
             mkdir data
             cd data
             git init
@@ -132,21 +162,25 @@ jobs:
           fi
 
       - name: Setup Python
+        if: steps.mode.outputs.should_run == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Cache pip dependencies
+        if: steps.mode.outputs.should_run == 'true'
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-classifier-${{ hashFiles('requirements.txt') }}
 
       - name: Install dependencies
+        if: steps.mode.outputs.should_run == 'true'
         run: |
           pip install -r requirements.txt
 
       - name: Run classifier
+        if: steps.mode.outputs.should_run == 'true'
         timeout-minutes: 30
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -168,35 +202,7 @@ jobs:
         run: |
           mkdir -p docs data
 
-          MODE="${{ github.event.inputs.mode }}"
-          if [ -z "$MODE" ]; then
-            # schedule 触发时根据日期自动判断模式
-            if [ "${{ github.event_name }}" = "schedule" ]; then
-              DAY=$(date -u +%d)
-              MONTH=$(date -u +%m)
-              DOW=$(date -u +%u)  # 1=周一
-
-              # 季度第一天 (1月/4月/7月/10月) → full
-              if [ "$DAY" = "01" ] && { [ "$MONTH" = "01" ] || [ "$MONTH" = "04" ] || [ "$MONTH" = "07" ] || [ "$MONTH" = "10" ]; }; then
-                MODE="full"
-                echo "[自动计划] 季度全量刷新 ($MONTH/$DAY)"
-              # 每月第一天 → deep
-              elif [ "$DAY" = "01" ]; then
-                MODE="deep"
-                echo "[自动计划] 月度深度整理 ($MONTH/$DAY)"
-              # 每周一 → incremental
-              elif [ "$DOW" = "1" ]; then
-                MODE="incremental"
-                echo "[自动计划] 日常增量更新 (周一)"
-              # 非运行日 → 跳过
-              else
-                echo "今天不是运行日，跳过"
-                exit 0
-              fi
-            else
-              MODE="incremental"
-            fi
-          fi
+          MODE="${{ steps.mode.outputs.mode }}"
 
           ARGS=(
             "--token" "$GH_TOKEN"
@@ -211,14 +217,13 @@ jobs:
             ARGS+=("--check-all-releases")
           fi
 
-          # ===== LLM 配置（P1-51: 模式映射逻辑统一在代码中处理） =====
+          # ===== LLM 配置 =====
           LLM_MODE="${{ github.event.inputs.llm_mode }}"
           if [ -n "$LLM_KEY" ]; then
             ARGS+=("--llm-key" "$LLM_KEY" "--llm-mode" "${LLM_MODE:-auto}")
             if [ -n "$LLM_PRESET" ]; then
               ARGS+=("--llm-preset" "$LLM_PRESET")
             fi
-            # 向后兼容：Variable 级别的 base/model 覆盖
             if [ -n "$LLM_BASE" ]; then
               ARGS+=("--llm-base" "$LLM_BASE")
             fi
@@ -258,6 +263,7 @@ jobs:
 
       # ========== 提交数据到 data 分支 ==========
       - name: Commit data updates (data branch)
+        if: steps.mode.outputs.should_run == 'true'
         uses: ./.github/actions/commit-and-push
         with:
           repository: ./data
@@ -266,6 +272,7 @@ jobs:
 
       # ========== 提交 requirements.txt 到 main 分支（如有变更）==========
       - name: Commit requirements.txt (main branch)
+        if: steps.mode.outputs.should_run == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -279,6 +286,7 @@ jobs:
           fi
 
       - name: Debug docs contents
+        if: steps.mode.outputs.should_run == 'true'
         run: |
           echo "=== docs/ directory contents ==="
           ls -la docs/ || echo "docs/ does not exist"
@@ -288,6 +296,7 @@ jobs:
           test -f docs/index.html && echo "YES" || echo "NO"
 
       - name: Verify docs/index.html exists
+        if: steps.mode.outputs.should_run == 'true'
         run: |
           if [ ! -f docs/index.html ]; then
             echo "::error::docs/index.html 不存在，中止部署"
@@ -296,13 +305,16 @@ jobs:
           echo "✅ docs/index.html 已验证存在"
 
       - name: Setup Pages
+        if: steps.mode.outputs.should_run == 'true'
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
+        if: steps.mode.outputs.should_run == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: './docs'
 
       - name: Deploy to GitHub Pages
+        if: steps.mode.outputs.should_run == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
