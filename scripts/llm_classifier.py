@@ -14,6 +14,7 @@
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+from config import LLM_CONFIG
 from config_rules import RULES_VERSION
 from utils import log
 from llm import LLMClient, ResponseParser, TTLCache
@@ -86,7 +87,6 @@ class LLMClassifier:
 
         total = len(uncached_items)
         total_batches = (total + self.batch_size - 1) // self.batch_size
-        from config import LLM_CONFIG
         max_consecutive = LLM_CONFIG.get("max_consecutive_failures", 3)
 
         label = f" [{round_label}]" if round_label else ""

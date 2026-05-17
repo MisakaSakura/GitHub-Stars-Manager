@@ -113,7 +113,6 @@ class IncrementalEngine:
             return True  # 从未分析过
 
         # 检查是否超过间隔天数
-        from datetime import datetime, timezone, timedelta
         try:
             last_dt = parse_iso(ai_record.analyzed_at)
             if last_dt is None:

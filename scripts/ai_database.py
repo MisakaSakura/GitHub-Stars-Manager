@@ -5,44 +5,8 @@
 import json
 import os
 from collections.abc import Iterable
-from dataclasses import dataclass, field
-from typing import Optional, List
-
+from models import AIResult
 from utils import log
-
-
-@dataclass
-class AIResult:
-    """单个项目的 AI 分析结果"""
-    full_name: str
-    analyzed_at: str = ""
-    llm_status: str = "not_analyzed"
-    llm_confidence: Optional[float] = None
-    llm_reason: Optional[str] = None
-    ai_summary: Optional[str] = None
-    ai_tags: Optional[List[str]] = None
-    ai_platforms: Optional[List[str]] = None
-    # AI 建议的分类（可与规则分类不同，用于报告展示）
-    ai_platform: Optional[str] = None
-    ai_type: Optional[str] = None
-    ai_ecology: Optional[str] = None
-    ai_ecology_role: Optional[str] = None
-
-    def to_dict(self) -> dict:
-        # GC-7: 统一为浅拷贝，与 StarItem.to_dict() 保持一致
-        return {k: getattr(self, k) for k in self.__dataclass_fields__}
-
-    @classmethod
-    def from_dict(cls, data: dict) -> "AIResult":
-        known = {f.name for f in cls.__dataclass_fields__.values()}
-        filtered = {k: v for k, v in data.items() if k in known}
-        # GC-8: 兜底默认值（向后兼容）
-        if not filtered.get("analyzed_at"):
-            from datetime import datetime, timezone
-            filtered["analyzed_at"] = datetime.now(timezone.utc).isoformat()
-        if not filtered.get("llm_status"):
-            filtered["llm_status"] = "not_analyzed"
-        return cls(**filtered)
 
 
 class AIDatabase:

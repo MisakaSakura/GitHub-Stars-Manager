@@ -27,6 +27,7 @@
 - **所有数据模型必须使用 `@dataclass`**，禁止使用裸 `dict` 传递结构化数据
 - **默认值必须集中定义**：默认字符串值应在 `config_rules.py` 中定义为常量，禁止在模型中硬编码
 - **必选字段**：`full_name`、`name`、`owner` 为必填，其余提供合理默认值
+- **模型集中存放**：`StarItem`（主数据模型）和 `AIResult`（AI 分析结果）统一存放在 `models.py`
 
 ```python
 # ✅ 正确
@@ -450,6 +451,8 @@ export LLM_PRESETS="mycompany|openai|https://llm.mycompany.com/v1|company-v1"
 | `WARN` | 非致命问题，如网络重试、缓存失效 | ⚠️ |
 | `ERROR` | 致命错误，操作失败 | ❌ |
 | `STEP` | 阶段性进度，如"开始分类" | 🔄 |
+
+**CI 环境**：当 `CI=true` 环境变量存在时，自动使用 ASCII 前缀（`[I]`、`[OK]`、`[W]`、`[E]`、`[>]`），避免 emoji 在 CI 日志中显示异常。
 
 ### 8.2 日志内容规范
 

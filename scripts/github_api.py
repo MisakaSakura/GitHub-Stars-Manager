@@ -5,6 +5,7 @@
 import json
 import os
 import re
+import base64
 import time
 import urllib.parse
 
@@ -142,8 +143,6 @@ class GitHubAPI:
 
     def get_readme(self, owner: str, repo: str, max_length: int = 2000) -> str:
         """获取仓库 README，带缓存（TTL 7 天）。"""
-        import base64
-
         cache_key = f"{owner}/{repo}"
         cached = self._readme_cache.get(cache_key, max_length)
         if cached is not None:

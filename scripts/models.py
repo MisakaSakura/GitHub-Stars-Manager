@@ -77,3 +77,33 @@ class StarItem:
             filtered["first_seen"] = filtered.get("last_updated") or "1970-01-01T00:00:00+00:00"
         return cls(**filtered)
 
+
+@dataclass
+class AIResult:
+    """单个项目的 AI 分析结果"""
+    full_name: str
+    analyzed_at: str = ""
+    llm_status: str = "not_analyzed"
+    llm_confidence: Optional[float] = None
+    llm_reason: Optional[str] = None
+    ai_summary: Optional[str] = None
+    ai_tags: Optional[List[str]] = None
+    ai_platforms: Optional[List[str]] = None
+    ai_platform: Optional[str] = None
+    ai_type: Optional[str] = None
+    ai_ecology: Optional[str] = None
+    ai_ecology_role: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {k: getattr(self, k) for k in self.__dataclass_fields__}
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "AIResult":
+        known = {f.name for f in cls.__dataclass_fields__.values()}
+        filtered = {k: v for k, v in data.items() if k in known}
+        if not filtered.get("analyzed_at"):
+            filtered["analyzed_at"] = datetime.now(timezone.utc).isoformat()
+        if not filtered.get("llm_status"):
+            filtered["llm_status"] = "not_analyzed"
+        return cls(**filtered)
+

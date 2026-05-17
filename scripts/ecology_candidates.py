@@ -9,7 +9,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from config_rules import PLATFORM_RULES, TYPE_RULES
-from utils import log
+from utils import log, parse_iso
 
 
 @dataclass
@@ -255,14 +255,9 @@ class EcologyCandidatePool:
         to_remove = []
         for name, state in self.candidates.items():
             if state.status == "expired":
-                try:
-                    last = datetime.fromisoformat(state.last_seen)
-                    if last.tzinfo is None:
-                        last = last.replace(tzinfo=timezone.utc)
-                    if (now - last).days > 30:
-                        to_remove.append(name)
-                except (ValueError, TypeError):
-                    pass
+                last = parse_iso(state.last_seen)
+                if last and (now - last).days > 30:
+                    to_remove.append(name)
         for name in to_remove:
             del self.candidates[name]
             log(f"  [{name}] 过期超过30天，已从候选池移除", "OK")
@@ -422,14 +417,9 @@ class EcologyCandidatePool:
         proposed_at = self._proposed_blocklist.get(indicator.lower())
         if not proposed_at:
             return False
-        try:
-            dt = datetime.fromisoformat(proposed_at)
-            if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=timezone.utc)
-            if (datetime.now(timezone.utc) - dt).days < days:
-                return True
-        except (ValueError, TypeError):
-            pass
+        dt = parse_iso(proposed_at)
+        if dt and (datetime.now(timezone.utc) - dt).days < days:
+            return True
         return False
 
     def record_blocklist_proposal(self, indicator: str) -> None:

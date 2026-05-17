@@ -5,6 +5,7 @@
 import csv
 import json
 import os
+import re
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
@@ -232,7 +233,6 @@ class ReportGenerator:
         """简单渲染 Release Notes 为 HTML（保留格式 + 简单 Markdown）"""
         if not text:
             return ""
-        import re
         lines = text.split('\n')
         result: list[str] = []
         in_code = False

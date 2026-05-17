@@ -7,14 +7,19 @@ from datetime import datetime, timezone
 
 
 def log(msg: str, level: str = "INFO") -> None:
-    """带时间戳和 emoji 的日志输出，在编码不支持时自动回退 ASCII"""
+    """带时间戳和 emoji 的日志输出。CI 环境（CI=true）自动使用 ASCII 前缀。"""
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    # CI 环境或编码不支持时使用 ASCII 前缀
+    if os.environ.get("CI", "").lower() == "true":
+        prefix = {"INFO": "[I]", "OK": "[OK]", "WARN": "[W]", "ERROR": "[E]", "STEP": "[>"}.get(level, "[*]")
+        print(f"[{ts}] {prefix} {msg}", flush=True)
+        return
     prefix = {"INFO": "ℹ️", "OK": "✅", "WARN": "⚠️", "ERROR": "❌", "STEP": "🔄"}.get(level, "•")
     try:
         print(f"[{ts}] {prefix} {msg}", flush=True)
     except UnicodeEncodeError:
-        prefix_ascii = {"INFO": "[I]", "OK": "[OK]", "WARN": "[W]", "ERROR": "[E]", "STEP": "[>"}.get(level, "[*]")
-        print(f"[{ts}] {prefix_ascii} {msg}", flush=True)
+        prefix = {"INFO": "[I]", "OK": "[OK]", "WARN": "[W]", "ERROR": "[E]", "STEP": "[>"}.get(level, "[*]")
+        print(f"[{ts}] {prefix} {msg}", flush=True)
 
 
 def _safe_print(msg: str) -> None:

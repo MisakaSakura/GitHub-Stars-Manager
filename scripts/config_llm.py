@@ -67,7 +67,7 @@ LLM_CONFIG = {
                          # 优先级：--llm-base CLI 参数 > 此处配置 > provider 内置默认值
     "model": "gpt-4o-mini",  # 或 "moonshot-v1-8k", "deepseek-chat"
     "max_tokens": 256,
-    "temperature": 0.1,
+    "temperature": 0.0,  # 分类任务使用确定性输出，减少结果漂移
     "timeout": 30,  # batch 请求需要更长时间
     "batch_size": 5,  # 每批处理的项目数（防止长描述项目触发 token 超限）
     "max_consecutive_failures": 3,  # 连续 batch 失败 N 次后终止，避免无底洞式消耗
