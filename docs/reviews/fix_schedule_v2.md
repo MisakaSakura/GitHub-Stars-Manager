@@ -602,3 +602,82 @@ clash_mihomo:
 | P2-4 | 延迟导入移至模块顶部 | 4 | 4 | ✅ 已完成 | 2026-05-18 |
 | P2-5 | CI 环境 ASCII 日志 | 1 | 1 | ✅ 已完成 | 2026-05-18 |
 | **合计** | | **8** | **8** | ✅ 全部完成 | 2026-05-18 |
+
+---
+
+## Phase 6：生态排除统一化（本地 + Action）— 待排期
+
+**目标**：用户只填候选名，系统自动从候选池读取项目列表、触发关键词、生成理由，一步到位更新 blocklist。
+**策略**：提取统一核心函数 `exclude_ecology()`，本地 CLI 和 Action 共用同一套逻辑。
+
+### 6.1 统一核心逻辑
+
+| # | 文件 | 内容 | 工作量 |
+|---|------|------|:------:|
+| 1 | `scripts/ecology_blocklist.py`（新建） | `exclude_ecology()` 读取候选池自动推断待排除项/类型/理由；`apply_exclusion()` 更新 yaml + 标记 rejected | 1 天 |
+| 2 | `scripts/ecology_candidates.py` | `NOISE_WORDS` 补充"应用、客户端、工具"等通用词 | 0.5 天 |
+| 3 | `scripts/ecology_candidates.py` | 修复 `consecutive_runs > threshold` 时显示负数的 bug | 0.5 天 |
+
+### 6.2 本地 CLI 支持
+
+| # | 文件 | 内容 | 工作量 |
+|---|------|------|:------:|
+| 4 | `scripts/blocklist_command.py`（新建） | 参照 `correct_command.py` 模式，实现 `--exclude-ecology 候选名` | 0.5 天 |
+| 5 | `scripts/classifier.py` | 新增 `--exclude-ecology` 参数 + 入口接入 | 0.5 天 |
+
+### 6.3 GitHub Action 自动处理
+
+| # | 文件 | 内容 | 工作量 |
+|---|------|------|:------:|
+| 6 | `.github/ISSUE_TEMPLATE/ecology-blocklist.yml` | 简化为只保留"候选生态名称" + 可选补充说明 | 0.5 天 |
+| 7 | `.github/workflows/process-ecology-blocklist.yml`（新建） | 监听 `生态-blocklist` label，自动调用核心逻辑更新 yaml 并关闭 issue | 0.5 天 |
+| 8 | `scripts/ci/apply_ecology_blocklist.py`（新建） | 解析 issue body 中的候选名，调用 `apply_exclusion()` | 0.5 天 |
+
+### 6.4 报告链接改进
+
+| # | 文件 | 内容 | 工作量 |
+|---|------|------|:------:|
+| 9 | `scripts/report.py` | 🚫 链接预填充 `candidate_name` 参数 | 0.5 天 |
+| 10 | `scripts/report_template.html` | 修复 example_projects 渲染缺分隔符的问题 | 0.5 天 |
+
+**完成标准**：
+- [ ] 本地 `python classifier.py --exclude-ecology Desktop-app` 一步完成排除
+- [ ] Action 创建 issue 只填候选名，自动补全并关闭
+- [ ] 241/241 测试通过
+
+**预计总工时**：3.5 天
+
+---
+
+## Phase 7：分类修正简化（报告入口 + 模板精简 + Action 补全）— 待排期
+
+**目标**：和 Phase 6 相同思路——用户只提供最小信息，系统自动补全。当前分类修正模板需要填 5 个字段，其中 2 个系统已知道、1 个容易拼写错误。
+**策略**：报告页面加 📝 一键修正链接（预填充项目地址），模板精简为 3 个字段，Action 自动补全当前分类。
+
+### 7.1 报告入口
+
+| # | 文件 | 内容 | 工作量 |
+|---|------|------|:------:|
+| 1 | `scripts/report.py` | 每个项目卡片增加 `blocklist_url` 式的 📝 修正链接，预填充 `full_name` 和 `title` | 0.5 天 |
+| 2 | `scripts/report_template.html` | 渲染 📝 修正图标链接，点击跳转到 issue 创建页 | 0.5 天 |
+
+### 7.2 模板精简
+
+| # | 文件 | 内容 | 工作量 |
+|---|------|------|:------:|
+| 3 | `.github/ISSUE_TEMPLATE/classification-correction.yml` | 去掉"当前分类"输入字段（改为 Action 自动补全显示），"修正字段"改为复选框多选，"建议分类"改为 textarea + 格式约定（带校验） | 0.5 天 |
+
+### 7.3 Action 自动补全
+
+| # | 文件 | 内容 | 工作量 |
+|---|------|------|:------:|
+| 4 | `scripts/ci/enrich_correction_issue.py`（新建） | 解析 issue body 中的 `full_name`，读取数据库获取当前分类，在 issue 下评论补全信息 | 0.5 天 |
+| 5 | `.github/workflows/process-feedback.yml` | 在 `apply_feedback_correction.py` 之前增加步骤：调用 `enrich_correction_issue.py` 补全当前分类 | 0.5 天 |
+
+**完成标准**：
+- [ ] 报告页面每个项目有 📝 修正链接，点击后项目地址已预填充
+- [ ] Issue 模板只需填：修正字段（复选）+ 建议分类 + 理由（可选）
+- [ ] Action 自动在 issue 下评论当前分类，方便审核确认
+- [ ] 241/241 测试通过
+
+**预计总工时**：1.5 天
