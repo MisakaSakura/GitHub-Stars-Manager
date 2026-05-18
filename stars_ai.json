@@ -8914,5 +8914,80 @@
     "ai_type": "应用 / App",
     "ai_ecology": "Electron",
     "ai_ecology_role": "GUI 前端 / Client"
+  },
+  "anomalyco/opencode": {
+    "full_name": "anomalyco/opencode",
+    "analyzed_at": "2026-05-18T16:17:03.935390+00:00",
+    "llm_status": "success",
+    "llm_confidence": 0.9,
+    "llm_reason": "项目描述为开源AI编码代理，属于AI/ML生态的核心工具",
+    "ai_summary": "开源AI编码代理，支持多语言，提供智能代码辅助功能",
+    "ai_tags": [
+      "AI",
+      "编码",
+      "代理",
+      "TypeScript"
+    ],
+    "ai_platforms": [
+      "web",
+      "cli",
+      "linux",
+      "mac",
+      "windows"
+    ],
+    "ai_platform": "跨平台",
+    "ai_type": "工具 / Tool",
+    "ai_ecology": "AI/ML",
+    "ai_ecology_role": "核心 / Core"
+  },
+  "code-yeongyu/oh-my-openagent": {
+    "full_name": "code-yeongyu/oh-my-openagent",
+    "analyzed_at": "2026-05-18T16:17:03.935402+00:00",
+    "llm_status": "success",
+    "llm_confidence": 0.85,
+    "llm_reason": "项目是AI代理框架的插件或工具，用于管理和编排AI代理",
+    "ai_summary": "AI代理管理框架，支持多种AI模型和IDE集成",
+    "ai_tags": [
+      "AI代理",
+      "编排",
+      "TypeScript",
+      "IDE"
+    ],
+    "ai_platforms": [
+      "web",
+      "cli",
+      "linux",
+      "mac",
+      "windows"
+    ],
+    "ai_platform": "跨平台",
+    "ai_type": "工具 / Tool",
+    "ai_ecology": "AI/ML",
+    "ai_ecology_role": "插件 / Plugin"
+  },
+  "microsoft/playwright": {
+    "full_name": "microsoft/playwright",
+    "analyzed_at": "2026-05-18T16:17:03.935407+00:00",
+    "llm_status": "success",
+    "llm_confidence": 0.95,
+    "llm_reason": "Playwright是用于Web测试和自动化的框架，支持多浏览器，属于独立项目",
+    "ai_summary": "Web测试和自动化框架，支持Chromium、Firefox和WebKit的单API测试",
+    "ai_tags": [
+      "测试",
+      "自动化",
+      "Web",
+      "TypeScript"
+    ],
+    "ai_platforms": [
+      "web",
+      "cli",
+      "linux",
+      "mac",
+      "windows"
+    ],
+    "ai_platform": "Web",
+    "ai_type": "框架 / Framework",
+    "ai_ecology": "独立项目",
+    "ai_ecology_role": "核心 / Core"
   }
 }
