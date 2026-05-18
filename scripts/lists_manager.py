@@ -78,6 +78,9 @@ class ListsManager:
                     "manual_override": True,
                     "override_fields": ["ecology", "platform", "type"],
                     "override_rules_version": "",  # 将在保存前由 StarsDB 自动填充当前版本
+                    "last_release_tag": None,
+                    "last_release_checked": None,
+                    "subscribe_releases": False,
                     "imported": True,
                     "github_list_source": list_name,
                 }

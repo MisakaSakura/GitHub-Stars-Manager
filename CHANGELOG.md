@@ -6,6 +6,10 @@
 
 ### 🐛 修复
 
+- **Release 时间窗口因 `last_release_checked` 丢失而重置** — deep/force_refresh 模式下 `_classify_item()` 重新分类时遗漏 `existing.last_release_checked`，导致下次 release 检查窗口退回到 7 天前，旧 release 被误判为新 release。`engine.py:410` 补全字段保留
+- **`sqlite_backend.py` 缺少 `last_release_checked` 列** — SQLite schema、`_COLUMN_MAP`、`_row_to_item` 均未包含该字段，使用 SQLite 后端时 `last_release_checked` 完全无法持久化。三处一并补齐；`_ensure_schema` 会自动 ALTER TABLE 添加新列
+- **`import_helper.py` / `lists_manager.py` 导入时遗漏 release 字段** — JSON/CSV 导入和 Lists 迁移未设置 `last_release_tag` / `last_release_checked` / `subscribe_releases`，导入后首次 release 检查窗口错误回退
+- **候选进度提示误导** — `consecutive_runs >= WATCHLIST_THRESHOLD` 但置信度不足时仍显示"需再观察 0 次"，用户误以为即将升级。改为"次数达标但置信度不足 (X% < 50%)"
 - **Release 区域文案误导** — 新收录项目的 release 显示为"收录于 X天前"，但 X天前是 release 发布时间而非收录时间。统一改为"released X天前 🆕 新收录"，时间语义清晰
 
 ### 🆕 新增

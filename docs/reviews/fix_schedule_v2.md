@@ -681,3 +681,23 @@ clash_mihomo:
 - [ ] 241/241 测试通过
 
 **预计总工时**：1.5 天
+
+---
+
+## Bugfix: release 时间窗口因 `last_release_checked` 系统性遗漏而重置 — ✅ 已完成 2026-05-19
+
+**发现方式**：用户反馈 deep 扫描间隔 10 分钟内，旧 release（2 天前）被误判为新 release。
+
+**根因**：`last_release_checked` 字段在多处创建/替换 `StarItem` 时被遗漏，导致时间窗口退回到 7 天前。
+
+### 影响范围与修复
+
+| # | 文件 | 问题 | 严重性 | 修复 |
+|---|------|------|:------:|------|
+| 1 | `scripts/engine.py` `_classify_item()` | 重新分类时未保留 `existing.last_release_checked` | 🔴 高 | 新增 `last_release_checked=existing.last_release_checked if existing else None` |
+| 2 | `scripts/repositories/sqlite_backend.py` SCHEMA | `stars` 表缺少 `last_release_checked` 列 | 🔴 高 | SCHEMA + `_COLUMN_MAP` + `_row_to_item` 三处补齐；`_ensure_schema` 自动 ALTER TABLE |
+| 3 | `scripts/import_helper.py` | JSON/CSV 导入未设置 `last_release_tag`/`last_release_checked`/`subscribe_releases` | 🟡 中 | `setdefault` / 显式赋值默认值 |
+| 4 | `scripts/lists_manager.py` | Lists 迁移未设置上述字段 | 🟡 中 | 显式赋值默认值 |
+| 5 | `scripts/ecology_candidates.py` `generate_summary()` | 次数达标但置信度不足时仍显示"需再观察 0 次" | 🟢 低 | 进度提示改为"次数达标但置信度不足 (X% < 50%)" |
+
+**验证**：241/241 测试通过，`_ensure_schema` 自动同步已验证。

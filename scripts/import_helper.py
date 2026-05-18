@@ -54,6 +54,9 @@ class FirstRunHelper:
             item["override_rules_version"] = RULES_VERSION
             item["first_seen"] = datetime.now(timezone.utc).isoformat()
             item["last_updated"] = item["first_seen"]
+            item.setdefault("last_release_tag", None)
+            item.setdefault("last_release_checked", None)
+            item.setdefault("subscribe_releases", False)
             item["imported"] = True
             db.set(key, item)
             imported += 1
@@ -91,6 +94,9 @@ class FirstRunHelper:
                     "last_updated": datetime.now(timezone.utc).isoformat(),
                     "manual_override": True,
                     "override_fields": ["platform", "type", "ecology", "ecology_role", "language"],
+                    "last_release_tag": None,
+                    "last_release_checked": None,
+                    "subscribe_releases": False,
                     "imported": True,
                 }
                 db.set(key, item)
