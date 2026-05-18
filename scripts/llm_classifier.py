@@ -11,6 +11,7 @@
 本层保持对外接口不变（契约锁定），仅作为 Facade 组合各组件。
 """
 
+import json
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -56,7 +57,7 @@ class LLMClassifier:
                 self.cache.set(cache_key, result)
                 self.cache.save()
                 return result
-            except Exception as e:
+            except (json.JSONDecodeError, ValueError, KeyError) as e:
                 log(f"LLM 单条解析失败: {e}", "WARN")
 
         return None
@@ -225,7 +226,7 @@ class LLMClassifier:
                 self.cache.set(self._make_cache_key(item), result)
                 results[key] = result
             return results
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError) as e:
             if fallback:
                 log(f"LLM batch 解析失败，回退到单条处理: {e}", "WARN")
                 return self._fallback_single(items)

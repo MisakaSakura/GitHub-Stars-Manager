@@ -1,59 +1,20 @@
 name: "🚫 生态 Blocklist 提议"
-description: "自动创建：提议将某个 topic 或前缀加入生态发现排除列表"
+description: "提议将某个生态候选加入排除列表（只需填写候选名称）"
 title: "[生态Blocklist] "
 labels: ["生态-blocklist"]
 body:
   - type: input
-    id: indicator
+    id: candidate_name
     attributes:
-      label: "待排除项"
-      description: |
-        被误识别为生态候选的 topic 或前缀。
-        **不区分大小写**，系统会自动转为小写处理。
-      placeholder: "如: android, cli, apk"
-    validations:
-      required: true
-
-  - type: dropdown
-    id: indicator_type
-    attributes:
-      label: "类型"
-      description: "待排除项的类型"
-      options:
-        - "topic"
-        - "name_prefix"
+      label: "候选生态名称"
+      description: "被误识别的生态候选名称（如 'Android'、'CLI-Tools'）"
+      placeholder: "如: Android"
     validations:
       required: true
 
   - type: textarea
-    id: triggered_candidate
+    id: notes
     attributes:
-      label: "触发的候选生态"
-      description: |
-        哪个生态候选被此 item 误触发。
-        填写生态候选的**名称**（不是 topic 关键词）。多个候选用换行分隔，每行一个。
-        格式: `候选名 (涉及N个项目)`
-        自动创建的 issue 会附带具体项目列表（最多显示10个）。
-      placeholder: |
-        Android (涉及5个项目)
-        具体项目: google/android, square/okhttp, ...
-        或填多个候选:
-        Android (涉及5个项目)
-        Android-Dev (涉及2个项目)
-
-  - type: textarea
-    id: reason
-    attributes:
-      label: "理由"
-      description: "为什么这个 topic/前缀 不应被识别为生态？"
-      placeholder: "如: 'android' 是平台关键词，属于 PLATFORM_RULES 已覆盖范围，不应作为独立生态"
-
-  - type: checkboxes
-    id: confirm
-    attributes:
-      label: "审核确认"
-      options:
-        - label: "确认加入 blocklist"
-          required: false
-        - label: "误报，不应加入 blocklist"
-          required: false
+      label: "补充说明（可选）"
+      description: "如有额外信息可在此补充，系统会自动从候选池推断待排除项"
+      placeholder: "如: 这个候选的 topic_patterns 包含 'android' 平台关键词"

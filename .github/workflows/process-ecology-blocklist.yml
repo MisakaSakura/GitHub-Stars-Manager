@@ -1,25 +1,25 @@
-name: Process Classification Feedback
+name: Process Ecology Blocklist
 
 on:
   issues:
     types: [opened, labeled]
 
 concurrency:
-  group: "process-feedback"
+  group: "process-ecology-blocklist"
   cancel-in-progress: false
 
 jobs:
-  apply-correction:
+  apply-blocklist:
     if: |
-      contains(github.event.issue.labels.*.name, '分类修正') ||
-      startsWith(github.event.issue.title, '[分类修正]')
+      contains(github.event.issue.labels.*.name, '生态-blocklist') ||
+      startsWith(github.event.issue.title, '[生态Blocklist]')
     runs-on: ubuntu-latest
     permissions:
       contents: write
       issues: write
 
     steps:
-      - name: Checkout code (main)
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: main
@@ -45,31 +45,21 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Enrich issue with current classification
+      - name: Apply blocklist exclusion
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 scripts/ci/enrich_correction_issue.py
+        run: python3 scripts/ci/apply_ecology_blocklist.py
 
-      - name: Parse issue and apply correction
-        env:
-          ISSUE_BODY: ${{ github.event.issue.body }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: python3 scripts/ci/apply_feedback_correction.py
-
-      - name: Regenerate learned rules
-        run: python3 scripts/ci/regenerate_learned_rules.py
-
-      - name: Commit data changes
+      - name: Commit blocklist changes
         uses: ./.github/actions/commit-and-push
         with:
-          repository: ./data
-          branch: data
-          message: "feedback: apply classification correction from issue #${{ github.event.issue.number }}"
+          repository: .
+          branch: main
+          message: "ecology: blocklist update from issue #${{ github.event.issue.number }}"
 
       - name: Close issue with comment
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh issue close ${{ github.event.issue.number }} --comment "✅ 已自动应用修正并提交到 data 分支。下次分类运行时会生效。"
+          gh issue close ${{ github.event.issue.number }} --comment "✅ 已自动更新 ecology_blocklist.yaml 并提交到 main 分支。生态发现将自动生效。"

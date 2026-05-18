@@ -12,33 +12,35 @@ body:
     validations:
       required: true
 
-  - type: dropdown
+  - type: checkboxes
     id: field
     attributes:
       label: "修正字段"
-      description: "哪个字段分类不正确？"
+      description: "哪些字段分类不正确？可多选"
       options:
-        - "生态归属 (ecology)"
-        - "平台 (platform)"
-        - "类型 (type)"
-        - "生态角色 (ecology_role)"
-        - "多个字段"
+        - label: "生态归属 (ecology)"
+        - label: "平台 (platform)"
+        - label: "类型 (type)"
+        - label: "生态角色 (ecology_role)"
     validations:
       required: true
 
-  - type: input
-    id: current
-    attributes:
-      label: "当前分类（错误）"
-      description: "系统当前的分类是什么？"
-      placeholder: "如: Docker"
-
-  - type: input
+  - type: textarea
     id: expected
     attributes:
       label: "建议分类（正确）"
-      description: "你认为应该是什么分类？"
-      placeholder: "如: 独立项目"
+      description: |
+        请按格式填写建议值，可多行：
+        ```
+        ecology: 建议生态
+        platform: 建议平台
+        type: 建议类型
+        ecology_role: 建议角色
+        ```
+      placeholder: |
+        ecology: 独立项目
+        platform: 跨平台
+      render: markdown
 
   - type: textarea
     id: reason

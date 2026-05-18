@@ -2,6 +2,52 @@
 
 所有重要变更均记录于此。格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [v4.2.6] - 2026-05-19
+
+### 🆕 新增
+
+- **Phase 7 分类修正简化** — 用户只需提供最小信息，系统自动补全当前分类
+  - 新建 `scripts/ci/enrich_correction_issue.py`：解析 issue 中的 `full_name`，读取数据库获取当前分类，在 issue 下自动评论补全信息供审核参考
+  - `.github/workflows/process-feedback.yml` 在 apply_feedback_correction.py 之前增加 enrich 步骤
+
+### 🔧 改进
+
+- **分类修正 Issue 模板精简** — `.github/ISSUE_TEMPLATE/classification-correction.yml` 去掉"当前分类"输入（改为 Action 自动补全），"修正字段"改为复选框多选，"建议分类"改为 textarea + markdown 格式约定
+- **报告修正链接预填充格式** — `report.py` `_feedback_url()` body 预填充 markdown 代码块格式，与新版模板对齐
+
+---
+
+## [v4.2.5] - 2026-05-19
+
+### 🆕 新增
+
+- **Phase 6 生态排除统一化** — 用户只需提供候选生态名称，系统自动从候选池推断待排除项并更新 blocklist
+  - 新建 `scripts/ecology_blocklist.py`：统一核心 `exclude_ecology()` + `apply_exclusion()`，本地 CLI 与 GitHub Action 共用
+  - 新建 `scripts/blocklist_command.py`：参照 `correct_command.py` 模式，支持 `--exclude-ecology 候选名`
+  - `scripts/classifier.py` 新增 `--exclude-ecology` 参数，快捷排除不运行完整流水线
+  - 新建 `.github/workflows/process-ecology-blocklist.yml`：监听 `生态-blocklist` label，自动调用核心逻辑更新 yaml 并关闭 issue
+  - 新建 `scripts/ci/apply_ecology_blocklist.py`：解析 issue body 中的候选名，调用 `exclude_ecology()`
+
+### 🔧 改进
+
+- **生态 Blocklist Issue 模板简化** — `.github/ISSUE_TEMPLATE/ecology-blocklist.yml` 精简为只保留"候选生态名称" + 可选补充说明
+- **报告 blocklist 链接预填充** — `report.py` 🚫 链接正文预填充候选名称，方便一键创建 issue
+- **`ecology_candidates.py` 修复负数显示** — `consecutive_runs > threshold` 时进度文本显示负数，改为 `max(..., 0)`
+
+---
+
+## [v4.2.4] - 2026-05-19
+
+### 🔧 改进
+
+- **异常捕获细化（6 处）** — 按 `roadmap-pending.md` 任务四完成遗留代码的异常类型细分，遵守 `conventions.md` §8.2 / §4.2
+  - `llm_classifier.py` `classify()` / `_classify_batch()`：`except Exception` → `except (json.JSONDecodeError, ValueError[, KeyError])`
+  - `engine.py` `process()`：`except Exception` → `except (KeyError, ValueError, TypeError)`
+  - `ecology_discovery.py` `_load_blocklist()`：`except Exception: pass` → `except (OSError, yaml.YAMLError)` + log
+  - `discover_ecologies_stage.py` `_load_auto_ecologies()` / `_llm_review_watchlist()`：同上细分 + 补充日志
+
+---
+
 ## [v4.2.2] - 2026-05-18
 
 ### 🆕 新增

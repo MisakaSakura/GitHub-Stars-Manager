@@ -27,8 +27,8 @@ def _load_auto_ecologies(ctx: PipelineContext) -> dict:
         try:
             with open(path, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except Exception:
-            pass
+        except (OSError, json.JSONDecodeError) as e:
+            log(f"自动生态规则加载失败: {e}", "WARN")
     return {}
 
 
@@ -125,7 +125,7 @@ def _llm_review_watchlist(ctx: PipelineContext, pool: EcologyCandidatePool) -> N
                 pool.mark_ai_reviewed(name, approved, conf, reason)
             else:
                 log(f"  [{name}] LLM 返回无法解析: {result}", "WARN")
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError) as e:
             log(f"  [{name}] LLM 审查失败: {e}", "WARN")
 
 

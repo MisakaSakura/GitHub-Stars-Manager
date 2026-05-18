@@ -605,7 +605,7 @@ clash_mihomo:
 
 ---
 
-## Phase 6：生态排除统一化（本地 + Action）— 待排期
+## Phase 6：生态排除统一化（本地 + Action）— ✅ 已完成 2026-05-19
 
 **目标**：用户只填候选名，系统自动从候选池读取项目列表、触发关键词、生成理由，一步到位更新 blocklist。
 **策略**：提取统一核心函数 `exclude_ecology()`，本地 CLI 和 Action 共用同一套逻辑。
@@ -641,15 +641,15 @@ clash_mihomo:
 | 10 | `scripts/report_template.html` | 修复 example_projects 渲染缺分隔符的问题 | 0.5 天 |
 
 **完成标准**：
-- [ ] 本地 `python classifier.py --exclude-ecology Desktop-app` 一步完成排除
-- [ ] Action 创建 issue 只填候选名，自动补全并关闭
-- [ ] 241/241 测试通过
+- [x] 本地 `python classifier.py --exclude-ecology Desktop-app` 一步完成排除
+- [x] Action 创建 issue 只填候选名，自动补全并关闭
+- [x] 241/241 测试通过
 
 **预计总工时**：3.5 天
 
 ---
 
-## Phase 7：分类修正简化（报告入口 + 模板精简 + Action 补全）— 待排期
+## Phase 7：分类修正简化（报告入口 + 模板精简 + Action 补全）— ✅ 已完成 2026-05-19
 
 **目标**：和 Phase 6 相同思路——用户只提供最小信息，系统自动补全。当前分类修正模板需要填 5 个字段，其中 2 个系统已知道、1 个容易拼写错误。
 **策略**：报告页面加 📝 一键修正链接（预填充项目地址），模板精简为 3 个字段，Action 自动补全当前分类。

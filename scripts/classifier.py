@@ -18,6 +18,7 @@ import os
 import sys
 
 import config_llm
+from blocklist_command import _do_exclude
 from correct_command import _do_correct
 from orchestrator import Pipeline
 
@@ -144,6 +145,10 @@ def _add_correct_args(parser: argparse.ArgumentParser) -> None:
     correct_group.add_argument("--correct-batch", metavar="PATH",
                                help="批量修正文件，格式: full_name,ecology,ecology_role,platform,type（CSV）")
 
+    blocklist_group = parser.add_argument_group("生态排除（不运行完整流水线）")
+    blocklist_group.add_argument("--exclude-ecology", metavar="CANDIDATE_NAME",
+                                 help="将指定生态候选加入 blocklist，自动推断排除项")
+
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """解析 CLI 参数。参数按功能分组注册，保持单一职责。"""
@@ -269,9 +274,11 @@ def _apply_mode(args: argparse.Namespace) -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
-    # 快捷修正模式：不运行完整流水线
+    # 快捷修正 / 生态排除模式：不运行完整流水线
     if args.correct or args.correct_batch:
         sys.exit(_do_correct(args))
+    if args.exclude_ecology:
+        sys.exit(_do_exclude(args))
 
     args = _apply_preset(args)
     args = _ensure_defaults(args)

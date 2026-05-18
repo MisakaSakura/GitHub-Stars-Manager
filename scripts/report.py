@@ -74,7 +74,14 @@ class ReportGenerator:
         if not repo:
             return ""
         title = f"[分类修正] {full_name}"
-        body = f"**项目地址**: {full_name}\n\n**修正字段**: 生态归属 (ecology)\n\n**当前分类（错误）**: {current_eco}\n\n**建议分类（正确）**: \n\n**理由**: "
+        body = (
+            f"**项目地址**: {full_name}\n\n"
+            f"**修正字段**: 生态归属 (ecology)\n\n"
+            f"**当前分类（错误）**: {current_eco}\n\n"
+            f"**建议分类（正确）**: \n"
+            f"```\necology: \n```\n\n"
+            f"**理由**: "
+        )
         return f"https://github.com/{repo}/issues/new?template=classification-correction.yml&title={escape(title)}&body={escape(body)}"
 
     def generate_html(self, output_dir: str, weekly_data: dict | None = None) -> str:
@@ -566,8 +573,15 @@ class ReportGenerator:
                 }.get(c.get("status"), "❓")
                 if repo:
                     from html import escape
-                    title = f"[生态Blocklist] 提议排除 '{c['name']}' (topic)"
-                    body = f"此候选被自动识别为潜在生态，但可能属于平台/类型关键词而非独立生态。\n\n- 候选名称: {c['name']}\n- 状态: {c['status']}\n- 涉及项目数: {c['count']}\n- 置信度: {c['confidence']:.0%}\n\n请确认是否应加入 ecology_blocklist.yaml。"
+                    title = f"[生态Blocklist] 提议排除 '{c['name']}'"
+                    body = (
+                        f"## 候选生态名称\n{c['name']}\n\n"
+                        f"## 补充说明\n"
+                        f"此候选被自动识别为潜在生态，但可能属于平台/类型关键词而非独立生态。\n\n"
+                        f"- 状态: {c['status']}\n"
+                        f"- 涉及项目数: {c['count']}\n"
+                        f"- 置信度: {c['confidence']:.0%}\n"
+                    )
                     c["blocklist_url"] = f"https://github.com/{repo}/issues/new?template=ecology-blocklist.yml&title={escape(title)}&body={escape(body)}"
             tabs.append({
                 "id": "eco",

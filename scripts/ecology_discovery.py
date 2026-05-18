@@ -95,8 +95,8 @@ class EcologyDiscovery:
                 import yaml
                 with open(blocklist_path, "r", encoding="utf-8") as f:
                     return yaml.safe_load(f) or {}
-            except Exception:
-                pass
+            except (OSError, yaml.YAMLError) as e:
+                log(f"生态 blocklist 加载失败: {e}", "WARN")
         return {}
 
     def _is_noise_prefix(self, prefix: str) -> bool:

@@ -148,7 +148,7 @@ class IncrementalEngine:
                 key = f"{item['owner']['login']}/{item['name']}"
                 llm_result = self.llm_results.get(key)
                 self._process_single(item, config, llm_result)
-            except Exception as e:
+            except (KeyError, ValueError, TypeError) as e:
                 log(f"处理 {item.get('full_name', item.get('name'))} 失败: {e}", "ERROR")
                 self.stats["error"] += 1
 

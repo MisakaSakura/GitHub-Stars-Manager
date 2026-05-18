@@ -331,11 +331,11 @@ class EcologyCandidatePool:
             latest_count = state.project_count_history[-1] if state.project_count_history else 0
             progress = ""
             if state.status == "candidate":
-                progress = f"需再观察 {self.WATCHLIST_THRESHOLD - state.consecutive_runs} 次"
+                progress = f"需再观察 {max(self.WATCHLIST_THRESHOLD - state.consecutive_runs, 0)} 次"
             elif state.status == "watchlist":
                 progress = "等待 LLM 审查"
             elif state.status == "ai_reviewed":
-                progress = f"再稳定 {2 - state.consecutive_runs} 次即可生效"
+                progress = f"再稳定 {max(2 - state.consecutive_runs, 0)} 次即可生效"
             elif state.status == "trusted":
                 progress = "已生效"
 
