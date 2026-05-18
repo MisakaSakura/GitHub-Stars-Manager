@@ -701,3 +701,32 @@ clash_mihomo:
 | 5 | `scripts/ecology_candidates.py` `generate_summary()` | 次数达标但置信度不足时仍显示"需再观察 0 次" | 🟢 低 | 进度提示改为"次数达标但置信度不足 (X% < 50%)" |
 
 **验证**：241/241 测试通过，`_ensure_schema` 自动同步已验证。
+
+---
+
+## 规范审查：近期变更全局一致性检查 — ✅ 已完成 2026-05-19
+
+**触发**：用户要求检查近期更新是否符合 `conventions.md` 全局一致性规范。
+
+**审查范围**：`791bed8..HEAD` 全部代码变更（异常捕获细化 + Phase 6/7 + Bugfix）。
+
+**不符合项（已修复）**：
+
+| # | 规范条款 | 文件 | 问题 | 修复 |
+|---|---------|------|------|------|
+| 1 | §4.3 异常捕获 | `discover_ecologies_stage.py:42` | `_save_auto_ecologies` 仍用 `except Exception` | `→ except (OSError, TypeError)` |
+| 2 | §4.3 异常捕获 | `discover_ecologies_stage.py:148` | `_get_repo_slug` 仍用 `except Exception` | `→ except (OSError, subprocess.SubprocessError)` |
+| 3 | §4.3 异常捕获 | `discover_ecologies_stage.py:205` | `_propose_blocklist_via_issue` 仍用 `except Exception` | `→ except (HTTPClientError, ValueError)` |
+| 4 | §4.3 异常捕获 | `discover_ecologies_stage.py:250` | `discover_ecologies_stage` 仍用 `except Exception` | `→ except OSError` |
+| 5 | §6.2 导入方式 | `blocklist_command.py:27` | 函数内延迟导入 `from ecology_candidates` | 移至文件顶部 |
+| 6 | §6.2 导入方式 | `ecology_blocklist.py:101` | 函数内延迟导入 `from ecology_candidates` / `from utils` | 移至文件顶部 |
+| 7 | §1.1 死代码 | `ecology_blocklist.py:12` | `NOISE_WORDS` 定义后从未使用 | 整合到 `_infer_indicator` 优先排除逻辑 |
+
+**确认不修复项**：
+- §8.1 CI emoji：`discover_ecologies_stage.py`/`report.py` 中的 emoji 在报告内容中（非日志），`utils.log()` 已在 CI 环境下自动使用 ASCII 前缀
+- §1.1 裸 dict：`enrich_correction_issue.py` 内部辅助函数，不对外传递
+- §4.3 TypeError：`engine.py:151` 按 `roadmap-pending.md` 排期执行
+
+**预防措施**：`conventions.md` §1.1 已新增"Dataclass 字段变更规范"，含全路径检查清单与 `last_release_checked` 反例。
+
+**验证**：241/241 测试通过。

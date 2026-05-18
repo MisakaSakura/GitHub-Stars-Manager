@@ -11,6 +11,10 @@
 - **`import_helper.py` / `lists_manager.py` 导入时遗漏 release 字段** — JSON/CSV 导入和 Lists 迁移未设置 `last_release_tag` / `last_release_checked` / `subscribe_releases`，导入后首次 release 检查窗口错误回退
 - **候选进度提示误导** — `consecutive_runs >= WATCHLIST_THRESHOLD` 但置信度不足时仍显示"需再观察 0 次"，用户误以为即将升级。改为"次数达标但置信度不足 (X% < 50%)"
 - **Release 区域文案误导** — 新收录项目的 release 显示为"收录于 X天前"，但 X天前是 release 发布时间而非收录时间。统一改为"released X天前 🆕 新收录"，时间语义清晰
+- **规范审查修复** — 全局一致性审查发现 7 项不符合 conventions.md 的问题
+  - `discover_ecologies_stage.py` 4 处 `except Exception` 未按 §4.3 细分（`_save_auto_ecologies`/`_get_repo_slug`/`_propose_blocklist_via_issue`/`discover_ecologies_stage`）
+  - `blocklist_command.py` / `ecology_blocklist.py` 函数内延迟导入违反 §6.2，移至文件顶部
+  - `ecology_blocklist.py` `NOISE_WORDS` 定义后从未使用（死代码），整合到 `_infer_indicator` 优先排除逻辑
 
 ### 🆕 新增
 
