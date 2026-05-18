@@ -6,6 +6,7 @@ import argparse
 import os
 
 from ecology_blocklist import exclude_ecology
+from ecology_candidates import EcologyCandidatePool
 
 
 class BlocklistCommand:
@@ -24,8 +25,6 @@ class BlocklistCommand:
         result = exclude_ecology(candidate_name, self.pool_path, self.yaml_path)
         if result is None:
             # 检查候选是否根本不存在
-            from ecology_candidates import EcologyCandidatePool
-
             pool = EcologyCandidatePool(self.pool_path)
             if candidate_name not in pool.candidates:
                 print(f"  [跳过] '{candidate_name}' 不在候选池中")

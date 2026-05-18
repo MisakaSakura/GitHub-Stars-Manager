@@ -9,6 +9,7 @@ from orchestrator.context import PipelineContext
 from ecology_discovery import EcologyDiscovery
 from ecology_candidates import EcologyCandidatePool
 from config_rules import ECOLOGY_RULES
+from http_client import HTTPClientError
 from utils import log
 
 
@@ -39,7 +40,7 @@ def _save_auto_ecologies(ctx: PipelineContext, rules: dict) -> None:
         with open(path, "w", encoding="utf-8") as f:
             json.dump(rules, f, ensure_ascii=False, indent=2)
         log(f"自动生态规则已保存: {path}", "OK")
-    except Exception as e:
+    except (OSError, TypeError) as e:
         log(f"自动生态规则保存失败: {e}", "WARN")
 
 
@@ -145,7 +146,7 @@ def _get_repo_slug() -> str:
             parts = url.replace(":", "/").split("/")
             if len(parts) >= 2:
                 return f"{parts[-2]}/{parts[-1].replace('.git', '')}"
-    except Exception:
+    except (OSError, subprocess.SubprocessError):
         pass
     return ""
 
@@ -202,7 +203,7 @@ def _propose_blocklist_via_issue(ctx: PipelineContext, pool: EcologyCandidatePoo
                 pool.record_blocklist_proposal(indicator)
                 created += 1
                 log(f"  Blocklist issue 已创建: {issue.get('html_url', '')}", "OK")
-        except Exception as e:
+        except (HTTPClientError, ValueError) as e:
             log(f"  创建 blocklist issue 失败 ({indicator}): {e}", "WARN")
 
     if created > 0:
@@ -247,7 +248,7 @@ def discover_ecologies_stage(ctx: PipelineContext) -> None:
             with open(out_path, "w", encoding="utf-8") as f:
                 f.write(md)
             log(f"生态发现报告已生成: {out_path}", "OK")
-        except Exception as e:
+        except OSError as e:
             log(f"生态发现报告写入失败: {e}", "WARN")
 
     # 把候选池摘要存入 ctx 供周报使用（附加示例项目）

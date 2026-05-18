@@ -7,9 +7,12 @@ from typing import Optional
 
 import yaml
 
+from ecology_candidates import EcologyCandidatePool
+from utils import log
+
 
 # 补充的通用噪声词（无法从现有规则自动推导的泛称）
-NOISE_WORDS = {
+NOISE_WORDS: set[str] = {
     "应用", "客户端", "工具", "软件", "程序", "系统",
     "app", "client", "tool", "utility", "software", "program",
 }
@@ -54,6 +57,9 @@ def _save_yaml(yaml_path: str, data: dict) -> None:
 def _infer_indicator(state) -> tuple[str, str]:
     """从候选状态推断最应排除的 indicator 及其类型。
 
+    优先检查 NOISE_WORDS（通用噪声词），其次选最短的关键词
+    （更通用，误触发面更大）。
+
     Returns:
         (indicator, indicator_type) — indicator_type 为 "topic" 或 "name_prefix"
     """
@@ -61,12 +67,22 @@ def _infer_indicator(state) -> tuple[str, str]:
     topic_patterns = patterns.get("topic_patterns", [])
     name_patterns = patterns.get("name_patterns", [])
 
-    # 优先选 topic_patterns（通常更具体、更精确）
+    # 1. 优先检查 topic_patterns 是否命中 NOISE_WORDS
+    for topic in topic_patterns:
+        if topic.lower() in NOISE_WORDS:
+            return topic, "topic"
+
+    # 2. 优先检查 name_patterns 是否命中 NOISE_WORDS
+    for prefix in name_patterns:
+        if prefix.lower() in NOISE_WORDS:
+            return prefix, "name_prefix"
+
+    # 3. 选最短的 topic_patterns（更通用）
     if topic_patterns:
-        # 选最短的关键词作为排除项（更通用，误触发面更大）
         indicator = min(topic_patterns, key=len)
         return indicator, "topic"
 
+    # 4. 选最短的 name_patterns
     if name_patterns:
         indicator = min(name_patterns, key=len)
         return indicator, "name_prefix"
@@ -85,9 +101,6 @@ def exclude_ecology(
     返回排除结果字典（含 indicator / reason / example_projects 等），
     若候选不存在或已排除则返回 None。
     """
-    from ecology_candidates import EcologyCandidatePool
-    from utils import log
-
     pool = EcologyCandidatePool(pool_path)
     state = pool.candidates.get(candidate_name)
     if not state:
