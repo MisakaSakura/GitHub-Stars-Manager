@@ -177,6 +177,11 @@ def _propose_blocklist_via_issue(ctx: PipelineContext, pool: EcologyCandidatePoo
         reason = prop["reason"]
 
         title = f"[生态Blocklist] 提议排除 '{indicator}' ({indicator_type})"
+        examples = prop.get('example_projects', [])
+        examples_md = "\n".join(f"  - `{ex}`" for ex in examples[:10])
+        if len(examples) > 10:
+            examples_md += f"\n  - ... 等共 {len(examples)} 个项目"
+
         body = (
             f"## 自动检测到的噪声候选\n\n"
             f"- **待排除项**: `{indicator}`\n"
@@ -184,6 +189,7 @@ def _propose_blocklist_via_issue(ctx: PipelineContext, pool: EcologyCandidatePoo
             f"- **触发的候选生态**: {candidate_name}\n"
             f"- **出现次数**: {prop['appear_count']}\n"
             f"- **涉及项目数**: {prop['project_count']}\n"
+            f"- **具体项目**:\n{examples_md}\n"
             f"- **理由**: {reason}\n\n"
             f"---\n"
             f"此 Issue 由生态自动发现流程自动创建。"

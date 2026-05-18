@@ -24,16 +24,23 @@ class EcologyCandidateState:
     confidence_history: list[float] = field(default_factory=list)
     project_count_history: list[int] = field(default_factory=list)
     suggested_patterns: dict = field(default_factory=dict)
+    example_projects: set[str] = field(default_factory=set)  # 累积所有批次匹配到的项目
     ai_review: Optional[dict] = None
     rejected_reason: str = ""
 
     def to_dict(self) -> dict:
-        return {k: getattr(self, k) for k in self.__dataclass_fields__}
+        # set 不能直接 JSON 序列化，转成 list
+        result = {k: getattr(self, k) for k in self.__dataclass_fields__}
+        result["example_projects"] = sorted(result["example_projects"])
+        return result
 
     @classmethod
     def from_dict(cls, data: dict) -> "EcologyCandidateState":
         known = {f.name for f in cls.__dataclass_fields__.values()}
         filtered = {k: v for k, v in data.items() if k in known}
+        # example_projects 从 list 恢复为 set
+        if "example_projects" in filtered:
+            filtered["example_projects"] = set(filtered["example_projects"])
         return cls(**filtered)
 
 
@@ -176,6 +183,7 @@ class EcologyCandidatePool:
                 state.missed_runs = 0
                 state.confidence_history.append(round(cand.confidence, 2))
                 state.project_count_history.append(cand.project_count)
+                state.example_projects.update(cand.examples)
                 # 保留最新 patterns
                 state.suggested_patterns = cand.suggested_patterns
 
@@ -216,6 +224,7 @@ class EcologyCandidatePool:
                     confidence_history=[round(cand.confidence, 2)],
                     project_count_history=[cand.project_count],
                     suggested_patterns=cand.suggested_patterns,
+                    example_projects=set(cand.examples),
                 )
 
         # 3. 清理过期候选
@@ -377,6 +386,7 @@ class EcologyCandidatePool:
                         "candidate_name": name,
                         "appear_count": state.appear_count,
                         "project_count": state.project_count_history[-1] if state.project_count_history else 0,
+                        "example_projects": sorted(state.example_projects),
                         "reason": f"'{name}' 属于平台/类型关键词，不应被识别为独立生态",
                     })
                 continue
@@ -393,6 +403,7 @@ class EcologyCandidatePool:
                             "candidate_name": name,
                             "appear_count": state.appear_count,
                             "project_count": state.project_count_history[-1] if state.project_count_history else 0,
+                        "example_projects": sorted(state.example_projects),
                             "reason": f"'{topic}' 属于平台/类型关键词，不应被识别为独立生态",
                         })
 
@@ -407,6 +418,7 @@ class EcologyCandidatePool:
                             "candidate_name": name,
                             "appear_count": state.appear_count,
                             "project_count": state.project_count_history[-1] if state.project_count_history else 0,
+                        "example_projects": sorted(state.example_projects),
                             "reason": f"'{prefix}' 是常见通用前缀，不应被识别为独立生态",
                         })
 
