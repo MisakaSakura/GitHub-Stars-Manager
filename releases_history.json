@@ -767,6 +767,19 @@
     "detected_at": "2026-05-16T15:43:23.568988+00:00"
   },
   {
+    "full_name": "czy0729/Bangumi",
+    "name": "Bangumi",
+    "owner": "czy0729",
+    "old_tag": "upstream-8.33.3",
+    "new_tag": "8.33.3",
+    "published_at": "2026-05-16T15:41:20Z",
+    "html_url": "https://github.com/czy0729/Bangumi/releases/tag/8.33.3",
+    "body": "[图文说明](https://www.yuque.com/chenzhenyu-k0epm/znygb4/ngolrxwixlixlsv1?singleDoc)\r\n\r\n[蓝奏云 v8a APK](https://czy0729.lanzoub.com/i2AIP3ppatfi) (只能电脑UA访问) | [123pan v8a APK](https://1819463884.share.123865.com/123pan/K0fQjv-SrGT3) | [v8a APK] 手动点击下方 Assets\r\n\r\n[蓝奏云 IPA](https://czy0729.lanzoub.com/iQjwf3pmakmd) | [github IPA](https://github.com/czy0729/Bangumi/releases/tag/upstream-8.33.2)\r\n\r\n## 8.33.3 - 2026/05/17\r\n\r\n### 修复\r\n- [x] [条目] 修复了一个冷启动后，头一次自动跳转会失败的问题（比如其他客户端跳转过来）\r\n\r\n## 8.33.2 - 2026/05/16\r\n\r\n### 优化\r\n- [x] [条目] 支持订阅游戏类型条目发售日期到日历（需设置打开「菜单增加导出 ICS」）\r\n- [x] [帖子] 支持显示相似帖子功能\r\n- [x] [帖子聚合] 优化页面数据加载表现，减少卡顿\r\n- [x] [空间] 现在查询某个用户的历史帖子能自动获取到最新一页\r\n- [x] [UI] 优化平板设备样式\r\n- [x] [iOS] 优化时光机 中 Tab + Scroll 列表的布局表现\r\n\r\n### 修复\r\n- [x] [设置] 修复「隐藏评分」设置打开时部分页面表现与预期不一致的问题\r\n- [x] [帖子] 修复章节类帖子顶部缩略图不正确的问题\r\n- [x] [iOS] 修复 iOS26 时光机、空间顶部锁定高度不符合预期、部分样式错误等问题",
+    "ai_digest": "",
+    "is_new_repo": false,
+    "detected_at": "2026-05-18T16:46:54.650614+00:00"
+  },
+  {
     "full_name": "MetaCubeX/mihomo",
     "name": "mihomo",
     "owner": "MetaCubeX",
