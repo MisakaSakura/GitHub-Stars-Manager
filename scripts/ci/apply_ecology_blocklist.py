@@ -40,10 +40,9 @@ def main() -> int:
         print("无法从 Issue 解析候选生态名称，跳过")
         return 1
 
-    # 构建路径
-    script_dir = os.path.dirname(os.path.dirname(__file__))
-    pool_path = os.path.join(script_dir, "data", "ecology_candidates.json")
-    yaml_path = os.path.join(script_dir, "ecology_blocklist.yaml")
+    # 构建路径（data 分支检出到工作目录的 data/ 下，yaml 在 scripts/ 下）
+    pool_path = os.path.join("data", "ecology_candidates.json")
+    yaml_path = os.path.join("scripts", "ecology_blocklist.yaml")
 
     # 候选池可能不存在（首次运行时）
     if not os.path.exists(pool_path):
