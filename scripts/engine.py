@@ -406,6 +406,7 @@ class IncrementalEngine:
             override_fields=[],
             subscribe_releases=(existing.subscribe_releases if existing else False) or subscribe_all_releases,
             last_release_tag=existing.last_release_tag if existing else None,
+            last_release_checked=existing.last_release_checked if existing else None,
             is_fork=item.get("fork", False),
         )
 
