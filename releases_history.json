@@ -1,5 +1,31 @@
 [
   {
+    "full_name": "shinchiro/mpv-winbuild-cmake",
+    "name": "mpv-winbuild-cmake",
+    "owner": "shinchiro",
+    "old_tag": "20260517",
+    "new_tag": "20260518",
+    "published_at": "2026-05-18T00:33:56Z",
+    "html_url": "https://github.com/shinchiro/mpv-winbuild-cmake/releases/tag/20260518",
+    "body": "![GitHub release (by tag)](https://img.shields.io/github/downloads/shinchiro/mpv-winbuild-cmake/20260518/total?label=Downloads)\n\n**Workflow run**: https://github.com/shinchiro/mpv-winbuild-cmake/actions/runs/26006518814",
+    "ai_digest": "",
+    "is_new_repo": false,
+    "detected_at": "2026-05-18T00:38:33.954940+00:00"
+  },
+  {
+    "full_name": "v2fly/v2ray-core",
+    "name": "v2ray-core",
+    "owner": "v2fly",
+    "old_tag": "v5.50.0",
+    "new_tag": "v5.51.0",
+    "published_at": "2026-05-18T00:28:05Z",
+    "html_url": "https://github.com/v2fly/v2ray-core/releases/tag/v5.51.0",
+    "body": "## New Features\r\n* **gdocsviewer** Add Google Docs Viewer based transport in https://github.com/v2fly/v2ray-core/pull/3725\r\n  * This is a new transport based on Tunneling with Google Docs Viewer, as used in https://github.com/0xinf0/gdocs-tunnel . \r\n  * [EN](https://www.v2fly.org/en_US/v5/config/stream/gdocsviewer.html) [CN](https://www.v2fly.org/v5/config/stream/gdocsviewer.html)  document has been updated.\r\n\r\n\r\n**Full Changelog**: https://github.com/v2fly/v2ray-core/compare/v5.50.0...v5.51.0",
+    "ai_digest": "",
+    "is_new_repo": false,
+    "detected_at": "2026-05-18T00:38:33.954953+00:00"
+  },
+  {
     "full_name": "jxxghp/MoviePilot",
     "name": "MoviePilot",
     "owner": "jxxghp",
