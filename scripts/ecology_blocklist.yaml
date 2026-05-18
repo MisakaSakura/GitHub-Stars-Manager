@@ -24,7 +24,10 @@ topics:
 - chrome-extension
 - jetpack-compose
 - payload
+- golang
 - gaming
+- desktop-app
+- chrome
 name_prefixes:
 - apk
 - ipa
@@ -40,5 +43,7 @@ notes:
   payload: 技术术语，非生态
   dotnet: 编程框架，非生态
   clipboard-manager: 功能描述，非生态
-  gaming: '''Gaming'' 被识别为生态候选，但其核心特征（gaming）属于通用平台/类型关键词或前缀，不应作为独立生态。 触发特征: topic_patterns:
-    [''gaming'']'
+  golang: 编程语言，非生态
+  gaming: 过于宽泛的泛称，非生态
+  desktop-app: 平台+类型组合，非生态
+  chrome: 浏览器平台，非生态

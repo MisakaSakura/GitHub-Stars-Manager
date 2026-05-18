@@ -46,6 +46,22 @@ class StarItem:
     language: str = "文档 / 无代码"  # 硬编码
 ```
 
+### 1.1 Dataclass 字段变更规范
+
+新增或修改 dataclass 字段时，**必须检查所有创建/替换该模型的代码路径**，确保新字段被正确传递。
+
+```
+新增字段 → 检查清单：
+├── models.py: dataclass 定义、默认值、from_dict() 兜底
+├── engine.py: _classify_item() 等创建入口
+├── import_helper.py: JSON/CSV 导入路径
+├── lists_manager.py: Lists 迁移路径
+├── models.py: from_github_api() 工厂方法
+└── 存储后端: sqlite_backend.py / json_backend.py schema 与映射
+```
+
+**反例**：`last_release_checked` 字段新增后，`engine.py` `_classify_item()`、`sqlite_backend.py` `_COLUMN_MAP` / `_row_to_item()`、`import_helper.py`、`lists_manager.py` 均未同步更新，导致该字段在 force_refresh、SQLite 后端、导入场景中系统性丢失。
+
 ### 1.2 序列化规范
 
 所有 dataclass 必须提供 `to_dict()` 和 `from_dict()` 方法，且遵循以下约定：
@@ -538,5 +554,6 @@ cache = TTLCache(".llm_cache.json", ttl_seconds=0, rules_version=RULES_VERSION)
 
 | 版本 | 日期 | 修订内容 |
 |------|------|----------|
+| 1.2 | 2026-05-19 | 新增 §1.1 Dataclass 字段变更规范（含全路径检查清单与 `last_release_checked` 反例） |
 | 1.1 | 2026-05-17 | 更新导入规范（config.py 绝对导入示例）；补充 AIDatabase 完整接口；移除 Phase 5 遗留标记 |
 | 1.0 | 2026-05-17 | 初始版本，基于全局一致性审查建立 |
