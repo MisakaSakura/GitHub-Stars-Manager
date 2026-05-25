@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-18T16:46:55.014432+00:00",
+  "updated_at": "2026-05-25T06:48:00.644347+00:00",
   "candidates": {
     "Android": {
       "status": "rejected",
@@ -8,7 +8,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 10,
+      "missed_runs": 11,
       "confidence_history": [
         1.0,
         1.0,
@@ -45,7 +45,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 10,
+      "missed_runs": 11,
       "confidence_history": [
         1.0,
         1.0,
@@ -82,7 +82,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 10,
+      "missed_runs": 11,
       "confidence_history": [
         0.7,
         0.7,
@@ -119,7 +119,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 10,
+      "missed_runs": 11,
       "confidence_history": [
         0.4,
         0.4,
@@ -151,7 +151,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 10,
+      "missed_runs": 11,
       "confidence_history": [
         0.4,
         0.4,
@@ -183,7 +183,7 @@
       "last_seen": "2026-05-18T16:30:26.751579+00:00",
       "appear_count": 12,
       "consecutive_runs": 0,
-      "missed_runs": 1,
+      "missed_runs": 2,
       "confidence_history": [
         0.3,
         0.3,
@@ -238,11 +238,12 @@
     "Moonlight": {
       "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-18T16:46:55.014161+00:00",
-      "appear_count": 13,
-      "consecutive_runs": 13,
+      "last_seen": "2026-05-25T06:48:00.644143+00:00",
+      "appear_count": 14,
+      "consecutive_runs": 14,
       "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3,
         0.3,
         0.3,
@@ -258,6 +259,7 @@
         0.3
       ],
       "project_count_history": [
+        3,
         3,
         3,
         3,
@@ -304,7 +306,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 10,
+      "missed_runs": 11,
       "confidence_history": [
         0.3,
         0.3,
@@ -336,7 +338,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 9,
+      "missed_runs": 10,
       "confidence_history": [
         0.3,
         0.4
@@ -366,7 +368,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 9,
+      "missed_runs": 10,
       "confidence_history": [
         0.3,
         0.4
@@ -396,7 +398,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 10,
+      "missed_runs": 11,
       "confidence_history": [
         0.8,
         0.8
@@ -426,7 +428,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 10,
+      "missed_runs": 11,
       "confidence_history": [
         0.3,
         0.3
@@ -456,7 +458,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 9,
+      "missed_runs": 10,
       "confidence_history": [
         0.3
       ],
@@ -484,7 +486,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 9,
+      "missed_runs": 10,
       "confidence_history": [
         0.3
       ],
@@ -512,7 +514,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 9,
+      "missed_runs": 10,
       "confidence_history": [
         0.3
       ],
@@ -540,7 +542,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 9,
+      "missed_runs": 10,
       "confidence_history": [
         0.3
       ],
@@ -568,7 +570,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 9,
+      "missed_runs": 10,
       "confidence_history": [
         0.3
       ],
@@ -591,12 +593,12 @@
       "rejected_reason": "blocklist"
     },
     "Desktop-app": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-17T12:22:30.971288+00:00",
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 9,
-      "consecutive_runs": 9,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3,
         0.3,
@@ -636,33 +638,63 @@
         "jimuzhe/tiez-clipboard"
       ],
       "ai_review": null,
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Mpv": {
       "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-05-18T16:46:55.014161+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 0,
-      "missed_runs": 0,
-      "confidence_history": [],
-      "project_count_history": [],
-      "suggested_patterns": {},
-      "example_projects": [],
-      "ai_review": null,
-      "rejected_reason": "blocklist"
-    },
-    "Bangumi": {
-      "status": "candidate",
-      "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-05-18T16:46:55.014161+00:00",
-      "appear_count": 1,
+      "last_seen": "2026-05-25T06:48:00.644143+00:00",
+      "appear_count": 2,
       "consecutive_runs": 1,
       "missed_runs": 0,
       "confidence_history": [
         0.5
       ],
       "project_count_history": [
+        5
+      ],
+      "suggested_patterns": {
+        "name_patterns": [
+          "mpv",
+          "mpv-",
+          "mpv_"
+        ],
+        "desc_patterns": [
+          "mpv",
+          "windows",
+          "the"
+        ],
+        "topic_patterns": [
+          "mpv",
+          "mpv-script",
+          "mpv-config"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "example_projects": [
+        "akiirui/mpv-handler",
+        "dyphire/mpv-config",
+        "hooke007/mpv_PlayKit",
+        "maoiscat/mpv-osc-modern",
+        "shinchiro/mpv-winbuild-cmake"
+      ],
+      "ai_review": null,
+      "rejected_reason": "blocklist"
+    },
+    "Bangumi": {
+      "status": "candidate",
+      "first_seen": "2026-05-18T16:46:55.014161+00:00",
+      "last_seen": "2026-05-25T06:48:00.644143+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 2,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.5,
+        0.5
+      ],
+      "project_count_history": [
+        5,
         5
       ],
       "suggested_patterns": {
@@ -689,42 +721,97 @@
     "Clash": {
       "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-05-18T16:46:55.014161+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 0,
-      "missed_runs": 0,
-      "confidence_history": [],
-      "project_count_history": [],
-      "suggested_patterns": {},
-      "example_projects": [],
-      "ai_review": null,
-      "rejected_reason": "blocklist"
-    },
-    "Typora": {
-      "status": "rejected",
-      "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-05-18T16:46:55.014161+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 0,
-      "missed_runs": 0,
-      "confidence_history": [],
-      "project_count_history": [],
-      "suggested_patterns": {},
-      "example_projects": [],
-      "ai_review": null,
-      "rejected_reason": "blocklist"
-    },
-    "Clash-meta": {
-      "status": "candidate",
-      "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-05-18T16:46:55.014161+00:00",
-      "appear_count": 1,
+      "last_seen": "2026-05-25T06:48:00.644143+00:00",
+      "appear_count": 2,
       "consecutive_runs": 1,
       "missed_runs": 0,
       "confidence_history": [
         0.4
       ],
       "project_count_history": [
+        4
+      ],
+      "suggested_patterns": {
+        "name_patterns": [
+          "clash",
+          "clash-",
+          "clash_"
+        ],
+        "desc_patterns": [
+          "clash",
+          "for",
+          "premium"
+        ],
+        "topic_patterns": [
+          "clash",
+          "clash-meta",
+          "mihomo"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "example_projects": [
+        "Loyalsoldier/clash-rules",
+        "Z-Siqi/Clash-for-Windows_Chinese",
+        "libnyanpasu/clash-nyanpasu",
+        "mihomo-party-org/clash-party"
+      ],
+      "ai_review": null,
+      "rejected_reason": "blocklist"
+    },
+    "Typora": {
+      "status": "rejected",
+      "first_seen": "2026-05-18T16:46:55.014161+00:00",
+      "last_seen": "2026-05-25T06:48:00.644143+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.4
+      ],
+      "project_count_history": [
+        4
+      ],
+      "suggested_patterns": {
+        "name_patterns": [
+          "typora",
+          "typora-",
+          "typora_"
+        ],
+        "desc_patterns": [
+          "typora",
+          "theme"
+        ],
+        "topic_patterns": [
+          "typora-theme",
+          "typora",
+          "typora-themes"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "example_projects": [
+        "Keldos-Li/typora-latex-theme",
+        "YiNNx/typora-theme-lapis",
+        "obscurefreeman/typora_theme_blackout",
+        "sumruler/typora-theme-phycat"
+      ],
+      "ai_review": null,
+      "rejected_reason": "blocklist"
+    },
+    "Clash-meta": {
+      "status": "candidate",
+      "first_seen": "2026-05-18T16:46:55.014161+00:00",
+      "last_seen": "2026-05-25T06:48:00.644143+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 2,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.4,
+        0.4
+      ],
+      "project_count_history": [
+        4,
         4
       ],
       "suggested_patterns": {
@@ -748,12 +835,12 @@
       "rejected_reason": ""
     },
     "Golang": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
-      "consecutive_runs": 1,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.4
       ],
@@ -778,15 +865,15 @@
         "tiny-craft/tiny-rdm"
       ],
       "ai_review": null,
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Chrome": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
-      "consecutive_runs": 1,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3
       ],
@@ -810,15 +897,15 @@
         "moonD4rk/HackBrowserData"
       ],
       "ai_review": null,
-      "rejected_reason": ""
+      "rejected_reason": "blocklist"
     },
     "Gaming": {
-      "status": "candidate",
+      "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
-      "consecutive_runs": 1,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3
       ],
@@ -840,6 +927,70 @@
         "ClassicOldSong/Apollo",
         "JosefNemec/Playnite",
         "ximu3/vnite"
+      ],
+      "ai_review": null,
+      "rejected_reason": "blocklist"
+    },
+    "Download": {
+      "status": "candidate",
+      "first_seen": "2026-05-25T06:48:00.644143+00:00",
+      "last_seen": "2026-05-25T06:48:00.644143+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "download"
+        ],
+        "topic_patterns": [
+          "download"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "example_projects": [
+        "aria2/aria2",
+        "btjawa/BiliTools",
+        "mayswind/AriaNg"
+      ],
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Chinese": {
+      "status": "candidate",
+      "first_seen": "2026-05-25T06:48:00.644143+00:00",
+      "last_seen": "2026-05-25T06:48:00.644143+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "chinese"
+        ],
+        "topic_patterns": [
+          "chinese"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "example_projects": [
+        "Anduin2017/HowToCook",
+        "Z-Siqi/Clash-for-Windows_Chinese",
+        "sparanoid/chinese-copywriting-guidelines"
       ],
       "ai_review": null,
       "rejected_reason": ""

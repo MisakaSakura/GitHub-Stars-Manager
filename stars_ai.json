@@ -9070,5 +9070,160 @@
     "ai_type": "框架 / Framework",
     "ai_ecology": "独立项目",
     "ai_ecology_role": "核心 / Core"
+  },
+  "choyy/VirtualDesktopSwitcher": {
+    "full_name": "choyy/VirtualDesktopSwitcher",
+    "analyzed_at": "2026-05-25T06:47:34.801385+00:00",
+    "llm_status": "success",
+    "llm_confidence": 0.9,
+    "llm_reason": "Windows 10/11 虚拟桌面切换和指示工具，属于系统工具类",
+    "ai_summary": "适用于 Windows 10/11 的轻量级虚拟桌面快速切换和状态指示工具",
+    "ai_tags": [
+      "virtual-desktop",
+      "windows-tools",
+      "desktop-indicator"
+    ],
+    "ai_platforms": [
+      "windows",
+      "cli"
+    ],
+    "ai_platform": "Windows",
+    "ai_type": "工具 / Tool",
+    "ai_ecology": "独立项目",
+    "ai_ecology_role": "脚本 / Script"
+  },
+  "Hmbown/CodeWhale": {
+    "full_name": "Hmbown/CodeWhale",
+    "analyzed_at": "2026-05-25T06:47:34.801397+00:00",
+    "llm_status": "success",
+    "llm_confidence": 0.9,
+    "llm_reason": "基于 Rust 的 Agentic 编码终端，支持多模型提供商和 DeepSeek 集成",
+    "ai_summary": "DeepSeek 优先的 Agentic 编码终端，支持多模型和本地工作空间编辑",
+    "ai_tags": [
+      "cli",
+      "llm",
+      "rust",
+      "terminal"
+    ],
+    "ai_platforms": [
+      "linux",
+      "mac",
+      "windows",
+      "cli"
+    ],
+    "ai_platform": "跨平台",
+    "ai_type": "CLI / 终端",
+    "ai_ecology": "AI/ML",
+    "ai_ecology_role": "API 封装 / Wrapper"
+  },
+  "massgravel/Microsoft-Activation-Scripts": {
+    "full_name": "massgravel/Microsoft-Activation-Scripts",
+    "analyzed_at": "2026-05-25T06:47:34.801402+00:00",
+    "llm_status": "success",
+    "llm_confidence": 0.9,
+    "llm_reason": "开源Windows和Office激活工具，使用脚本方法，属于系统工具",
+    "ai_summary": "开源Windows和Office激活脚本工具，支持多种激活方法和故障排除",
+    "ai_tags": [
+      "激活",
+      "脚本",
+      "Windows",
+      "Office"
+    ],
+    "ai_platforms": [
+      "windows",
+      "cli"
+    ],
+    "ai_platform": "Windows",
+    "ai_type": "工具 / Tool",
+    "ai_ecology": "独立项目",
+    "ai_ecology_role": "脚本 / Script"
+  },
+  "abgox/InputTip": {
+    "full_name": "abgox/InputTip",
+    "analyzed_at": "2026-05-25T06:47:34.801407+00:00",
+    "llm_status": "success",
+    "llm_confidence": 0.9,
+    "llm_reason": "Windows输入法状态管理工具，提供实时提示和状态切换功能",
+    "ai_summary": "轻量级Windows输入法状态管理工具，支持多种提示方案和状态切换",
+    "ai_tags": [
+      "输入法",
+      "状态管理",
+      "Windows",
+      "AutoHotkey"
+    ],
+    "ai_platforms": [
+      "windows"
+    ],
+    "ai_platform": "Windows",
+    "ai_type": "工具 / Tool",
+    "ai_ecology": "独立项目",
+    "ai_ecology_role": "GUI 前端 / Client"
+  },
+  "TIANLI0/BS2PRO-Controller": {
+    "full_name": "TIANLI0/BS2PRO-Controller",
+    "analyzed_at": "2026-05-25T06:47:34.801411+00:00",
+    "llm_status": "success",
+    "llm_confidence": 0.85,
+    "llm_reason": "基于Wails开发的桌面应用，用于控制飞智散热器设备",
+    "ai_summary": "桌面应用控制飞智BS散热器，支持风扇控制和温度监控",
+    "ai_tags": [
+      "散热器",
+      "桌面应用",
+      "硬件控制",
+      "Wails"
+    ],
+    "ai_platforms": [
+      "windows"
+    ],
+    "ai_platform": "Windows",
+    "ai_type": "桌面 GUI",
+    "ai_ecology": "独立项目",
+    "ai_ecology_role": "GUI 前端 / Client"
+  },
+  "microsoft/PowerToys": {
+    "full_name": "microsoft/PowerToys",
+    "analyzed_at": "2026-05-25T06:47:34.801415+00:00",
+    "llm_status": "success",
+    "llm_confidence": 0.9,
+    "llm_reason": "Microsoft官方工具集，用于Windows生产力和自定义优化",
+    "ai_summary": "微软官方工具集，提供30多个实用程序优化Windows体验",
+    "ai_tags": [
+      "生产力",
+      "工具集",
+      "Windows",
+      "微软"
+    ],
+    "ai_platforms": [
+      "windows"
+    ],
+    "ai_platform": "Windows",
+    "ai_type": "工具 / Tool",
+    "ai_ecology": "Apple",
+    "ai_ecology_role": "GUI 前端 / Client"
+  },
+  "zhu1090093659/spec_driven_develop": {
+    "full_name": "zhu1090093659/spec_driven_develop",
+    "analyzed_at": "2026-05-25T06:47:34.801419+00:00",
+    "llm_status": "success",
+    "llm_confidence": 0.85,
+    "llm_reason": "AI编码代理的结构化开发方法论，基于工程控制论，纯Markdown格式",
+    "ai_summary": "AI编码代理的结构化开发方法论，基于工程控制论的闭环反馈控制",
+    "ai_tags": [
+      "AI代理",
+      "开发方法论",
+      "结构化",
+      "工程控制论"
+    ],
+    "ai_platforms": [
+      "linux",
+      "mac",
+      "windows",
+      "web",
+      "cli"
+    ],
+    "ai_platform": "跨平台",
+    "ai_type": "自动化 / 工作流",
+    "ai_ecology": "AI/ML",
+    "ai_ecology_role": "教程 / Guide"
   }
 }

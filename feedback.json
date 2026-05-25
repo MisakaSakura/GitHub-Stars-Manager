@@ -1,7 +1,7 @@
 {
   "version": 1,
   "rules_version": "2026-05-17-platform-refactor",
-  "updated_at": "2026-05-18T16:46:55.022051+00:00",
+  "updated_at": "2026-05-25T06:48:00.652831+00:00",
   "entries": {
     "obra/superpowers": {
       "timestamp": "2026-05-17T11:35:04.821063+00:00",
@@ -1216,6 +1216,496 @@
         ],
         "language": "Kotlin"
       }
+    },
+    "AAswordman/Operit": {
+      "timestamp": "2026-05-25T06:48:00.652567+00:00",
+      "original": {
+        "platform": "Android",
+        "type": "移动端 App",
+        "ecology": "AI/ML",
+        "ecology_role": "核心 / Core"
+      },
+      "corrected": {
+        "platform": "跨平台",
+        "type": "移动端 App",
+        "ecology": "AI/ML",
+        "ecology_role": "核心 / Core"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "Operit",
+        "description": "The most powerful AI agent and AI chat software on Android/Operit是一款Android上能力最为强大、发展最久的AI Agent",
+        "topics": [
+          "agent",
+          "ai",
+          "android",
+          "compose",
+          "kotlin",
+          "llama",
+          "llm",
+          "mnn",
+          "terminal"
+        ],
+        "language": "Kotlin"
+      }
+    },
+    "graykode/abtop": {
+      "timestamp": "2026-05-25T06:48:00.652593+00:00",
+      "original": {
+        "platform": "Linux",
+        "type": "CLI / 终端",
+        "ecology": "AI/ML",
+        "ecology_role": "Web UI / Dashboard"
+      },
+      "corrected": {
+        "platform": "跨平台",
+        "type": "CLI / 终端",
+        "ecology": "AI/ML",
+        "ecology_role": "Web UI / Dashboard"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "abtop",
+        "description": "Like htop, but for AI coding agents. Monitor Claude    Code & Codex CLI sessions, tokens, context window,    rate limits, and ports in real-time.",
+        "topics": [
+          "ai-agents",
+          "ai-coding-agent",
+          "btop",
+          "claude-code",
+          "cli",
+          "codex",
+          "developer-tools",
+          "htop",
+          "monitor",
+          "ratatui",
+          "rust",
+          "terminal",
+          "tui"
+        ],
+        "language": "Rust"
+      }
+    },
+    "SillyTavern/SillyTavern": {
+      "timestamp": "2026-05-25T06:48:00.652610+00:00",
+      "original": {
+        "platform": "Web",
+        "type": "Web 前端",
+        "ecology": "AI/ML",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "跨平台",
+        "type": "Web 前端",
+        "ecology": "AI/ML",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "SillyTavern",
+        "description": "LLM Frontend for Power Users.",
+        "topics": [
+          "ai",
+          "chat",
+          "llm"
+        ],
+        "language": "JavaScript"
+      }
+    },
+    "Turbo1123/roubao": {
+      "timestamp": "2026-05-25T06:48:00.652621+00:00",
+      "original": {
+        "platform": "Android",
+        "type": "工具 / Tool",
+        "ecology": "AI/ML",
+        "ecology_role": "脚本 / Script"
+      },
+      "corrected": {
+        "platform": "跨平台",
+        "type": "工具 / Tool",
+        "ecology": "AI/ML",
+        "ecology_role": "脚本 / Script"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "roubao",
+        "description": "Android Automation Tool Based on Vision-Language Models",
+        "topics": [
+          "ai",
+          "ai-agents",
+          "android",
+          "android-automation",
+          "kotlin",
+          "mobile-agents",
+          "mobileagent",
+          "phone-automation"
+        ],
+        "language": "Kotlin"
+      }
+    },
+    "D4Vinci/Scrapling": {
+      "timestamp": "2026-05-25T06:48:00.652629+00:00",
+      "original": {
+        "platform": "Web",
+        "type": "框架 / Framework",
+        "ecology": "AI/ML",
+        "ecology_role": "API 封装 / Wrapper"
+      },
+      "corrected": {
+        "platform": "跨平台",
+        "type": "框架 / Framework",
+        "ecology": "AI/ML",
+        "ecology_role": "API 封装 / Wrapper"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "Scrapling",
+        "description": "🕷️ An adaptive Web Scraping framework that handles everything from a single request to a full-scale crawl!",
+        "topics": [
+          "ai",
+          "ai-scraping",
+          "automation",
+          "crawler",
+          "crawling",
+          "crawling-python",
+          "data",
+          "data-extraction",
+          "mcp",
+          "mcp-server",
+          "playwright",
+          "python",
+          "scraping",
+          "selectors",
+          "stealth",
+          "web-scraper",
+          "web-scraping",
+          "web-scraping-python",
+          "webscraping",
+          "xpath"
+        ],
+        "language": "Python"
+      }
+    },
+    "op7418/Humanizer-zh": {
+      "timestamp": "2026-05-25T06:48:00.652635+00:00",
+      "original": {
+        "platform": "Web",
+        "type": "工具 / Tool",
+        "ecology": "AI/ML",
+        "ecology_role": "教程 / Guide"
+      },
+      "corrected": {
+        "platform": "跨平台",
+        "type": "工具 / Tool",
+        "ecology": "AI/ML",
+        "ecology_role": "教程 / Guide"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "Humanizer-zh",
+        "description": "Humanizer 的汉化版本，Claude Code Skills，旨在消除文本中 AI 生成的痕迹。",
+        "topics": [],
+        "language": "文档 / 无代码"
+      }
+    },
+    "patchy631/ai-engineering-hub": {
+      "timestamp": "2026-05-25T06:48:00.652642+00:00",
+      "original": {
+        "platform": "Web",
+        "type": "算法 / 学习",
+        "ecology": "AI/ML",
+        "ecology_role": "教程 / Guide"
+      },
+      "corrected": {
+        "platform": "跨平台",
+        "type": "算法 / 学习",
+        "ecology": "AI/ML",
+        "ecology_role": "教程 / Guide"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "ai-engineering-hub",
+        "description": "In-depth tutorials on LLMs, RAGs and real-world AI agent applications.",
+        "topics": [
+          "agents",
+          "ai",
+          "llms",
+          "machine-learning",
+          "mcp",
+          "rag"
+        ],
+        "language": "Jupyter Notebook"
+      }
+    },
+    "WEIFENG2333/VideoCaptioner": {
+      "timestamp": "2026-05-25T06:48:00.652653+00:00",
+      "original": {
+        "platform": "Web",
+        "type": "工具 / Tool",
+        "ecology": "AI/ML",
+        "ecology_role": "脚本 / Script"
+      },
+      "corrected": {
+        "platform": "跨平台",
+        "type": "工具 / Tool",
+        "ecology": "AI/ML",
+        "ecology_role": "脚本 / Script"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "VideoCaptioner",
+        "description": "🎬 卡卡字幕助手 | VideoCaptioner - 基于 LLM 的智能字幕助手 - 视频字幕生成、断句、校正、字幕翻译全流程处理！- A powered tool for easy and efficient video subtitling.",
+        "topics": [
+          "ai",
+          "subtitle",
+          "translate",
+          "video-subtile"
+        ],
+        "language": "Python"
+      }
+    },
+    "Comfy-Org/ComfyUI": {
+      "timestamp": "2026-05-25T06:48:00.652661+00:00",
+      "original": {
+        "platform": "Web",
+        "type": "Web 前端",
+        "ecology": "AI/ML",
+        "ecology_role": "Web UI / Dashboard"
+      },
+      "corrected": {
+        "platform": "跨平台",
+        "type": "Web 前端",
+        "ecology": "AI/ML",
+        "ecology_role": "Web UI / Dashboard"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "ComfyUI",
+        "description": "The most powerful and modular diffusion model GUI, api and backend with a graph/nodes interface.",
+        "topics": [
+          "ai",
+          "comfy",
+          "comfyui",
+          "python",
+          "pytorch",
+          "stable-diffusion"
+        ],
+        "language": "Python"
+      }
+    },
+    "infiniflow/ragflow": {
+      "timestamp": "2026-05-25T06:48:00.652667+00:00",
+      "original": {
+        "platform": "Web",
+        "type": "Web 后端",
+        "ecology": "AI/ML",
+        "ecology_role": "核心 / Core"
+      },
+      "corrected": {
+        "platform": "跨平台",
+        "type": "Web 后端",
+        "ecology": "AI/ML",
+        "ecology_role": "核心 / Core"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "ragflow",
+        "description": "RAGFlow is a leading open-source Retrieval-Augmented Generation (RAG) engine that fuses cutting-edge RAG with Agent capabilities to create a superior context layer for LLMs",
+        "topics": [
+          "agentic-ai",
+          "agentic-retrieval",
+          "agentic-search",
+          "ai",
+          "ai-agents",
+          "context-engine",
+          "context-management",
+          "llm-apps",
+          "rag",
+          "retrieval-augmented-generation"
+        ],
+        "language": "Python"
+      }
+    },
+    "hacksider/Deep-Live-Cam": {
+      "timestamp": "2026-05-25T06:48:00.652672+00:00",
+      "original": {
+        "platform": "Web",
+        "type": "应用 / App",
+        "ecology": "AI/ML",
+        "ecology_role": "Web UI / Dashboard"
+      },
+      "corrected": {
+        "platform": "跨平台",
+        "type": "应用 / App",
+        "ecology": "AI/ML",
+        "ecology_role": "Web UI / Dashboard"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "Deep-Live-Cam",
+        "description": "real time face swap and one-click video deepfake with only a single image",
+        "topics": [
+          "ai",
+          "ai-deep-fake",
+          "ai-face",
+          "ai-webcam",
+          "artificial-intelligence",
+          "deep-fake",
+          "deepfake",
+          "deepfake-webcam",
+          "faceswap",
+          "fake-webcam",
+          "gan",
+          "real-time-deepfake",
+          "realtime",
+          "realtime-deepfake",
+          "realtime-face-changer",
+          "video-deepfake",
+          "webcam",
+          "webcamera"
+        ],
+        "language": "Python"
+      }
+    },
+    "Cinnamon/kotaemon": {
+      "timestamp": "2026-05-25T06:48:00.652678+00:00",
+      "original": {
+        "platform": "Web",
+        "type": "应用 / App",
+        "ecology": "AI/ML",
+        "ecology_role": "Web UI / Dashboard"
+      },
+      "corrected": {
+        "platform": "跨平台",
+        "type": "应用 / App",
+        "ecology": "AI/ML",
+        "ecology_role": "Web UI / Dashboard"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "kotaemon",
+        "description": "An open-source RAG-based tool for chatting with your documents.",
+        "topics": [
+          "chatbot",
+          "llms",
+          "open-source",
+          "rag"
+        ],
+        "language": "Python"
+      }
+    },
+    "RVC-Project/Retrieval-based-Voice-Conversion-WebUI": {
+      "timestamp": "2026-05-25T06:48:00.652683+00:00",
+      "original": {
+        "platform": "Web",
+        "type": "Web 前端",
+        "ecology": "AI/ML",
+        "ecology_role": "Web UI / Dashboard"
+      },
+      "corrected": {
+        "platform": "跨平台",
+        "type": "Web 前端",
+        "ecology": "AI/ML",
+        "ecology_role": "Web UI / Dashboard"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "Retrieval-based-Voice-Conversion-WebUI",
+        "description": "Easily train a good VC model with voice data <= 10 mins!",
+        "topics": [
+          "audio-analysis",
+          "change",
+          "conversational-ai",
+          "conversion",
+          "converter",
+          "retrieval-model",
+          "retrieve-data",
+          "rvc",
+          "so-vits-svc",
+          "sovits",
+          "vc",
+          "vits",
+          "voice",
+          "voice-conversion",
+          "voice-converter",
+          "voiceconversion"
+        ],
+        "language": "Python"
+      }
+    },
+    "OwO-Network/DeepLX": {
+      "timestamp": "2026-05-25T06:48:00.652688+00:00",
+      "original": {
+        "platform": "Web",
+        "type": "工具 / Tool",
+        "ecology": "AI/ML",
+        "ecology_role": "API 封装 / Wrapper"
+      },
+      "corrected": {
+        "platform": "跨平台",
+        "type": "工具 / Tool",
+        "ecology": "AI/ML",
+        "ecology_role": "API 封装 / Wrapper"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "DeepLX",
+        "description": "Powerful Free DeepL API, No Token Required",
+        "topics": [
+          "bobplugin",
+          "deepl"
+        ],
+        "language": "Go"
+      }
+    },
+    "microsoft/PowerToys": {
+      "timestamp": "2026-05-25T06:48:00.652694+00:00",
+      "original": {
+        "platform": "Windows",
+        "type": "工具 / Tool",
+        "ecology": "Apple",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "macOS",
+        "type": "工具 / Tool",
+        "ecology": "Apple",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "PowerToys",
+        "description": "Microsoft PowerToys is a collection of utilities that supercharge productivity and customization on Windows",
+        "topics": [
+          "advanced-paste",
+          "color-picker",
+          "command-palette",
+          "desktop",
+          "fancyzones",
+          "keyboard-manager",
+          "microsoft-powertoys",
+          "powerrename",
+          "powertoys",
+          "windows",
+          "windows-10",
+          "windows-11"
+        ],
+        "language": "C#"
+      }
     }
   },
   "patterns": {
@@ -1236,16 +1726,20 @@
         "macOS": 4
       },
       "Linux": {
-        "跨平台": 1
+        "跨平台": 2
       },
       "Windows": {
-        "跨平台": 2
+        "跨平台": 2,
+        "macOS": 1
       },
       "跨平台": {
         "Android": 1
       },
       "Android": {
-        "跨平台": 1
+        "跨平台": 3
+      },
+      "Web": {
+        "跨平台": 11
       }
     },
     "type": {
