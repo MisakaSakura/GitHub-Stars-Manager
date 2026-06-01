@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-25T06:48:00.644347+00:00",
+  "updated_at": "2026-06-01T07:26:25.882010+00:00",
   "candidates": {
     "Android": {
       "status": "rejected",
@@ -8,7 +8,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 11,
+      "missed_runs": 12,
       "confidence_history": [
         1.0,
         1.0,
@@ -45,7 +45,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 11,
+      "missed_runs": 12,
       "confidence_history": [
         1.0,
         1.0,
@@ -82,7 +82,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 11,
+      "missed_runs": 12,
       "confidence_history": [
         0.7,
         0.7,
@@ -119,7 +119,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 11,
+      "missed_runs": 12,
       "confidence_history": [
         0.4,
         0.4,
@@ -151,7 +151,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 11,
+      "missed_runs": 12,
       "confidence_history": [
         0.4,
         0.4,
@@ -183,7 +183,7 @@
       "last_seen": "2026-05-18T16:30:26.751579+00:00",
       "appear_count": 12,
       "consecutive_runs": 0,
-      "missed_runs": 2,
+      "missed_runs": 3,
       "confidence_history": [
         0.3,
         0.3,
@@ -238,11 +238,12 @@
     "Moonlight": {
       "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-25T06:48:00.644143+00:00",
-      "appear_count": 14,
-      "consecutive_runs": 14,
+      "last_seen": "2026-06-01T07:26:23.295200+00:00",
+      "appear_count": 15,
+      "consecutive_runs": 15,
       "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3,
         0.3,
         0.3,
@@ -259,6 +260,7 @@
         0.3
       ],
       "project_count_history": [
+        3,
         3,
         3,
         3,
@@ -306,7 +308,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 11,
+      "missed_runs": 12,
       "confidence_history": [
         0.3,
         0.3,
@@ -338,7 +340,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 10,
+      "missed_runs": 11,
       "confidence_history": [
         0.3,
         0.4
@@ -368,7 +370,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 10,
+      "missed_runs": 11,
       "confidence_history": [
         0.3,
         0.4
@@ -398,7 +400,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 11,
+      "missed_runs": 12,
       "confidence_history": [
         0.8,
         0.8
@@ -428,7 +430,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 11,
+      "missed_runs": 12,
       "confidence_history": [
         0.3,
         0.3
@@ -458,7 +460,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 10,
+      "missed_runs": 11,
       "confidence_history": [
         0.3
       ],
@@ -486,7 +488,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 10,
+      "missed_runs": 11,
       "confidence_history": [
         0.3
       ],
@@ -514,7 +516,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 10,
+      "missed_runs": 11,
       "confidence_history": [
         0.3
       ],
@@ -542,7 +544,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 10,
+      "missed_runs": 11,
       "confidence_history": [
         0.3
       ],
@@ -570,7 +572,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 10,
+      "missed_runs": 11,
       "confidence_history": [
         0.3
       ],
@@ -598,7 +600,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 9,
       "consecutive_runs": 0,
-      "missed_runs": 1,
+      "missed_runs": 2,
       "confidence_history": [
         0.3,
         0.3,
@@ -643,14 +645,16 @@
     "Mpv": {
       "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-05-25T06:48:00.644143+00:00",
-      "appear_count": 2,
-      "consecutive_runs": 1,
+      "last_seen": "2026-06-01T07:26:23.295200+00:00",
+      "appear_count": 3,
+      "consecutive_runs": 2,
       "missed_runs": 0,
       "confidence_history": [
+        0.5,
         0.5
       ],
       "project_count_history": [
+        5,
         5
       ],
       "suggested_patterns": {
@@ -685,15 +689,17 @@
     "Bangumi": {
       "status": "candidate",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-05-25T06:48:00.644143+00:00",
-      "appear_count": 2,
-      "consecutive_runs": 2,
+      "last_seen": "2026-06-01T07:26:23.295200+00:00",
+      "appear_count": 3,
+      "consecutive_runs": 0,
       "missed_runs": 0,
       "confidence_history": [
+        0.5,
         0.5,
         0.5
       ],
       "project_count_history": [
+        5,
         5,
         5
       ],
@@ -715,20 +721,27 @@
         "kjtsune/embyToLocalPlayer",
         "open-ani/animeko"
       ],
-      "ai_review": null,
+      "ai_review": {
+        "reviewed_at": "2026-06-01T07:26:25.881720+00:00",
+        "approved": false,
+        "llm_confidence": 0.8,
+        "llm_reason": "生态候选仅依赖单一主题模式，缺乏明确的项目边界和稳定性，不适合作为正式生态规则。"
+      },
       "rejected_reason": ""
     },
     "Clash": {
       "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-05-25T06:48:00.644143+00:00",
-      "appear_count": 2,
-      "consecutive_runs": 1,
+      "last_seen": "2026-06-01T07:26:23.295200+00:00",
+      "appear_count": 3,
+      "consecutive_runs": 2,
       "missed_runs": 0,
       "confidence_history": [
+        0.4,
         0.4
       ],
       "project_count_history": [
+        4,
         4
       ],
       "suggested_patterns": {
@@ -762,14 +775,16 @@
     "Typora": {
       "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-05-25T06:48:00.644143+00:00",
-      "appear_count": 2,
-      "consecutive_runs": 1,
+      "last_seen": "2026-06-01T07:26:23.295200+00:00",
+      "appear_count": 3,
+      "consecutive_runs": 2,
       "missed_runs": 0,
       "confidence_history": [
+        0.4,
         0.4
       ],
       "project_count_history": [
+        4,
         4
       ],
       "suggested_patterns": {
@@ -802,15 +817,17 @@
     "Clash-meta": {
       "status": "candidate",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-05-25T06:48:00.644143+00:00",
-      "appear_count": 2,
-      "consecutive_runs": 2,
+      "last_seen": "2026-06-01T07:26:23.295200+00:00",
+      "appear_count": 3,
+      "consecutive_runs": 3,
       "missed_runs": 0,
       "confidence_history": [
+        0.4,
         0.4,
         0.4
       ],
       "project_count_history": [
+        4,
         4,
         4
       ],
@@ -840,7 +857,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 1,
+      "missed_runs": 2,
       "confidence_history": [
         0.4
       ],
@@ -873,7 +890,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 1,
+      "missed_runs": 2,
       "confidence_history": [
         0.3
       ],
@@ -905,7 +922,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 1,
+      "missed_runs": 2,
       "confidence_history": [
         0.3
       ],
@@ -934,14 +951,16 @@
     "Download": {
       "status": "candidate",
       "first_seen": "2026-05-25T06:48:00.644143+00:00",
-      "last_seen": "2026-05-25T06:48:00.644143+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 1,
+      "last_seen": "2026-06-01T07:26:23.295200+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 2,
       "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3
       ],
       "project_count_history": [
+        3,
         3
       ],
       "suggested_patterns": {
@@ -966,14 +985,16 @@
     "Chinese": {
       "status": "candidate",
       "first_seen": "2026-05-25T06:48:00.644143+00:00",
-      "last_seen": "2026-05-25T06:48:00.644143+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 1,
+      "last_seen": "2026-06-01T07:26:23.295200+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 2,
       "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3
       ],
       "project_count_history": [
+        3,
         3
       ],
       "suggested_patterns": {
@@ -991,6 +1012,38 @@
         "Anduin2017/HowToCook",
         "Z-Siqi/Clash-for-Windows_Chinese",
         "sparanoid/chinese-copywriting-guidelines"
+      ],
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Blog": {
+      "status": "candidate",
+      "first_seen": "2026-06-01T07:26:23.295200+00:00",
+      "last_seen": "2026-06-01T07:26:23.295200+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "blog"
+        ],
+        "topic_patterns": [
+          "blog"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "example_projects": [
+        "AppFlowy-IO/AppFlowy",
+        "notionnext-org/NotionNext",
+        "transitive-bullshit/nextjs-notion-starter-kit"
       ],
       "ai_review": null,
       "rejected_reason": ""

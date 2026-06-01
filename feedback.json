@@ -1,7 +1,7 @@
 {
   "version": 1,
   "rules_version": "2026-05-17-platform-refactor",
-  "updated_at": "2026-05-25T06:48:00.652831+00:00",
+  "updated_at": "2026-06-01T07:26:25.891413+00:00",
   "entries": {
     "obra/superpowers": {
       "timestamp": "2026-05-17T11:35:04.821063+00:00",
@@ -877,7 +877,7 @@
       }
     },
     "jkcoxson/idevice_pair": {
-      "timestamp": "2026-05-18T16:46:55.021759+00:00",
+      "timestamp": "2026-06-01T07:26:25.891211+00:00",
       "original": {
         "platform": "iOS",
         "type": "工具 / Tool",
@@ -900,16 +900,16 @@
       }
     },
     "opa334/TrollStore": {
-      "timestamp": "2026-05-18T16:46:55.021778+00:00",
+      "timestamp": "2026-06-01T07:26:25.891231+00:00",
       "original": {
         "platform": "iOS",
-        "type": "工具 / Tool",
+        "type": "移动端 App",
         "ecology": "Apple",
         "ecology_role": "核心 / Core"
       },
       "corrected": {
         "platform": "macOS",
-        "type": "工具 / Tool",
+        "type": "移动端 App",
         "ecology": "Apple",
         "ecology_role": "核心 / Core"
       },
@@ -923,16 +923,16 @@
       }
     },
     "altstoreio/AltStore": {
-      "timestamp": "2026-05-18T16:46:55.021796+00:00",
+      "timestamp": "2026-06-01T07:26:25.891249+00:00",
       "original": {
         "platform": "iOS",
-        "type": "应用 / App",
+        "type": "移动端 App",
         "ecology": "Apple",
         "ecology_role": "GUI 前端 / Client"
       },
       "corrected": {
         "platform": "macOS",
-        "type": "应用 / App",
+        "type": "移动端 App",
         "ecology": "Apple",
         "ecology_role": "GUI 前端 / Client"
       },
@@ -946,18 +946,18 @@
       }
     },
     "LiveContainer/LiveContainer": {
-      "timestamp": "2026-05-18T16:46:55.021811+00:00",
+      "timestamp": "2026-06-01T07:26:25.891263+00:00",
       "original": {
         "platform": "iOS",
-        "type": "移动端 App",
+        "type": "工具 / Tool",
         "ecology": "Apple",
-        "ecology_role": "GUI 前端 / Client"
+        "ecology_role": "脚本 / Script"
       },
       "corrected": {
         "platform": "macOS",
-        "type": "移动端 App",
+        "type": "工具 / Tool",
         "ecology": "Apple",
-        "ecology_role": "GUI 前端 / Client"
+        "ecology_role": "脚本 / Script"
       },
       "source": "auto_fix",
       "rules_version": "2026-05-17-platform-refactor",
@@ -969,15 +969,15 @@
       }
     },
     "FDH2/UxPlay": {
-      "timestamp": "2026-05-18T16:46:55.021833+00:00",
+      "timestamp": "2026-06-01T07:26:25.891275+00:00",
       "original": {
-        "platform": "跨平台",
+        "platform": "Linux",
         "type": "CLI / 终端",
         "ecology": "AirPlay",
         "ecology_role": "核心 / Core"
       },
       "corrected": {
-        "platform": "跨平台",
+        "platform": "Linux",
         "type": "工具 / Tool",
         "ecology": "AirPlay",
         "ecology_role": "核心 / Core"
@@ -1052,7 +1052,7 @@
       }
     },
     "viarotel-org/escrcpy": {
-      "timestamp": "2026-05-18T16:46:55.021874+00:00",
+      "timestamp": "2026-06-01T07:26:25.891288+00:00",
       "original": {
         "platform": "跨平台",
         "type": "工具 / Tool",
@@ -1706,6 +1706,33 @@
         ],
         "language": "C#"
       }
+    },
+    "Anxcye/anx-reader": {
+      "timestamp": "2026-06-01T07:26:25.891307+00:00",
+      "original": {
+        "platform": "跨平台",
+        "type": "应用 / App",
+        "ecology": "Flutter",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "跨平台",
+        "type": "应用 / App",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "anx-reader",
+        "description": "Featuring powerful AI capabilities and supporting various e-book formats, it makes reading smarter and more focused. ",
+        "topics": [
+          "dart",
+          "ebook-reader",
+          "flutter"
+        ],
+        "language": "Dart"
+      }
     }
   },
   "patterns": {
@@ -1723,7 +1750,7 @@
         "移动端": 1
       },
       "iOS": {
-        "macOS": 4
+        "macOS": 8
       },
       "Linux": {
         "跨平台": 2
@@ -1733,7 +1760,7 @@
         "macOS": 1
       },
       "跨平台": {
-        "Android": 1
+        "Android": 2
       },
       "Android": {
         "跨平台": 3
@@ -1761,7 +1788,7 @@
         "工具 / Tool": 1
       },
       "CLI / 终端": {
-        "工具 / Tool": 2
+        "工具 / Tool": 3
       },
       "移动端 App": {
         "应用 / App": 1
@@ -1824,6 +1851,9 @@
       },
       "HMS": {
         "独立项目": 1
+      },
+      "Flutter": {
+        "独立项目": 1
       }
     },
     "ecology_role": {
@@ -1831,7 +1861,7 @@
         "-": 2
       },
       "GUI 前端 / Client": {
-        "-": 6
+        "-": 7
       },
       "插件 / Plugin": {
         "-": 2
