@@ -8197,5 +8197,151 @@
     "ai_type": "桌面 GUI",
     "ai_ecology": "独立项目",
     "ai_ecology_role": "GUI 前端 / Client"
+  },
+  "openai/tart": {
+    "full_name": "openai/tart",
+    "analyzed_at": "2026-06-08T07:05:00.749363+00:00",
+    "llm_status": "success",
+    "llm_confidence": 0.9,
+    "llm_reason": "Tart 是专为 Apple Silicon 设计的虚拟化工具，用于在 macOS 和 Linux 上运行 VM，支持 CI 自动化，属于 Apple 生态的核心工具。",
+    "ai_summary": "Tart 是 Apple Silicon 上的虚拟化工具，用于构建和管理 macOS 和 Linux 虚拟机，专为 CI 自动化设计。",
+    "ai_tags": [
+      "虚拟化",
+      "CI",
+      "自动化",
+      "macOS",
+      "Linux"
+    ],
+    "ai_platforms": [
+      "macos",
+      "linux",
+      "cli"
+    ],
+    "ai_platform": "macOS",
+    "ai_type": "工具 / Tool",
+    "ai_ecology": "Apple",
+    "ai_ecology_role": "核心 / Core"
+  },
+  "AstrBotDevs/AstrBot": {
+    "full_name": "AstrBotDevs/AstrBot",
+    "analyzed_at": "2026-06-08T07:05:00.749377+00:00",
+    "llm_status": "success",
+    "llm_confidence": 0.9,
+    "llm_reason": "AstrBot 是一个集成多种 IM 平台和 LLM 的 AI Agent 开发框架，支持 Docker 部署，属于 AI/ML 生态的核心框架。",
+    "ai_summary": "开源全功能 Agent 聊天机器人平台，集成主流即时通讯应用，提供可扩展的对话 AI 基础设施。",
+    "ai_tags": [
+      "AI",
+      "Agent",
+      "聊天机器人",
+      "框架",
+      "Docker"
+    ],
+    "ai_platforms": [
+      "linux",
+      "windows",
+      "mac",
+      "web",
+      "cli",
+      "docker"
+    ],
+    "ai_platform": "跨平台",
+    "ai_type": "框架",
+    "ai_ecology": "AI/ML",
+    "ai_ecology_role": "核心"
+  },
+  "Tnekow/zonehub": {
+    "full_name": "Tnekow/zonehub",
+    "analyzed_at": "2026-06-08T07:05:00.749382+00:00",
+    "llm_status": "success",
+    "llm_confidence": 0.85,
+    "llm_reason": "ZoneHub 是基于 Vite、React 和 TypeScript 构建的离线优先社区个人资料页面设计器，属于 Web 前端应用。",
+    "ai_summary": "离线优先的 Steam 风格个人资料页面设计器，支持自定义头像、昵称、展示等，无需 Steam 账号。",
+    "ai_tags": [
+      "Steam",
+      "个人资料",
+      "React",
+      "TypeScript",
+      "离线优先"
+    ],
+    "ai_platforms": [
+      "web",
+      "linux",
+      "windows",
+      "mac"
+    ],
+    "ai_platform": "Web",
+    "ai_type": "Web 前端",
+    "ai_ecology": "独立项目",
+    "ai_ecology_role": "GUI 前端"
+  },
+  "CyrilPeng/KokoroMemo": {
+    "full_name": "CyrilPeng/KokoroMemo",
+    "analyzed_at": "2026-06-08T07:05:00.749387+00:00",
+    "llm_status": "success",
+    "llm_confidence": 0.9,
+    "llm_reason": "KokoroMemo 是面向 AI 角色扮演和游戏的本地长期记忆核心，作为 OpenAI 兼容代理，属于 AI/ML 生态的 API 封装工具。",
+    "ai_summary": "本地长期记忆核心，为 AI 角色扮演、游戏和桌宠提供会话保存和维护功能，兼容 OpenAI 客户端。",
+    "ai_tags": [
+      "AI",
+      "记忆核心",
+      "角色扮演",
+      "OpenAI",
+      "本地"
+    ],
+    "ai_platforms": [
+      "linux",
+      "windows",
+      "mac",
+      "web",
+      "cli"
+    ],
+    "ai_platform": "跨平台",
+    "ai_type": "工具",
+    "ai_ecology": "AI/ML",
+    "ai_ecology_role": "API 封装 / Wrapper"
+  },
+  "JHRobotics/softgpu": {
+    "full_name": "JHRobotics/softgpu",
+    "analyzed_at": "2026-06-08T07:05:00.749391+00:00",
+    "llm_status": "success",
+    "llm_confidence": 0.85,
+    "llm_reason": "SoftGPU 是为 Windows 9x 虚拟机提供软件和硬件加速 GPU 驱动的工具集，属于独立项目中的工具。",
+    "ai_summary": "为 Windows 9x 虚拟机提供软件和硬件加速 GPU 驱动的工具集，支持多种虚拟化平台。",
+    "ai_tags": [
+      "GPU",
+      "驱动",
+      "虚拟机",
+      "Windows 9x",
+      "加速"
+    ],
+    "ai_platforms": [
+      "windows"
+    ],
+    "ai_platform": "Windows",
+    "ai_type": "工具",
+    "ai_ecology": "独立项目",
+    "ai_ecology_role": "脚本 / Script"
+  },
+  "kyujin-cho/Bada": {
+    "full_name": "kyujin-cho/Bada",
+    "analyzed_at": "2026-06-08T07:05:00.749395+00:00",
+    "llm_status": "success",
+    "llm_confidence": 0.9,
+    "llm_reason": "Bada 是 Android 上无需 GMS 依赖的快速分享实现，属于 Android 生态的移动端应用。",
+    "ai_summary": "Android 快速分享应用，无需 Google Play 服务，支持与 stock Android、macOS 和 Windows 互操作。",
+    "ai_tags": [
+      "Android",
+      "快速分享",
+      "无 GMS",
+      "文件传输",
+      "互操作"
+    ],
+    "ai_platforms": [
+      "android"
+    ],
+    "ai_platform": "Android",
+    "ai_type": "移动端 App",
+    "ai_ecology": "Android",
+    "ai_ecology_role": "GUI 前端"
   }
 }
