@@ -1,7 +1,7 @@
 {
   "version": 1,
   "rules_version": "2026-05-17-platform-refactor",
-  "updated_at": "2026-06-01T07:26:25.891413+00:00",
+  "updated_at": "2026-06-15T07:40:45.966238+00:00",
   "entries": {
     "obra/superpowers": {
       "timestamp": "2026-05-17T11:35:04.821063+00:00",
@@ -900,16 +900,16 @@
       }
     },
     "opa334/TrollStore": {
-      "timestamp": "2026-06-01T07:26:25.891231+00:00",
+      "timestamp": "2026-06-15T07:40:45.966121+00:00",
       "original": {
-        "platform": "iOS",
+        "platform": "macOS",
         "type": "移动端 App",
         "ecology": "Apple",
         "ecology_role": "核心 / Core"
       },
       "corrected": {
         "platform": "macOS",
-        "type": "移动端 App",
+        "type": "工具 / Tool",
         "ecology": "Apple",
         "ecology_role": "核心 / Core"
       },
@@ -923,16 +923,16 @@
       }
     },
     "altstoreio/AltStore": {
-      "timestamp": "2026-06-01T07:26:25.891249+00:00",
+      "timestamp": "2026-06-15T07:40:45.966131+00:00",
       "original": {
-        "platform": "iOS",
+        "platform": "macOS",
         "type": "移动端 App",
         "ecology": "Apple",
         "ecology_role": "GUI 前端 / Client"
       },
       "corrected": {
         "platform": "macOS",
-        "type": "移动端 App",
+        "type": "工具 / Tool",
         "ecology": "Apple",
         "ecology_role": "GUI 前端 / Client"
       },
@@ -1733,6 +1733,140 @@
         ],
         "language": "Dart"
       }
+    },
+    "lzhgus/Capso": {
+      "timestamp": "2026-06-15T07:40:45.966066+00:00",
+      "original": {
+        "platform": "macOS",
+        "type": "桌面 GUI",
+        "ecology": "Apple",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "macOS",
+        "type": "工具 / Tool",
+        "ecology": "Apple",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "Capso",
+        "description": "Open-source screenshot and screen recording for macOS. The free, native alternative to CleanShot X. Built with Swift 6.0 and SwiftUI.",
+        "topics": [
+          "annotation",
+          "cleanshot-alternative",
+          "macos",
+          "ocr",
+          "open-source",
+          "screen-recording",
+          "screenshot",
+          "swift",
+          "swiftui"
+        ],
+        "language": "Swift"
+      }
+    },
+    "darrylmorley/whatcable": {
+      "timestamp": "2026-06-15T07:40:45.966093+00:00",
+      "original": {
+        "platform": "macOS",
+        "type": "桌面 GUI",
+        "ecology": "Apple",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "macOS",
+        "type": "工具 / Tool",
+        "ecology": "Apple",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "whatcable",
+        "description": "macOS menu bar app that tells you, in plain English, what each USB-C cable plugged into your Mac can actually do",
+        "topics": [
+          "apple-silicon",
+          "hardware-info",
+          "iokit",
+          "mac-app",
+          "macos",
+          "menubar",
+          "menubar-app",
+          "swift",
+          "swiftui",
+          "thunderbolt",
+          "usb-c",
+          "usb-power-delivery",
+          "utility"
+        ],
+        "language": "Swift"
+      }
+    },
+    "rokartur/BetterAudio": {
+      "timestamp": "2026-06-15T07:40:45.966112+00:00",
+      "original": {
+        "platform": "macOS",
+        "type": "应用 / App",
+        "ecology": "Apple",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "macOS",
+        "type": "工具 / Tool",
+        "ecology": "Apple",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "BetterAudio",
+        "description": "Master your Mac’s audio",
+        "topics": [
+          "app",
+          "audio",
+          "audio-sharing",
+          "audio-utility",
+          "control-volume",
+          "dictation-apps",
+          "free",
+          "mac",
+          "macos",
+          "media-keys",
+          "menubar",
+          "mute",
+          "per-app-volume"
+        ],
+        "language": "TypeScript"
+      }
+    },
+    "SprInec/typora-spring-theme": {
+      "timestamp": "2026-06-15T07:40:45.966140+00:00",
+      "original": {
+        "platform": "macOS",
+        "type": "主题 / Theme",
+        "ecology": "Apple",
+        "ecology_role": "主题 / Theme"
+      },
+      "corrected": {
+        "platform": "macOS",
+        "type": "工具 / Tool",
+        "ecology": "Apple",
+        "ecology_role": "主题 / Theme"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "typora-spring-theme",
+        "description": "A refreshing and graceful Typora theme, like a gentle spring breeze.一款令人如沐春风的 Typora 灵动主题。",
+        "topics": [
+          "css",
+          "typora",
+          "typora-theme"
+        ],
+        "language": "CSS"
+      }
     }
   },
   "patterns": {
@@ -1771,7 +1905,7 @@
     },
     "type": {
       "应用 / App": {
-        "工具 / Tool": 7
+        "工具 / Tool": 8
       },
       "资源合集 / Awesome": {
         "工具 / Tool": 2
@@ -1791,10 +1925,15 @@
         "工具 / Tool": 3
       },
       "移动端 App": {
-        "应用 / App": 1
+        "应用 / App": 1,
+        "工具 / Tool": 2
       },
       "桌面 GUI": {
-        "应用 / App": 1
+        "应用 / App": 1,
+        "工具 / Tool": 2
+      },
+      "主题 / Theme": {
+        "工具 / Tool": 1
       }
     },
     "ecology": {
