@@ -8431,5 +8431,19 @@
     "ai_type": "应用 / App",
     "ai_ecology": "独立项目",
     "ai_ecology_role": "Web UI / Dashboard"
+  },
+  "Belphemur/SoundSwitch": {
+    "full_name": "Belphemur/SoundSwitch",
+    "analyzed_at": "2026-06-22T07:42:38.692813+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
   }
 }
