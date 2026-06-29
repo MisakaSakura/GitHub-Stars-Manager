@@ -8445,5 +8445,47 @@
     "ai_type": null,
     "ai_ecology": null,
     "ai_ecology_role": null
+  },
+  "vorssaint/vorssaint-utils": {
+    "full_name": "vorssaint/vorssaint-utils",
+    "analyzed_at": "2026-06-29T07:04:36.959545+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
+  },
+  "Cateners/tiny_container": {
+    "full_name": "Cateners/tiny_container",
+    "analyzed_at": "2026-06-29T07:04:36.959571+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
+  },
+  "librepods-org/librepods": {
+    "full_name": "librepods-org/librepods",
+    "analyzed_at": "2026-06-29T07:04:36.959582+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
   }
 }
