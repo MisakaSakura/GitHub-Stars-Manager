@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-29T07:04:58.054166+00:00",
+  "updated_at": "2026-07-01T06:46:55.623186+00:00",
   "candidates": {
     "Android": {
       "status": "rejected",
@@ -8,7 +8,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 16,
+      "missed_runs": 17,
       "confidence_history": [
         1.0,
         1.0,
@@ -45,7 +45,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 16,
+      "missed_runs": 17,
       "confidence_history": [
         1.0,
         1.0,
@@ -82,7 +82,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 16,
+      "missed_runs": 17,
       "confidence_history": [
         0.7,
         0.7,
@@ -119,7 +119,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 16,
+      "missed_runs": 17,
       "confidence_history": [
         0.4,
         0.4,
@@ -151,7 +151,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 16,
+      "missed_runs": 17,
       "confidence_history": [
         0.4,
         0.4,
@@ -180,11 +180,12 @@
     "Payload": {
       "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-05-18T16:30:26.751579+00:00",
-      "appear_count": 12,
-      "consecutive_runs": 0,
-      "missed_runs": 7,
+      "last_seen": "2026-07-01T06:46:55.622920+00:00",
+      "appear_count": 13,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3,
         0.3,
         0.3,
@@ -199,6 +200,7 @@
         0.3
       ],
       "project_count_history": [
+        3,
         3,
         3,
         3,
@@ -238,11 +240,12 @@
     "Moonlight": {
       "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-06-29T07:04:58.053931+00:00",
-      "appear_count": 19,
-      "consecutive_runs": 19,
+      "last_seen": "2026-07-01T06:46:55.622920+00:00",
+      "appear_count": 20,
+      "consecutive_runs": 20,
       "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3,
         0.3,
         0.3,
@@ -264,6 +267,7 @@
         0.3
       ],
       "project_count_history": [
+        3,
         3,
         3,
         3,
@@ -316,7 +320,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 16,
+      "missed_runs": 17,
       "confidence_history": [
         0.3,
         0.3,
@@ -348,7 +352,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 15,
+      "missed_runs": 16,
       "confidence_history": [
         0.3,
         0.4
@@ -378,7 +382,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 15,
+      "missed_runs": 16,
       "confidence_history": [
         0.3,
         0.4
@@ -408,7 +412,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 16,
+      "missed_runs": 17,
       "confidence_history": [
         0.8,
         0.8
@@ -438,7 +442,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 16,
+      "missed_runs": 17,
       "confidence_history": [
         0.3,
         0.3
@@ -468,7 +472,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 15,
+      "missed_runs": 16,
       "confidence_history": [
         0.3
       ],
@@ -496,7 +500,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 15,
+      "missed_runs": 16,
       "confidence_history": [
         0.3
       ],
@@ -524,7 +528,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 15,
+      "missed_runs": 16,
       "confidence_history": [
         0.3
       ],
@@ -552,7 +556,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 15,
+      "missed_runs": 16,
       "confidence_history": [
         0.3
       ],
@@ -580,7 +584,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 15,
+      "missed_runs": 16,
       "confidence_history": [
         0.3
       ],
@@ -608,7 +612,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 9,
       "consecutive_runs": 0,
-      "missed_runs": 6,
+      "missed_runs": 7,
       "confidence_history": [
         0.3,
         0.3,
@@ -653,11 +657,12 @@
     "Mpv": {
       "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-06-29T07:04:58.053931+00:00",
-      "appear_count": 7,
-      "consecutive_runs": 6,
+      "last_seen": "2026-07-01T06:46:55.622920+00:00",
+      "appear_count": 8,
+      "consecutive_runs": 7,
       "missed_runs": 0,
       "confidence_history": [
+        0.5,
         0.5,
         0.5,
         0.5,
@@ -666,6 +671,7 @@
         0.5
       ],
       "project_count_history": [
+        5,
         5,
         5,
         5,
@@ -707,8 +713,8 @@
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
       "last_seen": "2026-06-29T07:04:58.053931+00:00",
       "appear_count": 7,
-      "consecutive_runs": 4,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.5,
         0.5,
@@ -756,11 +762,12 @@
     "Clash": {
       "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-06-29T07:04:58.053931+00:00",
-      "appear_count": 7,
-      "consecutive_runs": 6,
+      "last_seen": "2026-07-01T06:46:55.622920+00:00",
+      "appear_count": 8,
+      "consecutive_runs": 7,
       "missed_runs": 0,
       "confidence_history": [
+        0.4,
         0.4,
         0.4,
         0.4,
@@ -769,6 +776,7 @@
         0.4
       ],
       "project_count_history": [
+        4,
         4,
         4,
         4,
@@ -807,9 +815,9 @@
     "Typora": {
       "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-06-29T07:04:58.053931+00:00",
-      "appear_count": 7,
-      "consecutive_runs": 6,
+      "last_seen": "2026-07-01T06:46:55.622920+00:00",
+      "appear_count": 8,
+      "consecutive_runs": 7,
       "missed_runs": 0,
       "confidence_history": [
         0.4,
@@ -817,7 +825,8 @@
         0.4,
         0.4,
         0.4,
-        0.4
+        0.4,
+        0.5
       ],
       "project_count_history": [
         4,
@@ -825,7 +834,8 @@
         4,
         4,
         4,
-        4
+        4,
+        5
       ],
       "suggested_patterns": {
         "name_patterns": [
@@ -847,6 +857,7 @@
       },
       "example_projects": [
         "Keldos-Li/typora-latex-theme",
+        "SprInec/typora-spring-theme",
         "YiNNx/typora-theme-lapis",
         "obscurefreeman/typora_theme_blackout",
         "sumruler/typora-theme-phycat"
@@ -857,11 +868,12 @@
     "Clash-meta": {
       "status": "candidate",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-06-29T07:04:58.053931+00:00",
-      "appear_count": 7,
-      "consecutive_runs": 7,
+      "last_seen": "2026-07-01T06:46:55.622920+00:00",
+      "appear_count": 8,
+      "consecutive_runs": 8,
       "missed_runs": 0,
       "confidence_history": [
+        0.4,
         0.4,
         0.4,
         0.4,
@@ -871,6 +883,7 @@
         0.4
       ],
       "project_count_history": [
+        4,
         4,
         4,
         4,
@@ -905,7 +918,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 6,
+      "missed_runs": 7,
       "confidence_history": [
         0.4
       ],
@@ -938,7 +951,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 6,
+      "missed_runs": 7,
       "confidence_history": [
         0.3
       ],
@@ -970,7 +983,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 6,
+      "missed_runs": 7,
       "confidence_history": [
         0.3
       ],
@@ -1001,8 +1014,8 @@
       "first_seen": "2026-05-25T06:48:00.644143+00:00",
       "last_seen": "2026-06-29T07:04:58.053931+00:00",
       "appear_count": 6,
-      "consecutive_runs": 6,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3,
         0.3,
@@ -1043,8 +1056,8 @@
       "first_seen": "2026-05-25T06:48:00.644143+00:00",
       "last_seen": "2026-06-29T07:04:58.053931+00:00",
       "appear_count": 6,
-      "consecutive_runs": 6,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3,
         0.3,
@@ -1085,8 +1098,8 @@
       "first_seen": "2026-06-01T07:26:23.295200+00:00",
       "last_seen": "2026-06-29T07:04:58.053931+00:00",
       "appear_count": 5,
-      "consecutive_runs": 5,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3,
         0.3,
@@ -1125,8 +1138,8 @@
       "first_seen": "2026-06-08T07:05:27.724063+00:00",
       "last_seen": "2026-06-29T07:04:58.053931+00:00",
       "appear_count": 4,
-      "consecutive_runs": 4,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3,
         0.3,
@@ -1154,6 +1167,136 @@
         "JHRobotics/softgpu",
         "lostindark/DriverStoreExplorer",
         "winfsp/winfsp"
+      ],
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Agent": {
+      "status": "candidate",
+      "first_seen": "2026-07-01T06:46:55.622920+00:00",
+      "last_seen": "2026-07-01T06:46:55.622920+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.4
+      ],
+      "project_count_history": [
+        4
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "agent"
+        ],
+        "topic_patterns": [
+          "agent"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "example_projects": [
+        "AAswordman/Operit",
+        "AstrBotDevs/AstrBot",
+        "esengine/DeepSeek-Reasonix",
+        "rikkahub/rikkahub"
+      ],
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Audio-player": {
+      "status": "candidate",
+      "first_seen": "2026-07-01T06:46:55.622920+00:00",
+      "last_seen": "2026-07-01T06:46:55.622920+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.4
+      ],
+      "project_count_history": [
+        4
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "audio-player"
+        ],
+        "topic_patterns": [
+          "audio-player"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "example_projects": [
+        "amll-dev/applemusic-like-lyrics",
+        "diana7127/mpv.net-DW",
+        "mikebrady/shairport-sync",
+        "mpvnet-player/mpv.net"
+      ],
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Compose": {
+      "status": "candidate",
+      "first_seen": "2026-07-01T06:46:55.622920+00:00",
+      "last_seen": "2026-07-01T06:46:55.622920+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "compose"
+        ],
+        "topic_patterns": [
+          "compose"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "example_projects": [
+        "AAswordman/Operit",
+        "abdallahmehiz/mpvKt",
+        "getarcaneapp/arcane"
+      ],
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Ai-agents": {
+      "status": "candidate",
+      "first_seen": "2026-07-01T06:46:55.622920+00:00",
+      "last_seen": "2026-07-01T06:46:55.622920+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "ai-agents"
+        ],
+        "topic_patterns": [
+          "ai-agents"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "example_projects": [
+        "Turbo1123/roubao",
+        "code-yeongyu/oh-my-openagent",
+        "graykode/abtop"
       ],
       "ai_review": null,
       "rejected_reason": ""

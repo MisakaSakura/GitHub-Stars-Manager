@@ -1,7 +1,7 @@
 {
   "version": 1,
   "rules_version": "2026-05-17-platform-refactor",
-  "updated_at": "2026-06-15T07:40:45.966238+00:00",
+  "updated_at": "2026-07-01T06:46:59.198963+00:00",
   "entries": {
     "obra/superpowers": {
       "timestamp": "2026-05-17T11:35:04.821063+00:00",
@@ -1867,6 +1867,102 @@
         ],
         "language": "CSS"
       }
+    },
+    "Hmbown/DeepSeek-TUI": {
+      "timestamp": "2026-07-01T06:46:59.198772+00:00",
+      "original": {
+        "platform": "跨平台",
+        "type": "CLI / 终端",
+        "ecology": "AI/ML",
+        "ecology_role": "脚本 / Script"
+      },
+      "corrected": {
+        "platform": "跨平台",
+        "type": "CLI / 终端",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "DeepSeek-TUI",
+        "description": "Coding agent for DeepSeek models that runs in your terminal",
+        "topics": [
+          "cli",
+          "deepseek",
+          "llm",
+          "rust",
+          "terminal",
+          "tui"
+        ],
+        "language": "Rust"
+      }
+    },
+    "cirruslabs/tart": {
+      "timestamp": "2026-07-01T06:46:59.198796+00:00",
+      "original": {
+        "platform": "macOS",
+        "type": "工具 / Tool",
+        "ecology": "Apple",
+        "ecology_role": "脚本 / Script"
+      },
+      "corrected": {
+        "platform": "macOS",
+        "type": "工具 / Tool",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "tart",
+        "description": "macOS and Linux VMs on Apple Silicon to use in CI and other automations",
+        "topics": [
+          "apple-silicon",
+          "automation",
+          "ci",
+          "fair-source",
+          "macos",
+          "tart",
+          "virtualization",
+          "virtualization-framework"
+        ],
+        "language": "Swift"
+      }
+    },
+    "kavishdevar/librepods": {
+      "timestamp": "2026-07-01T06:46:59.198819+00:00",
+      "original": {
+        "platform": "Android",
+        "type": "工具 / Tool",
+        "ecology": "AirPlay",
+        "ecology_role": "API 封装 / Wrapper"
+      },
+      "corrected": {
+        "platform": "Android",
+        "type": "工具 / Tool",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "librepods",
+        "description": "AirPods liberated from Apple's ecosystem.",
+        "topics": [
+          "accessiblity",
+          "airpods",
+          "android",
+          "battery-monitor",
+          "conversational-awareness",
+          "ear-detection",
+          "hearing-aid",
+          "hearing-aids",
+          "linux",
+          "reverse-engineering"
+        ],
+        "language": "Kotlin"
+      }
     }
   },
   "patterns": {
@@ -1993,6 +2089,15 @@
       },
       "Flutter": {
         "独立项目": 1
+      },
+      "AI/ML": {
+        "独立项目": 1
+      },
+      "Apple": {
+        "独立项目": 1
+      },
+      "AirPlay": {
+        "独立项目": 1
       }
     },
     "ecology_role": {
@@ -2009,13 +2114,13 @@
         "-": 1
       },
       "API 封装 / Wrapper": {
-        "-": 2
+        "-": 3
       },
       "其他 / Other": {
         "-": 2
       },
       "脚本 / Script": {
-        "-": 1
+        "-": 3
       },
       "教程 / Guide": {
         "-": 1
