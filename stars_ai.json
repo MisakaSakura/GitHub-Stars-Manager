@@ -6566,5 +6566,33 @@
     "ai_type": null,
     "ai_ecology": null,
     "ai_ecology_role": null
+  },
+  "dyang886/Game-Save-Manager": {
+    "full_name": "dyang886/Game-Save-Manager",
+    "analyzed_at": "2026-07-06T06:47:57.760800+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
+  },
+  "dyang886/Game-Cheats-Manager": {
+    "full_name": "dyang886/Game-Cheats-Manager",
+    "analyzed_at": "2026-07-06T06:47:57.760824+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
   }
 }
