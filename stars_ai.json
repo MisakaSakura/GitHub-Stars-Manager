@@ -6594,5 +6594,33 @@
     "ai_type": null,
     "ai_ecology": null,
     "ai_ecology_role": null
+  },
+  "IridiumIO/CompactGUI": {
+    "full_name": "IridiumIO/CompactGUI",
+    "analyzed_at": "2026-07-13T05:49:06.268473+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
+  },
+  "OwO-Network/DLX": {
+    "full_name": "OwO-Network/DLX",
+    "analyzed_at": "2026-07-13T05:49:06.268498+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
   }
 }
