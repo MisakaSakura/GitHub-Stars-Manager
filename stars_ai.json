@@ -6622,5 +6622,61 @@
     "ai_type": null,
     "ai_ecology": null,
     "ai_ecology_role": null
+  },
+  "justnullname/QuickView": {
+    "full_name": "justnullname/QuickView",
+    "analyzed_at": "2026-07-27T06:00:46.660219+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
+  },
+  "ruanyf/weekly": {
+    "full_name": "ruanyf/weekly",
+    "analyzed_at": "2026-07-27T06:00:46.660243+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
+  },
+  "Achilng/floral-notepaper": {
+    "full_name": "Achilng/floral-notepaper",
+    "analyzed_at": "2026-07-27T06:00:46.660253+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
+  },
+  "tonyantony300/dashbeam": {
+    "full_name": "tonyantony300/dashbeam",
+    "analyzed_at": "2026-07-27T06:00:46.660260+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
   }
 }
