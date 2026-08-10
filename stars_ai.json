@@ -6804,5 +6804,33 @@
     "ai_type": null,
     "ai_ecology": null,
     "ai_ecology_role": null
+  },
+  "asenyarzc-cpu/Twilight_Echo": {
+    "full_name": "asenyarzc-cpu/Twilight_Echo",
+    "analyzed_at": "2026-08-10T04:07:40.319418+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
+  },
+  "winboat-org/winboat": {
+    "full_name": "winboat-org/winboat",
+    "analyzed_at": "2026-08-10T04:07:40.319446+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
   }
 }
