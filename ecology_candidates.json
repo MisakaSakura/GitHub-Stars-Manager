@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-08-17T03:13:42.626127+00:00",
+  "updated_at": "2026-08-24T03:17:38.240064+00:00",
   "candidates": {
     "Android": {
       "status": "rejected",
@@ -8,7 +8,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 25,
+      "missed_runs": 26,
       "confidence_history": [
         1.0,
         1.0,
@@ -45,7 +45,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 25,
+      "missed_runs": 26,
       "confidence_history": [
         1.0,
         1.0,
@@ -82,7 +82,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 25,
+      "missed_runs": 26,
       "confidence_history": [
         0.7,
         0.7,
@@ -119,7 +119,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 25,
+      "missed_runs": 26,
       "confidence_history": [
         0.4,
         0.4,
@@ -151,7 +151,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 25,
+      "missed_runs": 26,
       "confidence_history": [
         0.4,
         0.4,
@@ -183,7 +183,7 @@
       "last_seen": "2026-08-10T04:07:57.086372+00:00",
       "appear_count": 20,
       "consecutive_runs": 0,
-      "missed_runs": 1,
+      "missed_runs": 2,
       "confidence_history": [
         0.3,
         0.3,
@@ -257,7 +257,7 @@
       "last_seen": "2026-07-27T06:01:09.968573+00:00",
       "appear_count": 24,
       "consecutive_runs": 0,
-      "missed_runs": 4,
+      "missed_runs": 5,
       "confidence_history": [
         0.3,
         0.3,
@@ -342,7 +342,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 25,
+      "missed_runs": 26,
       "confidence_history": [
         0.3,
         0.3,
@@ -374,7 +374,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 24,
+      "missed_runs": 25,
       "confidence_history": [
         0.3,
         0.4
@@ -404,7 +404,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 24,
+      "missed_runs": 25,
       "confidence_history": [
         0.3,
         0.4
@@ -434,7 +434,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 25,
+      "missed_runs": 26,
       "confidence_history": [
         0.8,
         0.8
@@ -464,7 +464,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 25,
+      "missed_runs": 26,
       "confidence_history": [
         0.3,
         0.3
@@ -494,7 +494,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 24,
+      "missed_runs": 25,
       "confidence_history": [
         0.3
       ],
@@ -522,7 +522,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 24,
+      "missed_runs": 25,
       "confidence_history": [
         0.3
       ],
@@ -550,7 +550,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 24,
+      "missed_runs": 25,
       "confidence_history": [
         0.3
       ],
@@ -578,7 +578,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 24,
+      "missed_runs": 25,
       "confidence_history": [
         0.3
       ],
@@ -606,7 +606,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 24,
+      "missed_runs": 25,
       "confidence_history": [
         0.3
       ],
@@ -634,7 +634,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 9,
       "consecutive_runs": 0,
-      "missed_runs": 15,
+      "missed_runs": 16,
       "confidence_history": [
         0.3,
         0.3,
@@ -679,11 +679,12 @@
     "Mpv": {
       "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-08-17T03:13:42.625754+00:00",
-      "appear_count": 16,
-      "consecutive_runs": 15,
+      "last_seen": "2026-08-24T03:17:38.239731+00:00",
+      "appear_count": 17,
+      "consecutive_runs": 16,
       "missed_runs": 0,
       "confidence_history": [
+        0.5,
         0.5,
         0.5,
         0.5,
@@ -701,6 +702,7 @@
         0.5
       ],
       "project_count_history": [
+        5,
         5,
         5,
         5,
@@ -749,11 +751,12 @@
     "Bangumi": {
       "status": "expired",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-08-17T03:13:42.625754+00:00",
-      "appear_count": 11,
-      "consecutive_runs": 4,
+      "last_seen": "2026-08-24T03:17:38.239731+00:00",
+      "appear_count": 12,
+      "consecutive_runs": 5,
       "missed_runs": 0,
       "confidence_history": [
+        0.5,
         0.5,
         0.5,
         0.5,
@@ -767,6 +770,7 @@
         0.5
       ],
       "project_count_history": [
+        5,
         5,
         5,
         5,
@@ -808,11 +812,12 @@
     "Clash": {
       "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-08-17T03:13:42.625754+00:00",
-      "appear_count": 16,
-      "consecutive_runs": 15,
+      "last_seen": "2026-08-24T03:17:38.239731+00:00",
+      "appear_count": 17,
+      "consecutive_runs": 16,
       "missed_runs": 0,
       "confidence_history": [
+        0.4,
         0.4,
         0.4,
         0.4,
@@ -830,6 +835,7 @@
         0.4
       ],
       "project_count_history": [
+        4,
         4,
         4,
         4,
@@ -877,9 +883,9 @@
     "Typora": {
       "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-08-17T03:13:42.625754+00:00",
-      "appear_count": 16,
-      "consecutive_runs": 15,
+      "last_seen": "2026-08-24T03:17:38.239731+00:00",
+      "appear_count": 17,
+      "consecutive_runs": 16,
       "missed_runs": 0,
       "confidence_history": [
         0.4,
@@ -888,6 +894,7 @@
         0.4,
         0.4,
         0.4,
+        0.5,
         0.5,
         0.5,
         0.5,
@@ -905,6 +912,7 @@
         4,
         4,
         4,
+        5,
         5,
         5,
         5,
@@ -946,11 +954,12 @@
     "Clash-meta": {
       "status": "candidate",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-08-17T03:13:42.625754+00:00",
-      "appear_count": 16,
-      "consecutive_runs": 16,
+      "last_seen": "2026-08-24T03:17:38.239731+00:00",
+      "appear_count": 17,
+      "consecutive_runs": 17,
       "missed_runs": 0,
       "confidence_history": [
+        0.4,
         0.4,
         0.4,
         0.4,
@@ -969,6 +978,7 @@
         0.4
       ],
       "project_count_history": [
+        4,
         4,
         4,
         4,
@@ -1012,7 +1022,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 15,
+      "missed_runs": 16,
       "confidence_history": [
         0.4
       ],
@@ -1045,7 +1055,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 15,
+      "missed_runs": 16,
       "confidence_history": [
         0.3
       ],
@@ -1077,7 +1087,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 15,
+      "missed_runs": 16,
       "confidence_history": [
         0.3
       ],
@@ -1109,7 +1119,7 @@
       "last_seen": "2026-06-29T07:04:58.053931+00:00",
       "appear_count": 6,
       "consecutive_runs": 0,
-      "missed_runs": 9,
+      "missed_runs": 10,
       "confidence_history": [
         0.3,
         0.3,
@@ -1151,7 +1161,7 @@
       "last_seen": "2026-06-29T07:04:58.053931+00:00",
       "appear_count": 6,
       "consecutive_runs": 0,
-      "missed_runs": 9,
+      "missed_runs": 10,
       "confidence_history": [
         0.3,
         0.3,
@@ -1192,8 +1202,8 @@
       "first_seen": "2026-06-01T07:26:23.295200+00:00",
       "last_seen": "2026-08-17T03:13:42.625754+00:00",
       "appear_count": 9,
-      "consecutive_runs": 4,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3,
         0.3,
@@ -1242,7 +1252,7 @@
       "last_seen": "2026-06-29T07:04:58.053931+00:00",
       "appear_count": 4,
       "consecutive_runs": 0,
-      "missed_runs": 9,
+      "missed_runs": 10,
       "confidence_history": [
         0.3,
         0.3,
@@ -1277,11 +1287,12 @@
     "Agent": {
       "status": "candidate",
       "first_seen": "2026-07-01T06:46:55.622920+00:00",
-      "last_seen": "2026-08-17T03:13:42.625754+00:00",
-      "appear_count": 9,
-      "consecutive_runs": 9,
+      "last_seen": "2026-08-24T03:17:38.239731+00:00",
+      "appear_count": 10,
+      "consecutive_runs": 10,
       "missed_runs": 0,
       "confidence_history": [
+        0.4,
         0.4,
         0.4,
         0.4,
@@ -1293,6 +1304,7 @@
         0.4
       ],
       "project_count_history": [
+        4,
         4,
         4,
         4,
@@ -1326,11 +1338,12 @@
     "Audio-player": {
       "status": "candidate",
       "first_seen": "2026-07-01T06:46:55.622920+00:00",
-      "last_seen": "2026-08-17T03:13:42.625754+00:00",
-      "appear_count": 9,
-      "consecutive_runs": 9,
+      "last_seen": "2026-08-24T03:17:38.239731+00:00",
+      "appear_count": 10,
+      "consecutive_runs": 10,
       "missed_runs": 0,
       "confidence_history": [
+        0.4,
         0.4,
         0.4,
         0.4,
@@ -1342,6 +1355,7 @@
         0.4
       ],
       "project_count_history": [
+        4,
         4,
         4,
         4,
@@ -1378,7 +1392,7 @@
       "last_seen": "2026-07-27T06:01:09.968573+00:00",
       "appear_count": 5,
       "consecutive_runs": 0,
-      "missed_runs": 4,
+      "missed_runs": 5,
       "confidence_history": [
         0.3,
         0.3,
@@ -1415,15 +1429,17 @@
     "Ai-agents": {
       "status": "candidate",
       "first_seen": "2026-07-01T06:46:55.622920+00:00",
-      "last_seen": "2026-07-01T06:46:55.622920+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 0,
-      "missed_runs": 8,
+      "last_seen": "2026-08-24T03:17:38.239731+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
       "confidence_history": [
-        0.3
+        0.3,
+        0.4
       ],
       "project_count_history": [
-        3
+        3,
+        4
       ],
       "suggested_patterns": {
         "name_patterns": [],
@@ -1439,7 +1455,8 @@
       "example_projects": [
         "Turbo1123/roubao",
         "code-yeongyu/oh-my-openagent",
-        "graykode/abtop"
+        "graykode/abtop",
+        "yjh051108/dsh-routing-suite"
       ],
       "ai_review": null,
       "rejected_reason": ""
@@ -1447,9 +1464,9 @@
     "Deepseek": {
       "status": "candidate",
       "first_seen": "2026-07-06T06:48:24.059173+00:00",
-      "last_seen": "2026-08-17T03:13:42.625754+00:00",
-      "appear_count": 8,
-      "consecutive_runs": 8,
+      "last_seen": "2026-08-24T03:17:38.239731+00:00",
+      "appear_count": 9,
+      "consecutive_runs": 9,
       "missed_runs": 0,
       "confidence_history": [
         0.3,
@@ -1459,7 +1476,8 @@
         0.3,
         0.3,
         0.3,
-        0.3
+        0.3,
+        0.4
       ],
       "project_count_history": [
         3,
@@ -1469,7 +1487,8 @@
         3,
         3,
         3,
-        3
+        3,
+        4
       ],
       "suggested_patterns": {
         "name_patterns": [
@@ -1478,13 +1497,13 @@
           "deepseek_"
         ],
         "desc_patterns": [
+          "deepseek",
           "coding",
-          "agent",
-          "for"
+          "agent"
         ],
         "topic_patterns": [
-          "cli",
           "deepseek",
+          "cli",
           "llm"
         ],
         "related_types": [],
@@ -1493,6 +1512,7 @@
       "example_projects": [
         "Hmbown/DeepSeek-TUI",
         "deepseek-ai/DeepSeek-V3",
+        "dsh-tauri-desk/deepseek-harness-desktop",
         "esengine/DeepSeek-Reasonix"
       ],
       "ai_review": null,
@@ -1501,14 +1521,16 @@
     "Dsh": {
       "status": "candidate",
       "first_seen": "2026-08-17T03:13:42.625754+00:00",
-      "last_seen": "2026-08-17T03:13:42.625754+00:00",
-      "appear_count": 1,
-      "consecutive_runs": 1,
+      "last_seen": "2026-08-24T03:17:38.239731+00:00",
+      "appear_count": 2,
+      "consecutive_runs": 2,
       "missed_runs": 0,
       "confidence_history": [
+        0.4,
         0.4
       ],
       "project_count_history": [
+        4,
         4
       ],
       "suggested_patterns": {
@@ -1518,9 +1540,9 @@
           "dsh_"
         ],
         "desc_patterns": [
-          "ocr",
-          "vision",
-          "pixel"
+          "deepseek",
+          "harness",
+          "for"
         ],
         "topic_patterns": [
           "dsh",
