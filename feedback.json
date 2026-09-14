@@ -1,7 +1,7 @@
 {
   "version": 1,
   "rules_version": "2026-05-17-platform-refactor",
-  "updated_at": "2026-07-01T06:46:59.198963+00:00",
+  "updated_at": "2026-09-14T07:55:48.701632+00:00",
   "entries": {
     "obra/superpowers": {
       "timestamp": "2026-05-17T11:35:04.821063+00:00",
@@ -1963,6 +1963,49 @@
         ],
         "language": "Kotlin"
       }
+    },
+    "Tiger3807861189/J-Space-Cognition-Suite": {
+      "timestamp": "2026-09-14T07:55:48.701529+00:00",
+      "original": {
+        "platform": "Linux",
+        "type": "Web 前端",
+        "ecology": "Ai-agents",
+        "ecology_role": "插件 / Plugin"
+      },
+      "corrected": {
+        "platform": "Linux",
+        "type": "Web 前端",
+        "ecology": "独立项目",
+        "ecology_role": "-"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "J-Space-Cognition-Suite",
+        "description": "J-Space Cognition Suite — a model-agnostic inference-time control suite for deep reasoning, long-horizon work, verification, and recovery. Based on Anthropic's J-space global workspace research. | 哔哩哔哩：Tiger380 — https://space.bilibili.com/3494375382321675",
+        "topics": [
+          "agent-skills",
+          "ai",
+          "ai-agent",
+          "ai-agents",
+          "claude-code",
+          "codex",
+          "cognitive-enhancement",
+          "deepseek",
+          "deepseek-harness",
+          "developer-tools",
+          "dsh",
+          "dsh-plugin",
+          "global-workspace",
+          "hermes-agent",
+          "inference-time-control",
+          "j-space",
+          "opencode",
+          "react",
+          "tailwindcss"
+        ],
+        "language": "Python"
+      }
     }
   },
   "patterns": {
@@ -2098,6 +2141,9 @@
       },
       "AirPlay": {
         "独立项目": 1
+      },
+      "Ai-agents": {
+        "独立项目": 1
       }
     },
     "ecology_role": {
@@ -2108,7 +2154,7 @@
         "-": 7
       },
       "插件 / Plugin": {
-        "-": 2
+        "-": 3
       },
       "主题 / Theme": {
         "-": 1
