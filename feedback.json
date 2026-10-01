@@ -1,7 +1,7 @@
 {
   "version": 1,
   "rules_version": "2026-05-17-platform-refactor",
-  "updated_at": "2026-09-14T07:55:48.701632+00:00",
+  "updated_at": "2026-10-01T09:00:53.117179+00:00",
   "entries": {
     "obra/superpowers": {
       "timestamp": "2026-05-17T11:35:04.821063+00:00",
@@ -1315,17 +1315,17 @@
       }
     },
     "Turbo1123/roubao": {
-      "timestamp": "2026-05-25T06:48:00.652621+00:00",
+      "timestamp": "2026-10-01T09:00:53.117006+00:00",
       "original": {
         "platform": "Android",
-        "type": "工具 / Tool",
-        "ecology": "AI/ML",
+        "type": "自动化 / 工作流",
+        "ecology": "Ai-agents",
         "ecology_role": "脚本 / Script"
       },
       "corrected": {
-        "platform": "跨平台",
-        "type": "工具 / Tool",
-        "ecology": "AI/ML",
+        "platform": "其他 / 未分类",
+        "type": "自动化 / 工作流",
+        "ecology": "Ai-agents",
         "ecology_role": "脚本 / Script"
       },
       "source": "auto_fix",
@@ -1502,17 +1502,17 @@
       }
     },
     "infiniflow/ragflow": {
-      "timestamp": "2026-05-25T06:48:00.652667+00:00",
+      "timestamp": "2026-10-01T09:00:53.117037+00:00",
       "original": {
-        "platform": "Web",
-        "type": "Web 后端",
-        "ecology": "AI/ML",
+        "platform": "Linux",
+        "type": "框架 / Framework",
+        "ecology": "Ai-agents",
         "ecology_role": "核心 / Core"
       },
       "corrected": {
-        "platform": "跨平台",
-        "type": "Web 后端",
-        "ecology": "AI/ML",
+        "platform": "其他 / 未分类",
+        "type": "框架 / Framework",
+        "ecology": "Ai-agents",
         "ecology_role": "核心 / Core"
       },
       "source": "auto_fix",
@@ -1521,18 +1521,23 @@
         "name": "ragflow",
         "description": "RAGFlow is a leading open-source Retrieval-Augmented Generation (RAG) engine that fuses cutting-edge RAG with Agent capabilities to create a superior context layer for LLMs",
         "topics": [
+          "agent-harness",
           "agentic-ai",
+          "agentic-nagive",
           "agentic-retrieval",
           "agentic-search",
           "ai",
           "ai-agents",
           "context-engine",
+          "context-engineering",
           "context-management",
-          "llm-apps",
+          "harness-engineering",
+          "knowledge-compilation",
           "rag",
-          "retrieval-augmented-generation"
+          "retrieval-augmented-generation",
+          "search-harness"
         ],
-        "language": "Python"
+        "language": "Go"
       }
     },
     "hacksider/Deep-Live-Cam": {
@@ -2026,7 +2031,8 @@
         "macOS": 8
       },
       "Linux": {
-        "跨平台": 2
+        "跨平台": 2,
+        "其他 / 未分类": 1
       },
       "Windows": {
         "跨平台": 2,
@@ -2036,7 +2042,8 @@
         "Android": 2
       },
       "Android": {
-        "跨平台": 3
+        "跨平台": 3,
+        "其他 / 未分类": 1
       },
       "Web": {
         "跨平台": 11

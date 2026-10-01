@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-09-28T08:43:35.917591+00:00",
+  "updated_at": "2026-10-01T09:00:41.965872+00:00",
   "candidates": {
     "Android": {
       "status": "rejected",
@@ -8,7 +8,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 32,
+      "missed_runs": 33,
       "confidence_history": [
         1.0,
         1.0,
@@ -45,7 +45,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 32,
+      "missed_runs": 33,
       "confidence_history": [
         1.0,
         1.0,
@@ -82,7 +82,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 32,
+      "missed_runs": 33,
       "confidence_history": [
         0.7,
         0.7,
@@ -119,7 +119,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 32,
+      "missed_runs": 33,
       "confidence_history": [
         0.4,
         0.4,
@@ -151,7 +151,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 32,
+      "missed_runs": 33,
       "confidence_history": [
         0.4,
         0.4,
@@ -180,11 +180,12 @@
     "Payload": {
       "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-08-10T04:07:57.086372+00:00",
-      "appear_count": 20,
-      "consecutive_runs": 0,
-      "missed_runs": 8,
+      "last_seen": "2026-10-01T09:00:41.965649+00:00",
+      "appear_count": 21,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3,
         0.3,
         0.3,
@@ -207,6 +208,7 @@
         0.3
       ],
       "project_count_history": [
+        3,
         3,
         3,
         3,
@@ -254,11 +256,12 @@
     "Moonlight": {
       "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-07-27T06:01:09.968573+00:00",
-      "appear_count": 24,
-      "consecutive_runs": 0,
-      "missed_runs": 11,
+      "last_seen": "2026-10-01T09:00:41.965649+00:00",
+      "appear_count": 25,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3,
         0.3,
         0.3,
@@ -285,6 +288,7 @@
         0.3
       ],
       "project_count_history": [
+        3,
         3,
         3,
         3,
@@ -342,7 +346,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 32,
+      "missed_runs": 33,
       "confidence_history": [
         0.3,
         0.3,
@@ -374,7 +378,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 31,
+      "missed_runs": 32,
       "confidence_history": [
         0.3,
         0.4
@@ -404,7 +408,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 31,
+      "missed_runs": 32,
       "confidence_history": [
         0.3,
         0.4
@@ -434,7 +438,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 32,
+      "missed_runs": 33,
       "confidence_history": [
         0.8,
         0.8
@@ -464,7 +468,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 32,
+      "missed_runs": 33,
       "confidence_history": [
         0.3,
         0.3
@@ -494,7 +498,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 31,
+      "missed_runs": 32,
       "confidence_history": [
         0.3
       ],
@@ -522,7 +526,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 31,
+      "missed_runs": 32,
       "confidence_history": [
         0.3
       ],
@@ -550,7 +554,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 31,
+      "missed_runs": 32,
       "confidence_history": [
         0.3
       ],
@@ -578,7 +582,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 31,
+      "missed_runs": 32,
       "confidence_history": [
         0.3
       ],
@@ -606,7 +610,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 31,
+      "missed_runs": 32,
       "confidence_history": [
         0.3
       ],
@@ -634,7 +638,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 9,
       "consecutive_runs": 0,
-      "missed_runs": 22,
+      "missed_runs": 23,
       "confidence_history": [
         0.3,
         0.3,
@@ -679,11 +683,12 @@
     "Mpv": {
       "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-09-28T08:43:35.917393+00:00",
-      "appear_count": 23,
-      "consecutive_runs": 22,
+      "last_seen": "2026-10-01T09:00:41.965649+00:00",
+      "appear_count": 24,
+      "consecutive_runs": 23,
       "missed_runs": 0,
       "confidence_history": [
+        0.5,
         0.5,
         0.5,
         0.5,
@@ -708,6 +713,7 @@
         0.5
       ],
       "project_count_history": [
+        5,
         5,
         5,
         5,
@@ -763,11 +769,12 @@
     "Bangumi": {
       "status": "expired",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-09-28T08:43:35.917393+00:00",
-      "appear_count": 18,
-      "consecutive_runs": 11,
+      "last_seen": "2026-10-01T09:00:41.965649+00:00",
+      "appear_count": 19,
+      "consecutive_runs": 12,
       "missed_runs": 0,
       "confidence_history": [
+        0.5,
         0.5,
         0.5,
         0.5,
@@ -788,6 +795,7 @@
         0.5
       ],
       "project_count_history": [
+        5,
         5,
         5,
         5,
@@ -838,8 +846,8 @@
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
       "last_seen": "2026-09-28T08:43:35.917393+00:00",
       "appear_count": 23,
-      "consecutive_runs": 22,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.4,
         0.4,
@@ -919,9 +927,9 @@
     "Typora": {
       "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-09-28T08:43:35.917393+00:00",
-      "appear_count": 23,
-      "consecutive_runs": 22,
+      "last_seen": "2026-10-01T09:00:41.965649+00:00",
+      "appear_count": 24,
+      "consecutive_runs": 23,
       "missed_runs": 0,
       "confidence_history": [
         0.4,
@@ -930,6 +938,7 @@
         0.4,
         0.4,
         0.4,
+        0.5,
         0.5,
         0.5,
         0.5,
@@ -954,6 +963,7 @@
         4,
         4,
         4,
+        5,
         5,
         5,
         5,
@@ -1004,8 +1014,8 @@
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
       "last_seen": "2026-09-28T08:43:35.917393+00:00",
       "appear_count": 23,
-      "consecutive_runs": 23,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.4,
         0.4,
@@ -1083,7 +1093,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 22,
+      "missed_runs": 23,
       "confidence_history": [
         0.4
       ],
@@ -1116,7 +1126,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 22,
+      "missed_runs": 23,
       "confidence_history": [
         0.3
       ],
@@ -1148,7 +1158,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 22,
+      "missed_runs": 23,
       "confidence_history": [
         0.3
       ],
@@ -1180,7 +1190,7 @@
       "last_seen": "2026-06-29T07:04:58.053931+00:00",
       "appear_count": 6,
       "consecutive_runs": 0,
-      "missed_runs": 16,
+      "missed_runs": 17,
       "confidence_history": [
         0.3,
         0.3,
@@ -1222,7 +1232,7 @@
       "last_seen": "2026-06-29T07:04:58.053931+00:00",
       "appear_count": 6,
       "consecutive_runs": 0,
-      "missed_runs": 16,
+      "missed_runs": 17,
       "confidence_history": [
         0.3,
         0.3,
@@ -1261,16 +1271,17 @@
     "Blog": {
       "status": "candidate",
       "first_seen": "2026-06-01T07:26:23.295200+00:00",
-      "last_seen": "2026-08-17T03:13:42.625754+00:00",
-      "appear_count": 9,
-      "consecutive_runs": 0,
-      "missed_runs": 7,
+      "last_seen": "2026-10-01T09:00:41.965649+00:00",
+      "appear_count": 10,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
       "confidence_history": [
         0.3,
         0.3,
         0.3,
         0.3,
         0.3,
+        0.4,
         0.4,
         0.4,
         0.4,
@@ -1282,6 +1293,7 @@
         3,
         3,
         3,
+        4,
         4,
         4,
         4,
@@ -1313,7 +1325,7 @@
       "last_seen": "2026-06-29T07:04:58.053931+00:00",
       "appear_count": 4,
       "consecutive_runs": 0,
-      "missed_runs": 16,
+      "missed_runs": 17,
       "confidence_history": [
         0.3,
         0.3,
@@ -1350,8 +1362,8 @@
       "first_seen": "2026-07-01T06:46:55.622920+00:00",
       "last_seen": "2026-09-28T08:43:35.917393+00:00",
       "appear_count": 16,
-      "consecutive_runs": 16,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.4,
         0.4,
@@ -1411,11 +1423,12 @@
     "Audio-player": {
       "status": "candidate",
       "first_seen": "2026-07-01T06:46:55.622920+00:00",
-      "last_seen": "2026-09-14T07:55:44.948889+00:00",
-      "appear_count": 14,
-      "consecutive_runs": 0,
-      "missed_runs": 2,
+      "last_seen": "2026-10-01T09:00:41.965649+00:00",
+      "appear_count": 15,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
       "confidence_history": [
+        0.4,
         0.4,
         0.4,
         0.4,
@@ -1432,6 +1445,7 @@
         0.4
       ],
       "project_count_history": [
+        4,
         4,
         4,
         4,
@@ -1473,7 +1487,7 @@
       "last_seen": "2026-07-27T06:01:09.968573+00:00",
       "appear_count": 5,
       "consecutive_runs": 0,
-      "missed_runs": 11,
+      "missed_runs": 12,
       "confidence_history": [
         0.3,
         0.3,
@@ -1512,8 +1526,8 @@
       "first_seen": "2026-07-01T06:46:55.622920+00:00",
       "last_seen": "2026-09-28T08:43:35.917393+00:00",
       "appear_count": 8,
-      "consecutive_runs": 7,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.3,
         0.4,
@@ -1558,9 +1572,9 @@
     "Deepseek": {
       "status": "watchlist",
       "first_seen": "2026-07-06T06:48:24.059173+00:00",
-      "last_seen": "2026-09-28T08:43:35.917393+00:00",
-      "appear_count": 15,
-      "consecutive_runs": 15,
+      "last_seen": "2026-10-01T09:00:41.965649+00:00",
+      "appear_count": 16,
+      "consecutive_runs": 16,
       "missed_runs": 0,
       "confidence_history": [
         0.3,
@@ -1577,7 +1591,8 @@
         0.4,
         0.4,
         0.5,
-        0.5
+        0.5,
+        0.3
       ],
       "project_count_history": [
         3,
@@ -1594,28 +1609,22 @@
         4,
         4,
         5,
-        5
+        5,
+        3
       ],
       "suggested_patterns": {
-        "name_patterns": [
-          "deepseek",
-          "deepseek-",
-          "deepseek_"
-        ],
+        "name_patterns": [],
         "desc_patterns": [
-          "deepseek",
-          "coding",
-          "agent"
+          "deepseek"
         ],
         "topic_patterns": [
-          "deepseek",
-          "dsh",
-          "dsh-plugin"
+          "deepseek"
         ],
         "related_types": [],
         "core_projects": []
       },
       "example_projects": [
+        "Hmbown/CodeWhale",
         "Hmbown/DeepSeek-TUI",
         "deepseek-ai/DeepSeek-V3",
         "dsh-tauri-desk/deepseek-harness-desktop",
@@ -1630,8 +1639,8 @@
       "first_seen": "2026-08-17T03:13:42.625754+00:00",
       "last_seen": "2026-09-28T08:43:35.917393+00:00",
       "appear_count": 8,
-      "consecutive_runs": 8,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.4,
         0.4,
@@ -1685,8 +1694,8 @@
       "first_seen": "2026-09-21T07:59:25.282126+00:00",
       "last_seen": "2026-09-28T08:43:35.917393+00:00",
       "appear_count": 2,
-      "consecutive_runs": 2,
-      "missed_runs": 0,
+      "consecutive_runs": 0,
+      "missed_runs": 1,
       "confidence_history": [
         0.5,
         0.5
@@ -1712,6 +1721,70 @@
         "Tiger3807861189/J-Space-Cognition-Suite",
         "Tiger3807861189/J-Space-Cognition-Suite-V3.7",
         "VoltAgent/awesome-openclaw-skills"
+      ],
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Docker-compose": {
+      "status": "candidate",
+      "first_seen": "2026-10-01T09:00:41.965649+00:00",
+      "last_seen": "2026-10-01T09:00:41.965649+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "docker-compose"
+        ],
+        "topic_patterns": [
+          "docker-compose"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "example_projects": [
+        "TibixDev/winboat",
+        "hanxi/xiaomusic",
+        "winboat-org/winboat"
+      ],
+      "ai_review": null,
+      "rejected_reason": ""
+    },
+    "Llm": {
+      "status": "candidate",
+      "first_seen": "2026-10-01T09:00:41.965649+00:00",
+      "last_seen": "2026-10-01T09:00:41.965649+00:00",
+      "appear_count": 1,
+      "consecutive_runs": 1,
+      "missed_runs": 0,
+      "confidence_history": [
+        0.3
+      ],
+      "project_count_history": [
+        3
+      ],
+      "suggested_patterns": {
+        "name_patterns": [],
+        "desc_patterns": [
+          "llm"
+        ],
+        "topic_patterns": [
+          "llm"
+        ],
+        "related_types": [],
+        "core_projects": []
+      },
+      "example_projects": [
+        "Hmbown/CodeWhale",
+        "Hmbown/DeepSeek-TUI",
+        "SillyTavern/SillyTavern"
       ],
       "ai_review": null,
       "rejected_reason": ""
