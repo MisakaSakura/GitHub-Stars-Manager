@@ -7490,5 +7490,47 @@
     "ai_type": null,
     "ai_ecology": null,
     "ai_ecology_role": null
+  },
+  "Ebony-Vinyl/dsh-our-free-model": {
+    "full_name": "Ebony-Vinyl/dsh-our-free-model",
+    "analyzed_at": "2026-10-05T09:07:12.219705+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
+  },
+  "KarinJS/Karin": {
+    "full_name": "KarinJS/Karin",
+    "analyzed_at": "2026-10-05T09:07:12.219730+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
+  },
+  "Bibapcs/BibaYanji": {
+    "full_name": "Bibapcs/BibaYanji",
+    "analyzed_at": "2026-10-05T09:07:12.219737+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
   }
 }
