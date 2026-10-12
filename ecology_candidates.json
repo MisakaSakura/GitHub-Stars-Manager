@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-10-05T09:07:37.274097+00:00",
+  "updated_at": "2026-10-12T09:15:48.270444+00:00",
   "candidates": {
     "Android": {
       "status": "rejected",
@@ -8,7 +8,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 34,
+      "missed_runs": 35,
       "confidence_history": [
         1.0,
         1.0,
@@ -45,7 +45,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 34,
+      "missed_runs": 35,
       "confidence_history": [
         1.0,
         1.0,
@@ -82,7 +82,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 34,
+      "missed_runs": 35,
       "confidence_history": [
         0.7,
         0.7,
@@ -119,7 +119,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 34,
+      "missed_runs": 35,
       "confidence_history": [
         0.4,
         0.4,
@@ -151,7 +151,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 34,
+      "missed_runs": 35,
       "confidence_history": [
         0.4,
         0.4,
@@ -180,11 +180,12 @@
     "Payload": {
       "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-10-05T09:07:37.273916+00:00",
-      "appear_count": 22,
-      "consecutive_runs": 2,
+      "last_seen": "2026-10-12T09:15:48.270217+00:00",
+      "appear_count": 23,
+      "consecutive_runs": 3,
       "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3,
         0.3,
         0.3,
@@ -209,6 +210,7 @@
         0.3
       ],
       "project_count_history": [
+        3,
         3,
         3,
         3,
@@ -258,11 +260,12 @@
     "Moonlight": {
       "status": "rejected",
       "first_seen": "2026-05-16T15:43:23.582131+00:00",
-      "last_seen": "2026-10-05T09:07:37.273916+00:00",
-      "appear_count": 26,
-      "consecutive_runs": 2,
+      "last_seen": "2026-10-12T09:15:48.270217+00:00",
+      "appear_count": 27,
+      "consecutive_runs": 3,
       "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3,
         0.3,
         0.3,
@@ -291,6 +294,7 @@
         0.3
       ],
       "project_count_history": [
+        3,
         3,
         3,
         3,
@@ -350,7 +354,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 3,
       "consecutive_runs": 0,
-      "missed_runs": 34,
+      "missed_runs": 35,
       "confidence_history": [
         0.3,
         0.3,
@@ -382,7 +386,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 33,
+      "missed_runs": 34,
       "confidence_history": [
         0.3,
         0.4
@@ -412,7 +416,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 33,
+      "missed_runs": 34,
       "confidence_history": [
         0.3,
         0.4
@@ -442,7 +446,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 34,
+      "missed_runs": 35,
       "confidence_history": [
         0.8,
         0.8
@@ -472,7 +476,7 @@
       "last_seen": "2026-05-17T11:35:01.472286+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 34,
+      "missed_runs": 35,
       "confidence_history": [
         0.3,
         0.3
@@ -502,7 +506,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 33,
+      "missed_runs": 34,
       "confidence_history": [
         0.3
       ],
@@ -530,7 +534,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 33,
+      "missed_runs": 34,
       "confidence_history": [
         0.3
       ],
@@ -558,7 +562,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 33,
+      "missed_runs": 34,
       "confidence_history": [
         0.3
       ],
@@ -586,7 +590,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 33,
+      "missed_runs": 34,
       "confidence_history": [
         0.3
       ],
@@ -614,7 +618,7 @@
       "last_seen": "2026-05-17T12:11:34.110410+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 33,
+      "missed_runs": 34,
       "confidence_history": [
         0.3
       ],
@@ -642,7 +646,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 9,
       "consecutive_runs": 0,
-      "missed_runs": 24,
+      "missed_runs": 25,
       "confidence_history": [
         0.3,
         0.3,
@@ -687,11 +691,12 @@
     "Mpv": {
       "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-10-05T09:07:37.273916+00:00",
-      "appear_count": 25,
-      "consecutive_runs": 24,
+      "last_seen": "2026-10-12T09:15:48.270217+00:00",
+      "appear_count": 26,
+      "consecutive_runs": 25,
       "missed_runs": 0,
       "confidence_history": [
+        0.5,
         0.5,
         0.5,
         0.5,
@@ -718,6 +723,7 @@
         0.5
       ],
       "project_count_history": [
+        5,
         5,
         5,
         5,
@@ -775,11 +781,12 @@
     "Bangumi": {
       "status": "expired",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-10-05T09:07:37.273916+00:00",
-      "appear_count": 20,
-      "consecutive_runs": 13,
+      "last_seen": "2026-10-12T09:15:48.270217+00:00",
+      "appear_count": 21,
+      "consecutive_runs": 14,
       "missed_runs": 0,
       "confidence_history": [
+        0.5,
         0.5,
         0.5,
         0.5,
@@ -802,6 +809,7 @@
         0.5
       ],
       "project_count_history": [
+        5,
         5,
         5,
         5,
@@ -855,7 +863,7 @@
       "last_seen": "2026-09-28T08:43:35.917393+00:00",
       "appear_count": 23,
       "consecutive_runs": 0,
-      "missed_runs": 2,
+      "missed_runs": 3,
       "confidence_history": [
         0.4,
         0.4,
@@ -935,9 +943,9 @@
     "Typora": {
       "status": "rejected",
       "first_seen": "2026-05-18T16:46:55.014161+00:00",
-      "last_seen": "2026-10-05T09:07:37.273916+00:00",
-      "appear_count": 25,
-      "consecutive_runs": 24,
+      "last_seen": "2026-10-12T09:15:48.270217+00:00",
+      "appear_count": 26,
+      "consecutive_runs": 25,
       "missed_runs": 0,
       "confidence_history": [
         0.4,
@@ -946,6 +954,7 @@
         0.4,
         0.4,
         0.4,
+        0.5,
         0.5,
         0.5,
         0.5,
@@ -972,6 +981,7 @@
         4,
         4,
         4,
+        5,
         5,
         5,
         5,
@@ -1025,7 +1035,7 @@
       "last_seen": "2026-09-28T08:43:35.917393+00:00",
       "appear_count": 23,
       "consecutive_runs": 0,
-      "missed_runs": 2,
+      "missed_runs": 3,
       "confidence_history": [
         0.4,
         0.4,
@@ -1103,7 +1113,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 24,
+      "missed_runs": 25,
       "confidence_history": [
         0.4
       ],
@@ -1136,7 +1146,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 24,
+      "missed_runs": 25,
       "confidence_history": [
         0.3
       ],
@@ -1168,7 +1178,7 @@
       "last_seen": "2026-05-18T16:46:55.014161+00:00",
       "appear_count": 1,
       "consecutive_runs": 0,
-      "missed_runs": 24,
+      "missed_runs": 25,
       "confidence_history": [
         0.3
       ],
@@ -1200,7 +1210,7 @@
       "last_seen": "2026-06-29T07:04:58.053931+00:00",
       "appear_count": 6,
       "consecutive_runs": 0,
-      "missed_runs": 18,
+      "missed_runs": 19,
       "confidence_history": [
         0.3,
         0.3,
@@ -1242,7 +1252,7 @@
       "last_seen": "2026-06-29T07:04:58.053931+00:00",
       "appear_count": 6,
       "consecutive_runs": 0,
-      "missed_runs": 18,
+      "missed_runs": 19,
       "confidence_history": [
         0.3,
         0.3,
@@ -1281,9 +1291,9 @@
     "Blog": {
       "status": "candidate",
       "first_seen": "2026-06-01T07:26:23.295200+00:00",
-      "last_seen": "2026-10-05T09:07:37.273916+00:00",
-      "appear_count": 11,
-      "consecutive_runs": 2,
+      "last_seen": "2026-10-12T09:15:48.270217+00:00",
+      "appear_count": 12,
+      "consecutive_runs": 3,
       "missed_runs": 0,
       "confidence_history": [
         0.3,
@@ -1291,6 +1301,7 @@
         0.3,
         0.3,
         0.3,
+        0.4,
         0.4,
         0.4,
         0.4,
@@ -1304,6 +1315,7 @@
         3,
         3,
         3,
+        4,
         4,
         4,
         4,
@@ -1337,7 +1349,7 @@
       "last_seen": "2026-06-29T07:04:58.053931+00:00",
       "appear_count": 4,
       "consecutive_runs": 0,
-      "missed_runs": 18,
+      "missed_runs": 19,
       "confidence_history": [
         0.3,
         0.3,
@@ -1375,7 +1387,7 @@
       "last_seen": "2026-09-28T08:43:35.917393+00:00",
       "appear_count": 16,
       "consecutive_runs": 0,
-      "missed_runs": 2,
+      "missed_runs": 3,
       "confidence_history": [
         0.4,
         0.4,
@@ -1433,11 +1445,11 @@
       "rejected_reason": ""
     },
     "Audio-player": {
-      "status": "candidate",
+      "status": "watchlist",
       "first_seen": "2026-07-01T06:46:55.622920+00:00",
-      "last_seen": "2026-10-05T09:07:37.273916+00:00",
-      "appear_count": 16,
-      "consecutive_runs": 2,
+      "last_seen": "2026-10-12T09:15:48.270217+00:00",
+      "appear_count": 17,
+      "consecutive_runs": 3,
       "missed_runs": 0,
       "confidence_history": [
         0.4,
@@ -1455,7 +1467,8 @@
         0.4,
         0.4,
         0.4,
-        0.4
+        0.4,
+        0.5
       ],
       "project_count_history": [
         4,
@@ -1473,7 +1486,8 @@
         4,
         4,
         4,
-        4
+        4,
+        5
       ],
       "suggested_patterns": {
         "name_patterns": [],
@@ -1487,6 +1501,7 @@
         "core_projects": []
       },
       "example_projects": [
+        "NereaFantasia/foo_ui_webview2",
         "amll-dev/applemusic-like-lyrics",
         "diana7127/mpv.net-DW",
         "mikebrady/shairport-sync",
@@ -1501,7 +1516,7 @@
       "last_seen": "2026-07-27T06:01:09.968573+00:00",
       "appear_count": 5,
       "consecutive_runs": 0,
-      "missed_runs": 13,
+      "missed_runs": 14,
       "confidence_history": [
         0.3,
         0.3,
@@ -1541,7 +1556,7 @@
       "last_seen": "2026-09-28T08:43:35.917393+00:00",
       "appear_count": 8,
       "consecutive_runs": 0,
-      "missed_runs": 2,
+      "missed_runs": 3,
       "confidence_history": [
         0.3,
         0.4,
@@ -1586,9 +1601,9 @@
     "Deepseek": {
       "status": "watchlist",
       "first_seen": "2026-07-06T06:48:24.059173+00:00",
-      "last_seen": "2026-10-05T09:07:37.273916+00:00",
-      "appear_count": 17,
-      "consecutive_runs": 17,
+      "last_seen": "2026-10-12T09:15:48.270217+00:00",
+      "appear_count": 18,
+      "consecutive_runs": 18,
       "missed_runs": 0,
       "confidence_history": [
         0.3,
@@ -1606,6 +1621,7 @@
         0.4,
         0.5,
         0.5,
+        0.3,
         0.3,
         0.3
       ],
@@ -1625,6 +1641,7 @@
         4,
         5,
         5,
+        3,
         3,
         3
       ],
@@ -1656,7 +1673,7 @@
       "last_seen": "2026-09-28T08:43:35.917393+00:00",
       "appear_count": 8,
       "consecutive_runs": 0,
-      "missed_runs": 2,
+      "missed_runs": 3,
       "confidence_history": [
         0.4,
         0.4,
@@ -1711,7 +1728,7 @@
       "last_seen": "2026-09-28T08:43:35.917393+00:00",
       "appear_count": 2,
       "consecutive_runs": 0,
-      "missed_runs": 2,
+      "missed_runs": 3,
       "confidence_history": [
         0.5,
         0.5
@@ -1744,15 +1761,17 @@
     "Docker-compose": {
       "status": "candidate",
       "first_seen": "2026-10-01T09:00:41.965649+00:00",
-      "last_seen": "2026-10-05T09:07:37.273916+00:00",
-      "appear_count": 2,
-      "consecutive_runs": 2,
+      "last_seen": "2026-10-12T09:15:48.270217+00:00",
+      "appear_count": 3,
+      "consecutive_runs": 3,
       "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3,
         0.3
       ],
       "project_count_history": [
+        3,
         3,
         3
       ],
@@ -1778,15 +1797,17 @@
     "Llm": {
       "status": "candidate",
       "first_seen": "2026-10-01T09:00:41.965649+00:00",
-      "last_seen": "2026-10-05T09:07:37.273916+00:00",
-      "appear_count": 2,
-      "consecutive_runs": 2,
+      "last_seen": "2026-10-12T09:15:48.270217+00:00",
+      "appear_count": 3,
+      "consecutive_runs": 3,
       "missed_runs": 0,
       "confidence_history": [
+        0.3,
         0.3,
         0.3
       ],
       "project_count_history": [
+        3,
         3,
         3
       ],
