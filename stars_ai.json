@@ -5041,7 +5041,7 @@
   },
   "Dr-TSNG/ZygiskNext": {
     "full_name": "Dr-TSNG/ZygiskNext",
-    "analyzed_at": "2026-09-01T07:51:23.318373+00:00",
+    "analyzed_at": "2026-10-19T07:48:47.518130+00:00",
     "llm_status": "failed",
     "llm_confidence": null,
     "llm_reason": null,
@@ -6345,7 +6345,7 @@
   },
   "TIANLI0/THRM": {
     "full_name": "TIANLI0/THRM",
-    "analyzed_at": "2026-09-01T07:51:23.317497+00:00",
+    "analyzed_at": "2026-10-19T07:48:47.518121+00:00",
     "llm_status": "failed",
     "llm_confidence": null,
     "llm_reason": null,
@@ -7592,6 +7592,34 @@
   "Devi766/FlyClash-Android": {
     "full_name": "Devi766/FlyClash-Android",
     "analyzed_at": "2026-10-12T09:15:24.828287+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
+  },
+  "yetone/magpie": {
+    "full_name": "yetone/magpie",
+    "analyzed_at": "2026-10-19T07:48:47.518083+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
+  },
+  "dashdogy/MFG-Unlocker": {
+    "full_name": "dashdogy/MFG-Unlocker",
+    "analyzed_at": "2026-10-19T07:48:47.518110+00:00",
     "llm_status": "failed",
     "llm_confidence": null,
     "llm_reason": null,
