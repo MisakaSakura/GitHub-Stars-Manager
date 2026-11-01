@@ -1,7 +1,7 @@
 {
   "version": 1,
   "rules_version": "2026-05-17-platform-refactor",
-  "updated_at": "2026-10-01T09:00:53.117179+00:00",
+  "updated_at": "2026-11-01T09:19:36.885943+00:00",
   "entries": {
     "obra/superpowers": {
       "timestamp": "2026-05-17T11:35:04.821063+00:00",
@@ -1019,18 +1019,18 @@
       }
     },
     "mikebrady/shairport-sync": {
-      "timestamp": "2026-05-18T16:46:55.021862+00:00",
+      "timestamp": "2026-11-01T09:19:36.885812+00:00",
       "original": {
-        "platform": "跨平台",
-        "type": "CLI / 终端",
-        "ecology": "AirPlay",
-        "ecology_role": "核心 / Core"
+        "platform": "其他 / 未分类",
+        "type": "其他 / 未分类",
+        "ecology": "Audio-player",
+        "ecology_role": "其他 / Other"
       },
       "corrected": {
-        "platform": "跨平台",
-        "type": "工具 / Tool",
-        "ecology": "AirPlay",
-        "ecology_role": "核心 / Core"
+        "platform": "Windows",
+        "type": "其他 / 未分类",
+        "ecology": "Audio-player",
+        "ecology_role": "其他 / Other"
       },
       "source": "auto_fix",
       "rules_version": "2026-05-17-platform-refactor",
@@ -2011,6 +2011,42 @@
         ],
         "language": "Python"
       }
+    },
+    "amll-dev/applemusic-like-lyrics": {
+      "timestamp": "2026-11-01T09:19:36.885838+00:00",
+      "original": {
+        "platform": "macOS",
+        "type": "Web 前端",
+        "ecology": "Audio-player",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "corrected": {
+        "platform": "Windows",
+        "type": "Web 前端",
+        "ecology": "Audio-player",
+        "ecology_role": "GUI 前端 / Client"
+      },
+      "source": "auto_fix",
+      "rules_version": "2026-05-17-platform-refactor",
+      "item_features": {
+        "name": "applemusic-like-lyrics",
+        "description": "An Apple Music style lyric player component, with React & Vue support. 一个类 Apple Music 歌词显示组件，同时提供 React 和 Vue 绑定。",
+        "topics": [
+          "apple-music",
+          "audio",
+          "audio-player",
+          "javascript",
+          "lyric",
+          "music",
+          "music-player",
+          "player",
+          "react",
+          "typescript",
+          "vue",
+          "vue3"
+        ],
+        "language": "TypeScript"
+      }
     }
   },
   "patterns": {
@@ -2047,6 +2083,12 @@
       },
       "Web": {
         "跨平台": 11
+      },
+      "其他 / 未分类": {
+        "Windows": 1
+      },
+      "macOS": {
+        "Windows": 1
       }
     },
     "type": {
