@@ -7770,5 +7770,19 @@
     "ai_type": null,
     "ai_ecology": null,
     "ai_ecology_role": null
+  },
+  "Diorser/LiteMonitor": {
+    "full_name": "Diorser/LiteMonitor",
+    "analyzed_at": "2026-11-02T09:32:17.970475+00:00",
+    "llm_status": "failed",
+    "llm_confidence": null,
+    "llm_reason": null,
+    "ai_summary": null,
+    "ai_tags": null,
+    "ai_platforms": null,
+    "ai_platform": null,
+    "ai_type": null,
+    "ai_ecology": null,
+    "ai_ecology_role": null
   }
 }
